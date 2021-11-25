@@ -1,0 +1,47 @@
+[11-Jun-2021 01:55:56 UTC] PHP Warning:  require(/home/dwsnet/neelum/public/../vendor/autoload.php): failed to open stream: No such file or directory in /home/dwsnet/neelum/public/index.php on line 34
+[11-Jun-2021 01:55:56 UTC] PHP Fatal error:  require(): Failed opening required '/home/dwsnet/neelum/public/../vendor/autoload.php' (include_path='.:/opt/alt/php74/usr/share/pear') in /home/dwsnet/neelum/public/index.php on line 34
+[27-Jun-2021 08:17:02 UTC] PHP Fatal error:  Constant expression contains invalid operations in /home/dwsnet/neelum/app/Services/TransactionService.php on line 22
+[27-Jun-2021 08:18:45 UTC] PHP Fatal error:  Constant expression contains invalid operations in /home/dwsnet/neelum/app/Services/TransactionService.php on line 22
+[27-Jun-2021 08:19:10 UTC] PHP Fatal error:  Constant expression contains invalid operations in /home/dwsnet/neelum/app/Services/TransactionService.php on line 22
+[27-Jun-2021 08:22:40 UTC] PHP Fatal error:  Constant expression contains invalid operations in /home/dwsnet/neelum/app/Services/TransactionService.php on line 22
+[28-Jun-2021 08:37:32 UTC] PHP Fatal error:  Constant expression contains invalid operations in /home/dwsnet/neelum/app/Services/TransactionService.php on line 22
+[28-Jun-2021 08:54:40 UTC] PHP Fatal error:  Constant expression contains invalid operations in /home/dwsnet/neelum/app/Services/TransactionService.php on line 22
+[28-Jun-2021 09:00:40 UTC] PHP Fatal error:  Constant expression contains invalid operations in /home/dwsnet/neelum/app/Services/TransactionService.php on line 22
+[28-Jun-2021 09:22:39 UTC] PHP Fatal error:  Constant expression contains invalid operations in /home/dwsnet/neelum/app/Services/TransactionService.php on line 22
+[12-Sep-2021 19:04:20 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 8192 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Collections/Collection.php on line 1301
+[12-Sep-2021 19:04:27 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 1949696 bytes) in /home/dwsnet/neelum/app/Models/AccountHead.php on line 143
+[12-Sep-2021 19:15:07 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 8192 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Collections/Collection.php on line 1301
+[12-Sep-2021 19:15:14 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 8192 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Collections/Collection.php on line 1301
+[12-Sep-2021 19:15:21 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 8192 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Collections/Collection.php on line 1301
+[13-Sep-2021 06:25:16 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 8192 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Collections/Collection.php on line 1301
+[13-Sep-2021 06:25:23 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 8192 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Collections/Collection.php on line 1301
+[13-Sep-2021 06:25:30 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 8192 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Collections/Collection.php on line 1301
+[13-Sep-2021 06:39:20 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 20480 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Database/Connection.php on line 338
+[13-Sep-2021 06:43:18 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 20480 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Database/Connection.php on line 338
+[13-Sep-2021 06:44:35 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 20480 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Database/Connection.php on line 338
+[13-Sep-2021 06:45:42 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 20480 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Database/Connection.php on line 338
+[13-Sep-2021 06:47:34 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 20480 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Database/Connection.php on line 338
+[13-Sep-2021 06:48:27 UTC] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 20480 bytes) in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Database/Connection.php on line 338
+[13-Sep-2021 08:47:44 UTC] PHP Fatal error:  Uncaught ErrorException: file_put_contents(/home/dwsnet/neelum/storage/framework/views/3fa92dc04e8c2dfc15d0648441b6c36920b7efb2.php): failed to open stream: No such file or directory in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php:185
+Stack trace:
+#0 [internal function]: Illuminate\Foundation\Bootstrap\HandleExceptions->handleError(2, 'file_put_conten...', '/home/dwsnet/ne...', 185, Array)
+#1 /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php(185): file_put_contents('/home/dwsnet/ne...', '<?php $__env->s...', 0)
+#2 /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/View/Compilers/BladeCompiler.php(157): Illuminate\Filesystem\Filesystem->put('/home/dwsnet/ne...', '<?php $__env->s...')
+#3 /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/View/Engines/CompilerEngine.php(55): Illuminate\View\Compilers\BladeCompiler->compile('/home/dwsnet/ne...')
+#4 /home/dwsnet/neelum/vendor/facade/ignition/src/Views/Engines/CompilerEng in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php on line 185
+[13-Sep-2021 08:48:17 UTC] PHP Fatal error:  Uncaught ErrorException: file_put_contents(/home/dwsnet/neelum/storage/framework/views/3fa92dc04e8c2dfc15d0648441b6c36920b7efb2.php): failed to open stream: No such file or directory in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php:185
+Stack trace:
+#0 [internal function]: Illuminate\Foundation\Bootstrap\HandleExceptions->handleError(2, 'file_put_conten...', '/home/dwsnet/ne...', 185, Array)
+#1 /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php(185): file_put_contents('/home/dwsnet/ne...', '<?php $__env->s...', 0)
+#2 /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/View/Compilers/BladeCompiler.php(157): Illuminate\Filesystem\Filesystem->put('/home/dwsnet/ne...', '<?php $__env->s...')
+#3 /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/View/Engines/CompilerEngine.php(55): Illuminate\View\Compilers\BladeCompiler->compile('/home/dwsnet/ne...')
+#4 /home/dwsnet/neelum/vendor/facade/ignition/src/Views/Engines/CompilerEng in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php on line 185
+[13-Sep-2021 08:49:54 UTC] PHP Fatal error:  Uncaught InvalidArgumentException: Please provide a valid cache path. in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/View/Compilers/Compiler.php:36
+Stack trace:
+#0 /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/View/ViewServiceProvider.php(88): Illuminate\View\Compilers\Compiler->__construct(Object(Illuminate\Filesystem\Filesystem), false)
+#1 /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Container/Container.php(805): Illuminate\View\ViewServiceProvider->Illuminate\View\{closure}(Object(Illuminate\Foundation\Application), Array)
+#2 /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Container/Container.php(691): Illuminate\Container\Container->build(Object(Closure))
+#3 /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(796): Illuminate\Container\Container->resolve('blade.compiler', Array, true)
+#4 /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/Container/Container.php(637): Illuminate\Foundation\Application->reso in /home/dwsnet/neelum/vendor/laravel/framework/src/Illuminate/View/Compilers/Compiler.php on line 36
+[30-Oct-2021 13:17:47 UTC] PHP Deprecated:  Unparenthesized `a ? b : c ? d : e` is deprecated. Use either `(a ? b : c) ? d : e` or `a ? b : (c ? d : e)` in /home/dwsnet/neelum/app/Models/Customer.php on line 38
+[30-Oct-2021 13:20:05 UTC] PHP Deprecated:  Unparenthesized `a ? b : c ? d : e` is deprecated. Use either `(a ? b : c) ? d : e` or `a ? b : (c ? d : e)` in /home/dwsnet/neelum/app/Models/Customer.php on line 38

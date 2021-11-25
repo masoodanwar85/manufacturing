@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+
+class AccruedSalaries extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'salaries:accrued';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'I make entries in database for accrued salaries';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
+    public function handle()
+    {
+		$staffSalaries = \App\Models\Staff::where('paymentAmount','>','0')->get();
+		foreach ($staffSalaries as $staffSalary) {
+			$transaction = \App\Models\Transaction::where('transactionDate',\Carbon\Carbon::now()->toDateString())
+				->whereHas('transactionDetails', function($query) use ($staffSalary) {
+					$query->where('headID',\Config::get('constants.account_heads.salaries_payable'))->where('subHeadID',$staffSalary->headID)->where('isDebit',0);
+				})->get();
+
+            if (count($transaction)) {
+				continue;
+			}
+
+            $isAddAccruedSalary = TRUE;
+
+			switch ($staffSalary->paymentFrequencyID) {
+				case 1:
+					// Monthly
+					$isLastDayOfMonth = \Carbon\Carbon::parse(\Carbon\Carbon::now())->endOfMonth()->isSameDay();
+					if (!$isLastDayOfMonth) {
+						// Add Salaries Payable in DB for this staff
+                        $isAddAccruedSalary = FALSE;
+					}
+					break;
+				case 2:
+					// Daily
+					// Add Salaries Payable in DB for this staff
+                    $today = new \Carbon\Carbon();
+                    if($today->dayOfWeek == \Carbon\Carbon::FRIDAY) {
+                        $isAddAccruedSalary = FALSE;
+                    }
+					break;
+				default:
+			}
+
+            if ($isAddAccruedSalary == TRUE) {
+                $transactionID = \App\Services\TransactionService::addTransactionArray(['isPaymentReceipt' => 1,'transactionTypeID' => 1,'createdByUserID' => 1]);
+                \App\Services\TransactionService::addTransactionDetailArray(['transactionID' => $transactionID, 'headID' => \Config::get('constants.account_heads.salaries'),'subHeadID' => $staffSalary->headID,'isDebit' => 1, 'amount' => $staffSalary->paymentAmount, 'description' => 'Salary Expense for the staff']);
+                \App\Services\TransactionService::addTransactionDetailArray(['transactionID' => $transactionID, 'headID' => \Config::get('constants.account_heads.salaries_payable'),'subHeadID' => $staffSalary->headID,'isDebit' => 0, 'amount' => $staffSalary->paymentAmount, 'description' => 'Accrued/Payable Salary for the staff']);
+            }
+
+		}
+        $this->info(count($staffSalaries));
+    }
+}

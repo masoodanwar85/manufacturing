@@ -1,0 +1,32 @@
+<?php
+
+return [
+    'dashboard'                     => 'Dashboard',
+    'user_management'               => 'USER MANAGEMENT',
+    'users'                         => 'Users',
+    'roles'                         => 'Roles',
+	'product_management'            => 'PRODUCT MANAGEMENT',
+	'products'                      => 'Products',
+	'categories'                    => 'Categories',
+	'purchase_management'			=> 'PURCHASE MANAGEMENT',
+	'purchase_orders'				=> 'Purchase Orders',
+	'suppliers'						=> 'Suppliers',
+	'batches'						=> 'Batches',
+	'staff_management'				=> 'STAFF MANAGEMENT',
+	'staff_type'					=> 'Staff Type',
+	'staff'							=> 'Staff',
+	'godowns'						=> 'Godowns',
+	'transport'						=> 'Transport',
+	'accounts_management'			=> 'ACCOUNTS MANAGEMENT',
+	'account_heads'					=> 'Account Heads',
+	'bank_accounts'					=> 'Bank Accounts',
+	'stock_management'				=> 'STOCK MANAGEMENT',
+	'stock'							=> 'Stock',
+	'opening_stock'					=> 'Opening Stock',
+	'sales_management'				=> 'SALES MANAGEMENT',
+	'sales_order'					=> 'Sales Order',
+	'customers'						=> 'Customers',
+	'payment'						=> 'Payment',
+	'receipt'						=> 'Receipt',
+	'cheques'						=> 'Cheques'
+];
