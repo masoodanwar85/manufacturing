@@ -372,6 +372,13 @@ return [
                     'can'  => ['transaction_create','transaction_read','transaction_delete'],
 					'active' => ['admin/accountHead/receipt']
                 ],
+                [
+                    'text' => 'invoice_books',
+                    'url'  => 'admin/invoiceBooks',
+                    'icon' => 'fas fa-fw fa-file-invoice-dollar',
+                    'can'  => ['invoice_books_create','invoice_books_read','invoice_books_delete'],
+					'active' => ['admin/invoiceBooks','regex:@^admin/invoiceBooks/.*$@']
+                ],
 				[
                     'text' => 'cheques',
                     'url'  => 'admin/accountHead/cheques',

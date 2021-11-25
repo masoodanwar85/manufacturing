@@ -26,6 +26,7 @@ return [
 	'account_heads'					=> 'Account Heads',
 	'bank_accounts'					=> 'Bank Accounts',
 	'opening_balances'				=> 'Opening Balances',
+    'invoice_books'                 => 'Invoice Books',
 	// 'stock_management'				=> 'STOCK MANAGEMENT',
     'stock_management'				=> ' ---- STOCK ----',
 	'stock'							=> 'Stock',

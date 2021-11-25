@@ -113,7 +113,8 @@ class InvoiceBooksController extends Controller
     public function show(InvoiceBooks $invoiceBook)
     {
 		abort_if(Gate::denies('invoice_books_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		return view('admin.invoiceBooks.show', compact('invoiceBook'));
+        $invoiceBook = $invoiceBook->where('invoiceBookID',$invoiceBook->invoiceBookID)->with('serials')->first();
+        return view('admin.invoiceBooks.show', compact('invoiceBook'));
     }
 
     /**

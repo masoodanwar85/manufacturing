@@ -80,7 +80,11 @@ class RolePrivilegeSeeder extends Seeder
 			['roleID' => 1,'privilegeID' => 64],
 			['roleID' => 1,'privilegeID' => 65],
             ['roleID' => 1,'privilegeID' => 66],
-			['roleID' => 1,'privilegeID' => 67]
+			['roleID' => 1,'privilegeID' => 67],
+            ['roleID' => 1,'privilegeID' => 68],
+			['roleID' => 1,'privilegeID' => 69],
+            ['roleID' => 1,'privilegeID' => 70],
+			['roleID' => 1,'privilegeID' => 71]
         ];
         foreach ($aryRolePrivileges as $rolePrivilege) {
             \Illuminate\Support\Facades\DB::table('rolePrivilege')->insert(

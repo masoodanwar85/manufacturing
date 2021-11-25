@@ -19,34 +19,20 @@
 			@endcan
         </div>
         <div class="card-body">
-			<table class="table table-hover table-sm">
+			<table class="table table-hover table-sm dt-invoice-books">
                 <thead>
                     <tr class="table-info">
-                        <th>#</th>
                         <th>Book Type</th>
                         <th>Book Number</th>
                         <th>Start Page</th>
                         <th>End Page</th>
 						<th>Invalidated</th>
+                        <th>Date Created</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (!$books->isEmpty())
-                        @foreach ($books as $book)
-    						<tr>
-    							<td>{{ $loop->iteration }}</td>
-    							<td>{{ $book->bookType }}</td>
-                                <td>{{ $book->bookNumber }}</td>
-                                <td>{{ $book->startPage }}</td>
-                                <td>{{ $book->endPage }}</td>
-                                <td>{{ $book->serials->count() }}</td>
-    						</tr>
-                        @endforeach
-                    @else
-                        <tr>
-                            <td colspan="6">No Invoice Book Added</td>
-                        </tr>
-                    @endif
+
                 </tbody>
             </table>
         </div>
@@ -55,4 +41,34 @@
 
 @section('css')
     <link rel="stylesheet" href="/css/app_.css">
+@stop
+
+@section('plugins.Datatables', true)
+@section('js')
+    <script>
+        $(function () {
+            let dtOverrideGlobals = {
+                processing: true,
+                serverSide: true,
+                retrieve: true,
+                aaSorting: [],
+                ajax: "{{ route('invoiceBooks.index') }}",
+                columns: [
+                    { data: 'bookType', name: 'bookType' },
+					{ data: 'bookNumber', name: 'bookNumber' },
+                    { data: 'bookStartPage', name: 'bookStartPage' },
+					{ data: 'bookEndPage', name: 'bookEndPage' },
+					{ data: 'invalidatedSerials', name: 'invalidatedSerials' },
+                    { data: 'dateCreated', name: 'dateCreated' },
+                    { data: 'actions', name: 'Actions' }
+                ],
+                pageLength: 100,
+            };
+
+            $('.dt-invoice-books').DataTable(dtOverrideGlobals);
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+                $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+            });
+        });
+    </script>
 @stop
