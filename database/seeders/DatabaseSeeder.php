@@ -45,6 +45,7 @@ class DatabaseSeeder extends Seeder
 			// PurchaseOrderSeeder::class,
 			// StaffSeeder::class,
 			BankAccountSeeder::class,
+            LeaveTypeSeeder::class,
         ]);
 
 		// \App\Models\Category::factory(5)->create();

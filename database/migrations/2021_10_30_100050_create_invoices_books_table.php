@@ -17,7 +17,8 @@ class CreateInvoicesBooksTable extends Migration
             $table->bigIncrements('invoiceBookID');
 			$table->enum('bookType',['RB','BB','CB']);
 			$table->integer('bookNumber');
-            $table->integer('pages');
+            $table->integer('startPage');
+            $table->integer('endPage');
 			$table->unsignedBigInteger('createdByUserID');
             $table->timestamp('dateCreated')->useCurrent();
             $table->foreign('createdByUserID')->references('userID')->on('users');
