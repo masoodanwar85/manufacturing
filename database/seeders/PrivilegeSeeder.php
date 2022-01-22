@@ -84,7 +84,11 @@ class PrivilegeSeeder extends Seeder
             ['moduleID' => 19, 'accessLevelID' => 1, 'privilegeCode' => 'INVOICE_BOOKS','privilegeName' => 'Invoice Books Create'],
 			['moduleID' => 19, 'accessLevelID' => 2, 'privilegeCode' => 'INVOICE_BOOKS','privilegeName' => 'Invoice Books Read'],
 			['moduleID' => 19, 'accessLevelID' => 3, 'privilegeCode' => 'INVOICE_BOOKS','privilegeName' => 'Invoice Books Update'],
-			['moduleID' => 19, 'accessLevelID' => 4, 'privilegeCode' => 'INVOICE_BOOKS','privilegeName' => 'Invoice Books Delete']
+			['moduleID' => 19, 'accessLevelID' => 4, 'privilegeCode' => 'INVOICE_BOOKS','privilegeName' => 'Invoice Books Delete'],
+            ['moduleID' => 20, 'accessLevelID' => 1, 'privilegeCode' => 'ATTENDANCE','privilegeName' => 'Staff Attendance Create'],
+			['moduleID' => 20, 'accessLevelID' => 2, 'privilegeCode' => 'ATTENDANCE','privilegeName' => 'Staff Attendance Read'],
+			['moduleID' => 20, 'accessLevelID' => 3, 'privilegeCode' => 'ATTENDANCE','privilegeName' => 'Staff Attendance Update'],
+			['moduleID' => 20, 'accessLevelID' => 4, 'privilegeCode' => 'ATTENDANCE','privilegeName' => 'Staff Attendance Delete']
         ];
 
         foreach ($aryPrivileges as $privilege) {

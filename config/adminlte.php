@@ -456,6 +456,13 @@ return [
                     'can'  => ['staff_create','staff_create','staff_create'],
 					'active' => ['admin/staff','regex:@^admin/staff/.*$@']
                 ],
+                [
+                    'text' => 'staff_attendance',
+                    'url'  => 'admin/attendance',
+                    'icon' => 'fas fa-fw fa-clipboard-check',
+                    'can'  => ['attendance_create','attendance_read','attendance_update','attendance_delete'],
+					'active' => ['admin/attendance','regex:@^admin/attendance/.*$@']
+                ],
             ],
         ],
 		[

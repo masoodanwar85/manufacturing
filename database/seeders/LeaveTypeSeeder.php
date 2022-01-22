@@ -14,6 +14,7 @@ class LeaveTypeSeeder extends Seeder
     public function run()
     {
         $aryLeaveTypes = [
+            ['leaveType' => 'Present', 'isPaid' => 1],
             ['leaveType' => 'Absent', 'isPaid' => 0],
             ['leaveType' => 'Earned Leave', 'isPaid' => 1],
 			['leaveType' => 'Casual Leave', 'isPaid' => 1],

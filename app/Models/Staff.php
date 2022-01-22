@@ -20,6 +20,11 @@ class Staff extends Model
         return $this->belongsTo('App\Models\StaffType','staffTypeID','staffTypeID');
     }
 
+    public function attendance()
+    {
+        return $this->belongsTo('App\Models\Attendance','staffID','staffID');
+    }
+
     public function head()
     {
         return $this->hasOne('App\Models\AccountHead','headID','headID');

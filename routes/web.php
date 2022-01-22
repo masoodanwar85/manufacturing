@@ -66,6 +66,7 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
 	Route::resource('bankAccount', App\Http\Controllers\Admin\BankAccountController::class);
 	Route::resource('staffType', App\Http\Controllers\Admin\StaffTypeController::class);
 	Route::resource('staff', App\Http\Controllers\Admin\StaffController::class);
+    Route::resource('attendance', App\Http\Controllers\Admin\AttendanceController::class);
 	Route::resource('stock', App\Http\Controllers\Admin\StockController::class);
 	Route::resource('sales', App\Http\Controllers\Admin\SalesOrderController::class);
 	Route::resource('customer', App\Http\Controllers\Admin\CustomerController::class);

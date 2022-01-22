@@ -19,6 +19,7 @@ return [
     'staff_management'				=> ' ---- STAFF ----',
 	'staff_type'					=> 'Staff Type',
 	'staff'							=> 'Staff',
+    'staff_attendance'				=> 'Staff Attendance',
 	'godowns'						=> 'Godowns',
 	'transport'						=> 'Transport',
 	// 'accounts_management'			=> 'ACCOUNTS MANAGEMENT',
