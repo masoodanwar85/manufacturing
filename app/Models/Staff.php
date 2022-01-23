@@ -22,7 +22,7 @@ class Staff extends Model
 
     public function attendance()
     {
-        return $this->belongsTo('App\Models\Attendance','staffID','staffID');
+        return $this->hasMany('App\Models\Attendance','staffID','staffID');
     }
 
     public function head()

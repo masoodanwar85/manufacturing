@@ -22,7 +22,7 @@ class Attendance extends Model
 
     public function staff()
     {
-        return $this->hasOne('App\Models\Staff','staffID','staffID');
+        return $this->belongsTo('App\Models\Staff','staffID','staffID');
     }
 
     public static function getStaffMonthlyAttendance($date = null) {

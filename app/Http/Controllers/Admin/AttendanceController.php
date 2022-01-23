@@ -25,7 +25,9 @@ class AttendanceController extends Controller
     {
 		abort_if(Gate::denies('attendance_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $today = \Carbon\Carbon::now();
-        $staffMonthlyAttendance = Attendance::whereBetween('attendanceDate',[$today->firstOfMonth()->format('Y-m-d'),$today->lastOfMonth()->format('Y-m-d')])->get();
+        $staffMonthlyAttendance = Staff::with(['attendance' => function($query) use($today) {
+            $query->whereBetween('attendanceDate',[$today->firstOfMonth()->format('Y-m-d'),$today->lastOfMonth()->format('Y-m-d')]);
+        }])->get();
         $monthDates = Attendance::getMonthDates();
         return view('admin.attendance.index',compact('staffMonthlyAttendance','monthDates'));
     }
