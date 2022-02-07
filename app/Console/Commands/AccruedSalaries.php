@@ -49,23 +49,30 @@ class AccruedSalaries extends Command
 				continue;
 			}
 
-            $isAddAccruedSalary = TRUE;
+            $isAddAccruedSalary = FALSE;
 
-			switch ($staffSalary->paymentFrequencyID) {
+            $salaryAmount = $staffSalary->paymentAmount;
+
+            $today = new \Carbon\Carbon();
+            switch ($staffSalary->paymentFrequencyID) {
 				case 1:
 					// Monthly
-					$isLastDayOfMonth = \Carbon\Carbon::parse(\Carbon\Carbon::now())->endOfMonth()->isSameDay();
-					if (!$isLastDayOfMonth) {
+					$isLastDayOfMonth = $today->lastOfMonth()->isSameDay();
+                    if (!$isLastDayOfMonth && $today->hour >= 18) {
 						// Add Salaries Payable in DB for this staff
-                        $isAddAccruedSalary = FALSE;
+                        $totalDays = \App\Models\Attendance::where('staffID',$staffSalary->staffID)->whereBetween('attendanceDate',[$today->firstOfMonth()->toDateString(),$today->lastOfMonth()->toDateString()])->with(['leaveType' => function($query) {
+                            $query->where('isPaid',1);
+                        }])->count();
+                        $salaryAmount = ($staffSalary->paymentAmount * $totalDays) / (\Config::get('constants.client_settings.monthlySalaryDays'));
+                        $isAddAccruedSalary = TRUE;
 					}
 					break;
 				case 2:
 					// Daily
 					// Add Salaries Payable in DB for this staff
-                    $today = new \Carbon\Carbon();
-                    if($today->dayOfWeek == \Carbon\Carbon::FRIDAY) {
-                        $isAddAccruedSalary = FALSE;
+                    $attendance = Attendance::where('staffID',$staffSalary->staffID)->whereDate('attendanceDate',$today->toDateString())->first();
+                    if($attendance && $attendance->leaveType->isPaid == 1) {
+                        $isAddAccruedSalary = TRUE;
                     }
 					break;
 				default:
@@ -73,8 +80,8 @@ class AccruedSalaries extends Command
 
             if ($isAddAccruedSalary == TRUE) {
                 $transactionID = \App\Services\TransactionService::addTransactionArray(['isPaymentReceipt' => 1,'transactionTypeID' => 1,'createdByUserID' => 1]);
-                \App\Services\TransactionService::addTransactionDetailArray(['transactionID' => $transactionID, 'headID' => \Config::get('constants.account_heads.salaries'),'subHeadID' => $staffSalary->headID,'isDebit' => 1, 'amount' => $staffSalary->paymentAmount, 'description' => 'Salary Expense for the staff']);
-                \App\Services\TransactionService::addTransactionDetailArray(['transactionID' => $transactionID, 'headID' => \Config::get('constants.account_heads.salaries_payable'),'subHeadID' => $staffSalary->headID,'isDebit' => 0, 'amount' => $staffSalary->paymentAmount, 'description' => 'Accrued/Payable Salary for the staff']);
+                \App\Services\TransactionService::addTransactionDetailArray(['transactionID' => $transactionID, 'headID' => \Config::get('constants.account_heads.salaries'),'subHeadID' => $staffSalary->headID,'isDebit' => 1, 'amount' => $salaryAmount, 'description' => 'Salary Expense for the staff']);
+                \App\Services\TransactionService::addTransactionDetailArray(['transactionID' => $transactionID, 'headID' => \Config::get('constants.account_heads.salaries_payable'),'subHeadID' => $staffSalary->headID,'isDebit' => 0, 'amount' => $salaryAmount, 'description' => 'Accrued/Payable Salary for the staff']);
             }
 
 		}

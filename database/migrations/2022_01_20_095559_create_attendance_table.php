@@ -18,6 +18,7 @@ class CreateAttendanceTable extends Migration
             $table->unsignedBigInteger('leaveTypeID');
             $table->unsignedBigInteger('staffID');
             $table->date('attendanceDate');
+            $table->integer('hours')->default(8);
             $table->text('description')->nullable();
             $table->timestamp('dateCreated')->useCurrent();
             $table->unsignedBigInteger('createdByUserID');

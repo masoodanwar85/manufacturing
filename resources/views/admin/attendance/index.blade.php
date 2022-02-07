@@ -1,8 +1,8 @@
 @extends('adminlte::page')
-@section('title', 'Purchase Order')
+@section('title', 'Staff Monthly Attendance')
 
 @section('content_header')
-    <h1>Purchase Order</h1>
+    <h1>Staff Monthly Attendance</h1>
 @stop
 
 @section('content')
@@ -18,7 +18,18 @@
 			@endcan
 		</div>
 		<div class="card-body">
-            <table class=" table table-bordered table-striped table-hover ajaxTable datatable">
+            <form>
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label for="inputFromDate">Month</label>
+                        <input type="month" class="form-control" name="monthAttendance" value="{{ $monthAttendance }}" />
+                    </div>
+					<div class="form-group col-md-2">
+                        <button style="margin-top:30px;" type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+            <table class="table table-bordered table-striped table-hover ajaxTable attendance">
                 <thead>
                     <tr>
                         <td>Staff</td>
@@ -29,10 +40,10 @@
                 </thead>
                 <tbody>
                     @foreach ($staffMonthlyAttendance as $staffAtt)
-                        <tr>
+                        <tr id="st-{{$staffAtt->staffID}}">
                             <td>{{ $staffAtt->staffName }}</td>
-                            @foreach ($staffAtt->attendance as $att)
-                                <td>{{ $att->leaveType->leaveType }}</td>
+                            @foreach ($monthDates as $monthDays)
+                                <td id="st-{{$staffAtt->staffID}}-{{$monthDays->Date}}" class="table-warning"></td>
                             @endforeach
                         </tr>
                     @endforeach
@@ -44,12 +55,47 @@
 
 @section('css')
     <link rel="stylesheet" href="/css/admin_custom.css">
+    <style>
+        table.table.table-bordered.table-striped.table-hover.ajaxTable.attendance thead tr td {
+            rotate: degree('-90');
+        }
+        table.table.table-bordered.table-striped.table-hover.ajaxTable.attendance {
+            font-size:smaller;
+        }
+    </style>
 @stop
 
 @section('js')
     <script>
-        $(function () {
+        var staffAttendance = {
+            @foreach ($staffMonthlyAttendance as $staffAtt)
+                "st-{{$staffAtt->staffID}}" : {
+                    "attendance" : [
+                    @foreach ($staffAtt->attendance as $att)
+                        {
+                            "attDate" : "{{$att->attendanceDate}}",
+                            "attLeaveType" : "{{$att->leaveType->leaveType}}",
+                            "tableClass" : "{!! $att->leaveType->isPaid ? 'table-success' : 'table-danger' !!}"
+                        },
+                    @endforeach
+                    ]
+                },
+            @endforeach
+        };
 
+        $(function () {
+            jQuery('table.attendance tbody tr').each(function(idx,elem) {
+                var thisTR = jQuery(elem);
+                var rowID = thisTR.attr('id');
+                var staffAtt = staffAttendance[rowID].attendance;
+                if (staffAtt.length) {
+                    staffAtt.forEach(function(v,i) {
+                        var colID = jQuery('td#'+rowID+'-'+v.attDate);
+                        colID.removeClass().addClass(v.tableClass);
+                        colID.text(v.attLeaveType);
+                    });
+                }
+            });
         });
     </script>
 @stop

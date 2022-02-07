@@ -75,13 +75,13 @@ class ReportController extends Controller
     //     return view('admin.reports.ledgers');
 	// }
 
-	public function sales(Request $request) {
-		abort_if(Gate::denies('report_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		if (!empty($request->isSearchByBillBook)) {
-			$isSearchByBillBook = $request->isSearchByBillBook;
-		} else {
-			$isSearchByBillBook = 0;
-		}
+    public function sales(Request $request) {
+        abort_if(Gate::denies('report_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (!empty($request->isSearchByBillBook)) {
+            $isSearchByBillBook = $request->isSearchByBillBook;
+        } else {
+            $isSearchByBillBook = 0;
+        }
 		if (!empty($request->isSearchByCashBook)) {
 			$isSearchByCashBook = $request->isSearchByCashBook;
 		} else {

@@ -13,7 +13,7 @@ class Attendance extends Model
     protected $primaryKey = 'attendanceID';
 	protected $with = ['leaveType','staff'];
     public $timestamps = false;
-    protected $fillable = ['attendanceID','leaveTypeID','staffID','attendanceDate','description','createdByUserID'];
+    protected $fillable = ['attendanceID','leaveTypeID','staffID','attendanceDate','hours','description','createdByUserID'];
 
     public function leaveType()
     {
@@ -45,6 +45,7 @@ class Attendance extends Model
             ) as dates on dates.date = attendance.attendanceDate
             order by dates.date DESC
         ";
+        
         return DB::select($rawSQL);
     }
 

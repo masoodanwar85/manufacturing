@@ -83,6 +83,8 @@
             ],
 			'bad_status' => [3,4]
         ],
-		'client_settings' => [],
+		'client_settings' => [
+            'monthlySalaryDays' => 30
+        ],
 		'user_settings' => []
     ];
