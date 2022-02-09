@@ -34,7 +34,7 @@
                     <tr>
                         <td>Staff</td>
                         @foreach ($monthDates as $monthDays)
-                            <td>{{ $monthDays->Date }}</td>
+                            <td {!! $monthDays->weekDay == 'Friday' ? 'class="table-info"' : '' !!}>{{ $monthDays->Date }}</td>
                         @endforeach
                     </tr>
                 </thead>
@@ -69,13 +69,22 @@
     <script>
         var staffAttendance = {
             @foreach ($staffMonthlyAttendance as $staffAtt)
-                "st-{{$staffAtt->staffID}}" : {
+                "st-{{ $staffAtt->staffID }}" : {
                     "attendance" : [
                     @foreach ($staffAtt->attendance as $att)
                         {
-                            "attDate" : "{{$att->attendanceDate}}",
-                            "attLeaveType" : "{{$att->leaveType->leaveType}}",
-                            "tableClass" : "{!! $att->leaveType->isPaid ? 'table-success' : 'table-danger' !!}"
+                            "attDate" : "{{ $att->attendanceDate }}",
+                            "description" : "{{ $att->description }}",
+                            "attLeaveType" : "{{ $att->leaveType->leaveType }}",
+                            @if ($att->leaveTypeID == 6)
+                                "tableClass" : "table-secondary"
+                            @else
+                                @if ($staffAtt->paymentFrequencyID == 1)
+                                    "tableClass" : "{!! $att->leaveType->isPaidToMonthly ? 'table-success' : 'table-danger' !!}"
+                                @else
+                                    "tableClass" : "{!! $att->leaveType->isPaidToDaily ? 'table-success' : 'table-danger' !!}"
+                                @endif
+                            @endif
                         },
                     @endforeach
                     ]
@@ -92,7 +101,11 @@
                     staffAtt.forEach(function(v,i) {
                         var colID = jQuery('td#'+rowID+'-'+v.attDate);
                         colID.removeClass().addClass(v.tableClass);
-                        colID.text(v.attLeaveType);
+                        var text = v.attLeaveType;
+                        if (v.description.length) {
+                            text = '<abbr title="'+v.description+'">'+text+'</a>';
+                        }
+                        colID.html(text);
                     });
                 }
             });

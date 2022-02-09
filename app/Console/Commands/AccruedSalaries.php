@@ -39,21 +39,22 @@ class AccruedSalaries extends Command
     public function handle()
     {
 		$staffSalaries = \App\Models\Staff::where('paymentAmount','>','0')->get();
+        $addedRecords = 0;
 		foreach ($staffSalaries as $staffSalary) {
-			$transaction = \App\Models\Transaction::where('transactionDate',\Carbon\Carbon::now()->toDateString())
+            $today = new \Carbon\Carbon();
+			$transaction = \App\Models\Transaction::where('transactionDate',$today->toDateString())
 				->whereHas('transactionDetails', function($query) use ($staffSalary) {
 					$query->where('headID',\Config::get('constants.account_heads.salaries_payable'))->where('subHeadID',$staffSalary->headID)->where('isDebit',0);
 				})->get();
 
             if (count($transaction)) {
-				continue;
+                continue;
 			}
 
             $isAddAccruedSalary = FALSE;
 
             $salaryAmount = $staffSalary->paymentAmount;
 
-            $today = new \Carbon\Carbon();
             switch ($staffSalary->paymentFrequencyID) {
 				case 1:
 					// Monthly
@@ -61,7 +62,7 @@ class AccruedSalaries extends Command
                     if (!$isLastDayOfMonth && $today->hour >= 18) {
 						// Add Salaries Payable in DB for this staff
                         $totalDays = \App\Models\Attendance::where('staffID',$staffSalary->staffID)->whereBetween('attendanceDate',[$today->firstOfMonth()->toDateString(),$today->lastOfMonth()->toDateString()])->with(['leaveType' => function($query) {
-                            $query->where('isPaid',1);
+                            $query->where('isPaidToMonthly',1);
                         }])->count();
                         $salaryAmount = ($staffSalary->paymentAmount * $totalDays) / (\Config::get('constants.client_settings.monthlySalaryDays'));
                         $isAddAccruedSalary = TRUE;
@@ -70,8 +71,8 @@ class AccruedSalaries extends Command
 				case 2:
 					// Daily
 					// Add Salaries Payable in DB for this staff
-                    $attendance = Attendance::where('staffID',$staffSalary->staffID)->whereDate('attendanceDate',$today->toDateString())->first();
-                    if($attendance && $attendance->leaveType->isPaid == 1) {
+                    $attendance = \App\Models\Attendance::where('staffID',$staffSalary->staffID)->whereDate('attendanceDate',$today->toDateString())->first();
+                    if($attendance && $attendance->leaveType->isPaidToDaily == 1) {
                         $isAddAccruedSalary = TRUE;
                     }
 					break;
@@ -82,9 +83,10 @@ class AccruedSalaries extends Command
                 $transactionID = \App\Services\TransactionService::addTransactionArray(['isPaymentReceipt' => 1,'transactionTypeID' => 1,'createdByUserID' => 1]);
                 \App\Services\TransactionService::addTransactionDetailArray(['transactionID' => $transactionID, 'headID' => \Config::get('constants.account_heads.salaries'),'subHeadID' => $staffSalary->headID,'isDebit' => 1, 'amount' => $salaryAmount, 'description' => 'Salary Expense for the staff']);
                 \App\Services\TransactionService::addTransactionDetailArray(['transactionID' => $transactionID, 'headID' => \Config::get('constants.account_heads.salaries_payable'),'subHeadID' => $staffSalary->headID,'isDebit' => 0, 'amount' => $salaryAmount, 'description' => 'Accrued/Payable Salary for the staff']);
+                $addedRecords++;
             }
 
 		}
-        $this->info(count($staffSalaries));
+        $this->info($addedRecords);
     }
 }

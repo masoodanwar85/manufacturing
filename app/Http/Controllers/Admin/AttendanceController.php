@@ -53,7 +53,8 @@ class AttendanceController extends Controller
             $query->where('attendanceDate','=',$attendanceDate);
         }])->get();
         $leaveTypes = \App\Models\LeaveType::all();
-        return view('admin.attendance.create',compact('staffAttendance','attendanceDate','leaveTypes'));
+        $canOverrideToday = TRUE;
+        return view('admin.attendance.create',compact('staffAttendance','attendanceDate','leaveTypes','canOverrideToday'));
     }
 
     /**

@@ -17,8 +17,11 @@
 				@csrf
                 <div class="form-group row">
                     <label for="attendanceDate" class="col-sm-2 col-form-label">Attendance Date: *</label>
-					<div class="col-sm-10">
+					<div class="col-sm-5">
 	                    <input type="date" name="attendanceDate" class="form-control" value="{{ $attendanceDate }}" required readonly>
+					</div>
+                    <div class="col-sm-5">
+	                    <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($attendanceDate)->isoFormat('dddd, DD MMMM, GGGG') }}" disabled>
 					</div>
                 </div>
                 <table class="table table-bordered table-striped table-hover ajaxTable attendance">
@@ -44,25 +47,25 @@
                                         $isAlreadyExists = TRUE;
                                     }
                                 ?>
-                                @if (!$isAlreadyExists)
+                                @if (!$isAlreadyExists || $canOverrideToday)
                                 <input type="hidden" name="staffIDs[]" value="{{ $staffAtt->staffID }}" />
                                 @endif
                                 <td>
-                                    <select name="staffAttendances[]" class="form-control" @if ($isAlreadyExists) disabled @endif>
+                                    <select name="staffAttendances[]" class="form-control" @if ($isAlreadyExists && !$canOverrideToday) disabled @endif>
                                         @foreach ($leaveTypes as $leaveType)
                                             <option value="{{ $leaveType->leaveTypeID }}" {!!  ($leaveType->leaveTypeID == $thisStaffLeaveTypeID ? 'selected' : '') !!}>{{ $leaveType->leaveType }}</option>
                                         @endforeach
                                     </select>
                                 </td>
                                 <td>
-                                    <input type="text" name="descriptions[]" class="form-control" value="{{ $thisStaffDescription }}" @if ($isAlreadyExists) disabled @endif />
+                                    <input type="text" name="descriptions[]" class="form-control" value="{{ $thisStaffDescription }}" @if ($isAlreadyExists && !$canOverrideToday) disabled @endif />
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
                 <div>
-                    <input class="btn btn-primary btn-block" type="submit" @if ($isAlreadyExists) disabled @endif value="Save Attendance">
+                    <input class="btn btn-primary btn-block" type="submit" @if ($isAlreadyExists && !$canOverrideToday) disabled @endif value="Save Attendance">
                 </div>
             </form>
         </div>

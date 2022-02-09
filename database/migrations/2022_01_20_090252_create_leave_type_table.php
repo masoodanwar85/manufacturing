@@ -16,7 +16,8 @@ class CreateLeaveTypeTable extends Migration
         Schema::create('leaveType', function (Blueprint $table) {
             $table->bigIncrements('leaveTypeID');
 			$table->string('leaveType');
-            $table->tinyInteger('isPaid')->default(1);
+            $table->tinyInteger('isPaidToMonthly')->default(1);
+            $table->tinyInteger('isPaidToDaily')->default(1);
 			$table->unsignedBigInteger('createdByUserID');
 			$table->timestamp('dateCreated')->useCurrent();
 			$table->foreign('createdByUserID')->references('userID')->on('users');

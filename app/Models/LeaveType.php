@@ -11,7 +11,7 @@ class LeaveType extends Model
     protected $table = 'leaveType';
     protected $primaryKey = 'leaveTypeID';
     public $timestamps = false;
-    protected $fillable = ['leaveTypeID','leaveType','isPaid','createdByUserID'];
+    protected $fillable = ['leaveTypeID','leaveType','isPaidToMonthly','isPaidToDaily','createdByUserID'];
 
     public function attendances()
     {
