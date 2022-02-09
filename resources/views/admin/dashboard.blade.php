@@ -66,6 +66,31 @@
 		@endcan
 	</div>
 	<hr />
+    <div class="row">
+		@can('attendance_create')
+		<div class="col">
+            <a href="{{ route('attendance.index') }}">
+    			<div class="info-box mb-3">
+    				<span class="info-box-icon @if($attendance) bg-success @else bg-danger @endif elevation-1"><i class="fas fa-clipboard-check"></i></span>
+    				<div class="info-box-content">
+    					<span class="info-box-text">Attendance</span>
+    					<span class="info-box-number">@if ($attendance) Marked @else Not Marked @endif</span>
+    				</div>
+    			</div>
+            </a>
+		</div>
+		@endcan
+        <div class="col">
+
+        </div>
+        <div class="col">
+
+        </div>
+        <div class="col">
+
+        </div>
+    </div>
+    <hr />
     <h3>Search</h3>
     <div class="row">
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">

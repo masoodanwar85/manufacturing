@@ -14,6 +14,7 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        $today = \Carbon\Carbon::now();
 		$totalPurchases = \App\Models\PurchaseOrder::count();
 		$totalSales = \App\Models\SalesOrder::count();
 		$thresholdStocks = \App\Models\Stock::getStock(NULL,TRUE);
@@ -21,7 +22,8 @@ class DashboardController extends Controller
 		$receivables['staff'] = \App\Models\Staff::getBalance()[0]->totalPayable;
 		$receivables['suppliers'] = \App\Models\Supplier::getBalance()[0]->totalPayable;
         $customers = \App\Models\Customer::orderBy('customerName')->get();
-		return view('admin.dashboard',compact('totalPurchases','totalSales','thresholdStocks','receivables','customers'));
+        $attendance = \App\Models\Attendance::where('attendanceDate',$today->toDateString())->first();
+        return view('admin.dashboard',compact('totalPurchases','totalSales','thresholdStocks','receivables','customers','attendance'));
     }
 
     public function search(Request $request)
