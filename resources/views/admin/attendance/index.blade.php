@@ -34,7 +34,17 @@
                     <tr>
                         <td>Staff</td>
                         @foreach ($monthDates as $monthDays)
-                            <td {!! $monthDays->weekDay == 'Friday' ? 'class="table-info"' : '' !!}>{{ $monthDays->Date }}</td>
+                            <td {!! $monthDays->weekDay == 'Friday' ? 'class="table-info"' : '' !!}>
+								@can('attendance_create')
+									@if (\Carbon\Carbon::parse($monthDays->Date)->diffInDays(\Carbon\Carbon::now()) <= 10 && \Carbon\Carbon::parse($monthDays->Date)->lte(\Carbon\Carbon::now()))
+										<a href="{{ route('attendance.create') }}/?attendanceDate={{ $monthDays->Date }}">{{ $monthDays->Date }}</a>
+									@else
+										{{ $monthDays->Date }}
+									@endif
+								@else
+									{{ $monthDays->Date }}
+								@endcan
+							</td>
                         @endforeach
                     </tr>
                 </thead>

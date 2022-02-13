@@ -45,16 +45,22 @@ class AttendanceController extends Controller
     public function create(Request $request)
     {
 		abort_if(Gate::denies('attendance_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $attendanceDate = \Carbon\Carbon::now()->format('Y-m-d');
+		$today = \Carbon\Carbon::now();
+        $attendanceDate = $today->format('Y-m-d');
         if ($request->get('attendanceDate') && strlen($request->get('attendanceDate'))) {
             $attendanceDate = \Carbon\Carbon::parse($request->get('attendanceDate'))->format('Y-m-d');
         }
-        $staffAttendance = Staff::where('paymentAmount','>','0')->with(['attendance' => function($query) use($attendanceDate) {
-            $query->where('attendanceDate','=',$attendanceDate);
-        }])->get();
-        $leaveTypes = \App\Models\LeaveType::all();
-        $canOverrideToday = TRUE;
-        return view('admin.attendance.create',compact('staffAttendance','attendanceDate','leaveTypes','canOverrideToday'));
+
+		if (\Carbon\Carbon::parse($attendanceDate)->diffInDays($today) <= 10 && \Carbon\Carbon::parse($attendanceDate)->lte($today)) {
+			$staffAttendance = Staff::where('paymentAmount','>','0')->with(['attendance' => function($query) use($attendanceDate) {
+	            $query->where('attendanceDate','=',$attendanceDate);
+	        }])->get();
+	        $leaveTypes = \App\Models\LeaveType::all();
+	        $canOverrideToday = TRUE;
+	        return view('admin.attendance.create',compact('staffAttendance','attendanceDate','leaveTypes','canOverrideToday'));
+		} else {
+			abort(403);
+		}
     }
 
     /**
