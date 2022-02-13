@@ -33,6 +33,9 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <?php
+                            $isAlreadyExists = FALSE;
+                        ?>
                         @foreach ($staffAttendance as $staffAtt)
                             <tr>
                                 <td>{{ $staffAtt->staffName }}</td>
