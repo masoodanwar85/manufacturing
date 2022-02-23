@@ -16,7 +16,7 @@ class LeaveTypeSeeder extends Seeder
         $aryLeaveTypes = [
             ['leaveType' => 'Present', 'isPaidToMonthly' => 1, 'isPaidToDaily' => 1],
             ['leaveType' => 'Absent', 'isPaidToMonthly' => 0, 'isPaidToDaily' => 0],
-            ['leaveType' => 'Earned Leave', 'isPaidToMonthly' => 1, 'isPaidToDaily' => 0],
+            ['leaveType' => 'Earned Leave', 'isPaidToMonthly' => 1, 'isPaidToDaily' => 1],
 			['leaveType' => 'Casual Leave', 'isPaidToMonthly' => 1, 'isPaidToDaily' => 0],
 			['leaveType' => 'Sick Leave', 'isPaidToMonthly' => 1, 'isPaidToDaily' => 0],
             ['leaveType' => 'Holiday', 'isPaidToMonthly' => 1, 'isPaidToDaily' => 0]
