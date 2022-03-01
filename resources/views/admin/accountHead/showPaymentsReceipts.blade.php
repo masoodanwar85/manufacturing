@@ -106,7 +106,7 @@
                                     <td>{{ $transaction->transactionTypeNumber }}</td>
                                     <td>{{ $subHead }}</td>
                                     <td>{!! $head !!}</td>
-                                    <td>{{ $amount }}</td>
+                                    <td align="right">@money('$amount','') &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
                                     <td>{{ $transaction->dateCreated }}</td>
                                     <td>{{ $description }}</td>
                                     <td>
@@ -125,7 +125,8 @@
                     @endforeach
 					<tfoot>
 						<td colspan="5" class="text-right font-weight-bolder">Total:</td>
-						<td colspan="4" id="totals" class="font-weight-bolder"></td>
+						<td id="totals" class="text-right font-weight-bolder"></td>
+                        <td colspan="3"></td>
 					</tfoot>
                 @else
                     <tr><td colspan="9">No Record Found.</td></tr>
@@ -137,8 +138,8 @@
 @section('js')
 	<script>
         $(function () {
-			var total = $('table tbody tr td:nth-child(6)').toArray().reduce((partial_sum, a) => partial_sum + parseInt(a.innerHTML),0);
-			$('#totals').html(total);
+			var total = $('table tbody tr td:nth-child(6)').toArray().reduce((partial_sum, a) => partial_sum + parseInt(a.innerHTML.replace(/,/g,'')),0);
+			$('#totals').html(total + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
         });
     </script>
 @stop

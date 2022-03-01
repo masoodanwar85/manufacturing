@@ -51,7 +51,7 @@ class AttendanceController extends Controller
             $attendanceDate = \Carbon\Carbon::parse($request->get('attendanceDate'))->format('Y-m-d');
         }
 
-		if (\Carbon\Carbon::parse($attendanceDate)->diffInDays($today) <= 10 && \Carbon\Carbon::parse($attendanceDate)->lte($today)) {
+		if (\Carbon\Carbon::parse($attendanceDate)->diffInDays($today) <= 30 && \Carbon\Carbon::parse($attendanceDate)->lte($today)) {
 			$staffAttendance = Staff::where('paymentAmount','>','0')->with(['attendance' => function($query) use($attendanceDate) {
 	            $query->where('attendanceDate','=',$attendanceDate);
 	        }])->get();

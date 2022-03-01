@@ -35,13 +35,15 @@
                     <tbody>
                         <?php
                             $isAlreadyExists = FALSE;
+                            $ctr = -1;
                         ?>
                         @foreach ($staffAttendance as $staffAtt)
                             <tr>
                                 <td>{{ $staffAtt->staffName }}</td>
 
                                 <?php
-                                    $thisStaffLeaveTypeID = 2;
+                                    $ctr++;
+                                    $thisStaffLeaveTypeID = 1;
                                     $thisStaffDescription = "";
                                     $isAlreadyExists = FALSE;
                                     if (!empty($staffAtt->attendance[0]) && $staffAtt->attendance[0]->leaveTypeID) {
@@ -54,11 +56,13 @@
                                 <input type="hidden" name="staffIDs[]" value="{{ $staffAtt->staffID }}" />
                                 @endif
                                 <td>
-                                    <select name="staffAttendances[]" class="form-control" @if ($isAlreadyExists && !$canOverrideToday) disabled @endif>
-                                        @foreach ($leaveTypes as $leaveType)
-                                            <option value="{{ $leaveType->leaveTypeID }}" {!!  ($leaveType->leaveTypeID == $thisStaffLeaveTypeID ? 'selected' : '') !!}>{{ $leaveType->leaveType }}</option>
-                                        @endforeach
-                                    </select>
+                                    @foreach ($leaveTypes as $leaveType)
+                                        <div class="form-check-inline">
+                                            <label class="form-check-label">
+                                                <input type="radio" class="form-check-input" name="staffAttendances[{{$ctr}}]" @if ($isAlreadyExists && !$canOverrideToday) disabled @endif value="{{ $leaveType->leaveTypeID }}" {!!  ($leaveType->leaveTypeID == $thisStaffLeaveTypeID ? 'checked' : '') !!}> {{ $leaveType->leaveType }}
+                                            </label>
+                                        </div>
+                                    @endforeach
                                 </td>
                                 <td>
                                     <input type="text" name="descriptions[]" class="form-control" value="{{ $thisStaffDescription }}" @if ($isAlreadyExists && !$canOverrideToday) disabled @endif />

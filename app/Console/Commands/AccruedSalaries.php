@@ -63,16 +63,9 @@ class AccruedSalaries extends Command
 						$isLastDayOfMonth = $today->toDateString() == $today->endOfMonth()->toDateString();
                         if ($isLastDayOfMonth && $today->hour >= 18) {
     						// Add Salaries Payable in DB for this staff
-                            $totalDays = \App\Models\Attendance::where('staffID',$staffSalary->staffID)->whereBetween('attendanceDate',[$today->firstOfMonth()->toDateString(),$today->lastOfMonth()->toDateString()])->with(['leaveType' => function($query) {
-                                $query->where('isPaidToMonthly',1);
-                            }])->count();
-							echo $totalDays;
-							echo PHP_EOL;
-							$perDaySalary = $salaryAmount / $today->daysInMonth;
-							echo $perDaySalary;
-							echo PHP_EOL;
+                            $totalDays = \App\Models\Attendance::where('staffID',$staffSalary->staffID)->whereBetween('attendanceDate',[$today->firstOfMonth()->toDateString(),$today->lastOfMonth()->toDateString()])->whereRaw('leaveTypeID IN (SELECT leaveTypeID FROM leaveType WHERE isPaidToMonthly = 1)')->count();
+                            $perDaySalary = $salaryAmount / $today->daysInMonth;
 							$salaryAmount = $perDaySalary * $totalDays;
-							echo $salaryAmount;
 							if ($salaryAmount > 0) {
 								$isAddAccruedSalary = TRUE;
 							}
