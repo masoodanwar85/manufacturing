@@ -75,7 +75,7 @@
                     <th>Bill #</th>
                     <th>Account</th>
                     <th>Head</th>
-                    <th>Amount</th>
+                    <th style="text-align:center">Amount</th>
                     <th>Creation Date</th>
                     <th>Description</th>
                     <th>Action</th>

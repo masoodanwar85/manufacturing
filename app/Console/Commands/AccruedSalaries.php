@@ -41,7 +41,7 @@ class AccruedSalaries extends Command
 		$staffSalaries = \App\Models\Staff::where('paymentAmount','>','0')->get();
 		$addedRecords = 0;
 		foreach ($staffSalaries as $staffSalary) {
-			for ($ctr = 10; $ctr >= 0; $ctr--) {
+			for ($ctr = 30; $ctr >= 0; $ctr--) {
                 $today = \Carbon\Carbon::now()->subDay($ctr);
 
 				$transaction = \App\Models\Transaction::where('transactionDate',$today->toDateString())
