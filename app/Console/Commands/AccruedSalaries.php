@@ -39,12 +39,12 @@ class AccruedSalaries extends Command
     public function handle()
     {
 		$staffSalaries = \App\Models\Staff::where('paymentAmount','>','0')->get();
-        $addedRecords = 0;
+		$addedRecords = 0;
 		foreach ($staffSalaries as $staffSalary) {
-            for ($ctr = 10; $ctr >= 0; $ctr--) {
+			for ($ctr = 10; $ctr >= 0; $ctr--) {
                 $today = \Carbon\Carbon::now()->subDay($ctr);
 
-                $transaction = \App\Models\Transaction::where('transactionDate',$today->toDateString())
+				$transaction = \App\Models\Transaction::where('transactionDate',$today->toDateString())
     				->whereHas('transactionDetails', function($query) use ($staffSalary) {
     					$query->where('headID',\Config::get('constants.account_heads.salaries_payable'))->where('subHeadID',$staffSalary->headID)->where('isDebit',0);
     				})->get();
@@ -60,16 +60,24 @@ class AccruedSalaries extends Command
                 switch ($staffSalary->paymentFrequencyID) {
     				case 1:
     					// Monthly
-    					$isLastDayOfMonth = $today->lastOfMonth()->isSameDay();
-                        if (!$isLastDayOfMonth && $today->hour >= 18) {
+						$isLastDayOfMonth = $today->toDateString() == $today->endOfMonth()->toDateString();
+                        if ($isLastDayOfMonth && $today->hour >= 18) {
     						// Add Salaries Payable in DB for this staff
                             $totalDays = \App\Models\Attendance::where('staffID',$staffSalary->staffID)->whereBetween('attendanceDate',[$today->firstOfMonth()->toDateString(),$today->lastOfMonth()->toDateString()])->with(['leaveType' => function($query) {
                                 $query->where('isPaidToMonthly',1);
                             }])->count();
-                            $salaryAmount = ($staffSalary->paymentAmount * $totalDays) / (\Config::get('constants.client_settings.monthlySalaryDays'));
-                            $isAddAccruedSalary = TRUE;
+							echo $totalDays;
+							echo PHP_EOL;
+							$perDaySalary = $salaryAmount / $today->daysInMonth;
+							echo $perDaySalary;
+							echo PHP_EOL;
+							$salaryAmount = $perDaySalary * $totalDays;
+							echo $salaryAmount;
+							if ($salaryAmount > 0) {
+								$isAddAccruedSalary = TRUE;
+							}
     					}
-    					break;
+						break;
     				case 2:
     					// Daily
     					// Add Salaries Payable in DB for this staff
@@ -77,7 +85,7 @@ class AccruedSalaries extends Command
                         if($attendance && $attendance->leaveType->isPaidToDaily == 1) {
                             $isAddAccruedSalary = TRUE;
                         }
-    					break;
+						break;
     				default:
     			}
 
