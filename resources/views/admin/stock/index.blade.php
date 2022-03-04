@@ -25,10 +25,18 @@
 						@endif
 						<th>Good Returns</th>
 						<th>Bad Returns</th>
-						<th>Last Purchase Price (PKR)</th>
+						<th>Last Purchase Price</th>
+                        <th>Stock Total Price</th>
 						<th>Action</th>
 					</tr>
 				</thead>
+                <tfoot>
+                    <tr>
+                        <td colspan="7" class="text-right font-weight-bold">Grand Total:</td>
+                        <td class="font-weight-bold" id="stock-grand-total">Rs. </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
 			</table>
 		</div>
 	</div>
@@ -58,8 +66,12 @@
 					{ data: 'totalGoodSalesReturn', name: 'totalGoodSalesReturn' },
 					{ data: 'totalBadSalesReturn', name: 'totalBadSalesReturn' },
 					{ data: 'lastPurchasePrice', name: 'lastPurchasePrice' },
+                    { data: 'totalPriceInStock', name: 'totalPriceInStock' },
                     { data: 'actions', name: 'Actions' }
                 ],
+                drawCallback: function(settings) {
+                    $('#stock-grand-total').text('Rs. ' + settings.json.grandTotal);
+                },
                 pageLength: {{ $globalSettings['user_settings.records_per_page'] }}
             };
 

@@ -22,7 +22,11 @@ class StockController extends Controller
     {
 		abort_if(Gate::denies('stock_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if ($request->ajax()) {
-			$table = Datatables::of(Stock::getStock());
+
+            $query = Stock::getStock();
+
+            $grandTotal = array_sum(array_column($query,'inStockTotalPrice'));
+            $table = Datatables::of($query);
 
             $table->addColumn('placeholder', '&nbsp;');
             $table->addColumn('actions', '&nbsp;');
@@ -64,7 +68,13 @@ class StockController extends Controller
             $table->editColumn('lastPurchasePrice', function ($row) {
                 return \App\Services\CurrencyService::getCurrencyFormatted($row->lastPurchasePrice);
             });
+            $table->editColumn('totalPriceInStock', function ($row) use ($grandTotal) {
+                $grandTotal+=$row->inStockTotalPrice;
+                return \App\Services\CurrencyService::getCurrencyFormatted($row->inStockTotalPrice);
+            });
+
             $table->rawColumns(['actions', 'placeholder']);
+            $table->with('grandTotal', $grandTotal);
 
             return $table->make(true);
         }

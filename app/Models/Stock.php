@@ -54,7 +54,8 @@ class Stock extends Model
 				totalGoodSalesReturnUnits,
 				(totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity) AS inStockQuantity,
 				(totalPurchasedUnits + totalGoodSalesReturnUnits - totalSoldUnits - totalDamagedUnits - totalBadSalesReturnUnits) AS inStockUnits,
-				lastPurchasePrice
+				lastPurchasePrice,
+                ((totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity) * lastPurchasePrice) AS inStockTotalPrice
 			FROM (
 				SELECT
 					measurementUnit.symbol,
@@ -174,85 +175,6 @@ class Stock extends Model
 			ORDER BY productName";
 		return DB::select($rawSQL);
 	}
-
-	// public static function getProductGodownStock($productID) {
-	// 	$whereClause = " WHERE productID = " . (int) $productID;
-	// 	$rawSQL = "
-	// 		SELECT symbol,productID,unitsInProduct,productName,godownID,godownName,totalPurchased,totalSold, totalDamaged, totalBadSalesReturn,totalGoodSalesReturn,(totalPurchased + totalGoodSalesReturn - totalSold - totalDamaged - totalBadSalesReturn) AS inStock,lastPurchasePrice
-	// 		FROM (
-	// 			SELECT measurementUnit.symbol,temp.productID,product.unitsInProduct,product.productName,temp.godownID,godown.name as godownName,SUM(temp.totalPurchased) AS totalPurchased,SUM(temp.sold) AS totalSold,SUM(temp.damaged) AS totalDamaged,SUM(temp.bad) AS totalBadSalesReturn,SUM(temp.good) AS totalGoodSalesReturn,product.unitPurchasePrice AS lastPurchasePrice
-	// 			FROM (
-	// 				SELECT stockDetail.productID,stockDetail.godownID,SUM(stockDetail.quantity) AS totalPurchased, 0 AS sold, 0 AS damaged, 0 AS bad, 0 AS good
-	// 				FROM stockDetail
-	// 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
-	// 				WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.quetta_godown') . "
-	// 				GROUP BY stockDetail.productID,stockDetail.godownID
-	// 				UNION
-	// 				SELECT
-	// 					stockDetail.productID,
-	// 					stockDetail.godownID,
-	// 					0 AS totalPurchased,
-	// 					0 AS sold,
-	// 					0 AS damaged,
-	// 					0 AS bad,
-	// 					SUM(stockDetailStatus.quantity) AS good
-	// 				FROM stockDetail
-	// 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
-	// 				INNER JOIN product ON product.productID = stockDetail.productID
-	// 				WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.good_sales_return') . "
-	// 				GROUP BY stockDetail.productID,stockDetail.godownID
-	// 				UNION
-	// 				SELECT
-	// 					stockDetail.productID,
-	// 					stockDetail.godownID,
-	// 					0 AS totalPurchased,
-	// 					SUM(stockDetailStatus.quantity) AS sold,
-	// 					0 AS damaged,
-	// 					0 AS bad,
-	// 					0 AS good
-	// 				FROM stockDetail
-	// 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
-	// 				INNER JOIN product ON product.productID = stockDetail.productID
-	// 				WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.sold') . "
-	// 				GROUP BY stockDetail.productID,stockDetail.godownID
-	// 				UNION
-	// 				SELECT
-	// 					stockDetail.productID,
-	// 					stockDetail.godownID,
-	// 					0 AS totalPurchased,
-	// 					0 AS sold,
-	// 					0 AS damaged,
-	// 					SUM(stockDetailStatus.quantity) AS bad,
-	// 					0 AS good
-	// 				FROM stockDetail
-	// 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
-	// 				INNER JOIN product ON product.productID = stockDetail.productID
-	// 				WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.bad_sales_return') . "
-	// 				GROUP BY stockDetail.productID,stockDetail.godownID
-	// 				UNION
-	// 				SELECT
-	// 					stockDetail.productID,
-	// 					stockDetail.godownID,
-	// 					0 AS totalPurchased,
-	// 					0 AS sold,
-	// 					SUM(stockDetailStatus.quantity) AS damaged,
-	// 					0 AS bad,
-	// 					0 AS good
-	// 				FROM stockDetail
-	// 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
-	// 				INNER JOIN product ON product.productID = stockDetail.productID
-	// 				WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.damaged') . "
-	// 				GROUP BY stockDetail.productID,stockDetail.godownID
-	// 			) AS temp
-	// 			INNER JOIN product ON product.productID = temp.productID
-	// 			INNER JOIN godown ON godown.godownID = temp.godownID
-	// 			INNER JOIN measurementUnit ON product.maximumUnitID = measurementUnit.unitID
-	// 			GROUP BY temp.productID,temp.godownID
-	// 		) AS temp2
-	// 		" . $whereClause . "
-	// 		ORDER BY productName";
-	// 	return DB::select($rawSQL);
-	// }
 
 	public static function getGodownStock($godownID) {
 	    DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
