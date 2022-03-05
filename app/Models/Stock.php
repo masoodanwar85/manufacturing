@@ -421,8 +421,10 @@ class Stock extends Model
 				WHERE stockDetailStatus.statusID IN (" . \Config::get('constants.stock_status.isNotAvailableForSale') . ")" . $whereClause . "
 				GROUP BY stockDetail.stockDetailID
 			) AS temp
+            LEFT JOIN godown ON godown.godownID = temp.godownID
 			GROUP BY temp.stockDetailID,temp.godownID
-			HAVING unitsAvailable > 0";
+			HAVING unitsAvailable > 0
+            ORDER BY godown.saleSortOrder";
 		return DB::select($rawSQL);
 	}
 

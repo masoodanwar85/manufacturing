@@ -180,15 +180,13 @@ class StockController extends Controller
     }
 
     public function transfer(Request $request) {
-		abort_if(Gate::denies('stock_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+		abort_if(Gate::denies('stock_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         DB::beginTransaction();
 		try {
             if ($request->previousGodownID != $request->newGodownID) {
                 $stockDetails = \App\Models\Stock::getProductStockDetails($request->productID,$request->previousGodownID);
-
                 $quantityRemaining = $request->quantityToMove;
                 $unitsRemaining = $request->unitsToMove;
-
                 foreach ($stockDetails as $stockDetail) {
                     $oldStockDetail = \App\Models\StockDetail::find($stockDetail->stockDetailID);
                     $oldStockDetailStatuses = \App\Models\StockDetailStatus::where('stockDetailID',$stockDetail->stockDetailID)->where('godownID',$request->previousGodownID)->get();
@@ -227,9 +225,14 @@ class StockController extends Controller
                             $quantityRemaining -= $firstStockDetailStatus->quantity;
                             $unitsRemaining -= $firstStockDetailStatus->quantityUnits;
 
-                            $firstStockDetailStatus->quantity = $quantityRemaining;
-                            $firstStockDetailStatus->quantityUnits = $unitsRemaining;
+                            $firstStockDetailStatus->quantity = abs($quantityRemaining);
+                            $firstStockDetailStatus->quantityUnits = abs($unitsRemaining);
                             $firstStockDetailStatus->save();
+
+                            if ($quantityRemaining < 0 && $unitsRemaining < 0) {
+                                $quantityRemaining = 0;
+                                $unitsRemaining = 0;
+                            }
                         }
                         if ($quantityRemaining == 0) {
                             break;

@@ -19,6 +19,7 @@ class CreateGodownTable extends Migration
 			$table->string('name',250);
 			$table->text('address',250);
 			$table->text('description')->nullable();
+            $table->integer('saleSortOrder')->default(1);
 			$table->unsignedBigInteger('createdByUserID');
             $table->timestamp('dateCreated')->useCurrent();
             $table->foreign('headID')->references('headID')->on('accountHead');
