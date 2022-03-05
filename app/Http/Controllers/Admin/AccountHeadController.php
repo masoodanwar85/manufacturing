@@ -698,39 +698,4 @@ class AccountHeadController extends Controller
 		}
 		return redirect()->route('accountHead.paymentsReceipts');
 	}
-
-    public function bookSerials() {
-        abort_if(Gate::denies('account_head_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $bookSerials = \App\Models\BookSerials::getBookSerials();
-		return view('admin.accountHead.bookSerials', compact('bookSerials'));
-    }
-
-    public function formBookSerial(Request $request) {
-		abort_if(Gate::denies('account_head_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		$bookInfo = $request->all();
-		$bookSerial = [];
-		if (!empty($bookInfo)) {
-			$bookSerial = \App\Models\BookSerials::where('bookType',$bookInfo['bookType'])->where('bookNumber',$bookInfo['bookNumber'])->get();
-		}
-		$isNew = $request->isNew;
-		return view('admin.accountHead.formBookSerial', compact('bookSerial','bookInfo','isNew'));
-	}
-
-    public function updateBookSerials(Request $request) {
-		abort_if(Gate::denies('account_head_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		\App\Models\BookSerials::where('bookType',$request->bookType)->where('bookNumber',$request->bookNumber)->delete();
-		$aryBookSerials = [];
-        foreach ($request->serialNumber as $idx => $serial) {
-			array_push($aryBookSerials,[
-				'bookType' => $request->bookType,
-				'bookNumber' => $request->bookNumber,
-				'serialNumber' => $serial,
-				'reason' => $request->reason[$idx],
-				'createdByUserID' => Auth::id()
-			]);
-        }
-
-		\App\Models\BookSerials::insert($aryBookSerials);
-        return redirect()->route('accountHead.bookSerials');
-	}
 }

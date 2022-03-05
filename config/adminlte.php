@@ -435,6 +435,13 @@ return [
                     'can'  => ['report_read'],
 					'active' => ['admin/report/duplicates']
                 ],
+                [
+                    'text' => 'missing',
+                    'url'  => 'admin/report/missing',
+                    'icon' => 'fas fa-fw fa-strikethrough',
+                    'can'  => ['report_read'],
+					'active' => ['admin/report/missing']
+                ],
             ],
         ],
 		[

@@ -32,8 +32,8 @@ class InvoiceBooks extends Model
             SELECT
                 serialNumber.id as sequenceNumber, CONCAT_WS('-',invoiceBooks.bookType,invoiceBooks.bookNumber,serialNumber.id) as serial, invoiceBooks.*
             FROM serialNumber
-            LEFT JOIN invoiceBooks on (invoiceBooks.startPage = serialNumber.id or invoiceBooks.startpage <= serialNumber.id) and (invoiceBooks.endPage = serialNumber.id or invoiceBooks.endPage >= serialNumber.id)
-            WHERE 1=1
+            LEFT JOIN invoiceBooks ON (invoiceBooks.startPage = serialNumber.id OR invoiceBooks.startpage <= serialNumber.id) AND (invoiceBooks.endPage = serialNumber.id OR invoiceBooks.endPage >= serialNumber.id)
+            WHERE invoiceBooks.bookNumber IS NOT NULL
 		";
         $rawSQL .= $strWhere;
         return DB::select($rawSQL);
@@ -48,4 +48,26 @@ class InvoiceBooks extends Model
         ";
         return DB::select($rawSQL);
     }
+
+    public static function getInvoiceBooksMissingSerialNumbers($params = []) {
+        DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+        $strWhere = "";
+        if (isset($params['invoiceBookID']) && is_numeric($params['invoiceBookID'])) {
+            $strWhere .= " AND invoiceBooks.invoiceBookID = " . $params['invoiceBookID'] ;
+        }
+        if (isset($params['bookType']) && is_numeric($params['bookType'])) {
+            $strWhere .= " AND invoiceBooks.bookType = " . $params['bookType'] ;
+        }
+        $rawSQL = "
+            SELECT
+                serialNumber.id as sequenceNumber, CONCAT_WS('-',invoiceBooks.bookType,invoiceBooks.bookNumber,serialNumber.id) as serial, invoiceBooks.*
+            FROM serialNumber
+            LEFT JOIN invoiceBooks ON (invoiceBooks.startPage = serialNumber.id OR invoiceBooks.startpage <= serialNumber.id) AND (invoiceBooks.endPage = serialNumber.id OR invoiceBooks.endPage >= serialNumber.id)
+            LEFT JOIN `transaction` ON CONCAT_WS('-',SUBSTRING_INDEX(transactionTypeNumber,'-',2),TRIM(leading '0' from SUBSTRING_INDEX(transactionTypeNumber,'-',-1))) = CONCAT_WS('-', invoiceBooks.bookType, invoiceBooks.bookNumber, serialNumber.id)
+            WHERE invoiceBooks.bookNumber IS NOT NULL AND `transaction`.transactionID IS NULL
+		";
+        $rawSQL .= $strWhere;
+        $rawSQL .= " ORDER BY invoiceBooks.bookType,invoiceBooks.bookNumber";
+        return DB::select($rawSQL);
+	}
 }

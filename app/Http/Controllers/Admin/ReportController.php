@@ -129,9 +129,13 @@ class ReportController extends Controller
         return view('admin.reports.duplicates', compact('allTransactions'));
     }
 
-    public function books(Request $request) {
+    public function missings(Request $request) {
 		abort_if(Gate::denies('report_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $books = \App\Models\InvoiceBooks::with('serials')->get();
-        return view('admin.reports.books', compact('books'));
+        $missings = \App\Models\InvoiceBooks::getInvoiceBooksMissingSerialNumbers();
+        $missings_grouped = array();
+        foreach ($missings as $key => $item) {
+            $missings_grouped[$item->bookType . '-' . $item->bookNumber][] = $item;
+        }
+        return view('admin.reports.missings', compact('missings_grouped'));
     }
 }

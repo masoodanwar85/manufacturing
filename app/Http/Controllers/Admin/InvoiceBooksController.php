@@ -171,4 +171,34 @@ class InvoiceBooksController extends Controller
 
         return redirect()->route('invoiceBooks.index');
     }
+
+    public function updateBookSerials(Request $request) {
+		abort_if(Gate::denies('account_head_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $invoiceBook = InvoiceBooks::find($request->get('invoiceBookID'));
+        if ($request->serialNumber != null) {
+            $aryBookSerials = [];
+            foreach ($request->serialNumber as $idx => $serial) {
+    			array_push($aryBookSerials,[
+    				'serialNumber' => $serial,
+    				'reason' => $request->reason[$idx],
+    				'createdByUserID' => Auth::id()
+    			]);
+            }
+        }
+
+        DB::beginTransaction();
+		try {
+            $invoiceBook->serials()->delete();
+            if ($request->serialNumber != null) {
+                $invoiceBook->serials()->createMany($aryBookSerials);
+            }
+			DB::commit();
+			$request->session()->flash('message', 'Book Serials Voids updated successfully!');
+		} catch (\Exception $e) {
+			DB::rollback();
+			$request->session()->flash('error', 'An error occurred while Updating Serials Voids!');
+		}
+
+        return redirect()->route('invoiceBooks.show',$request->get('invoiceBookID'));
+	}
 }

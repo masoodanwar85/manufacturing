@@ -38,9 +38,6 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
 	Route::post('accountHead/doReceipt', [App\Http\Controllers\Admin\AccountHeadController::class, 'doReceipt'])->name('accountHead.doReceipt');
 	Route::get('accountHead/openingBalance', [App\Http\Controllers\Admin\AccountHeadController::class, 'openingBalance'])->name('accountHead.openingBalance');
 	Route::post('accountHead/updateOpeningBalance', [App\Http\Controllers\Admin\AccountHeadController::class, 'updateOpeningBalance'])->name('accountHead.updateOpeningBalance');
-    Route::get('accountHead/bookSerials', [App\Http\Controllers\Admin\AccountHeadController::class, 'bookSerials'])->name('accountHead.bookSerials');
-    Route::get('accountHead/formBookSerial/{isNew}', [App\Http\Controllers\Admin\AccountHeadController::class, 'formBookSerial'])->name('accountHead.formBookSerial');
-    Route::post('accountHead/updateBookSerials', [App\Http\Controllers\Admin\AccountHeadController::class, 'updateBookSerials'])->name('accountHead.updateBookSerials');
     Route::post('purchase/doCustomizedShift', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'doCustomizedShift'])->name('purchase.doCustomizedShift');
 	Route::get('stock/{productID}/view', [App\Http\Controllers\Admin\StockController::class, 'view'])->name('stock.view');
     Route::post('stock/transfer', [App\Http\Controllers\Admin\StockController::class,'transfer'])->name('stock.transfer');
@@ -53,6 +50,7 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
 	Route::get('godown/{godownID}/balanceByHead', [App\Http\Controllers\Admin\GodownController::class, 'getBalanceByHeadID'])->name('godown.balanceByHead');
 	Route::get('transport/{transportID}/balance', [App\Http\Controllers\Admin\TransportController::class, 'getBalance'])->name('transport.balance');
 	Route::get('transport/{transportID}/balanceByHead', [App\Http\Controllers\Admin\TransportController::class, 'getBalanceByHeadID'])->name('transport.balanceByHead');
+    Route::post('invoiceBooks/updateBookSerials', [App\Http\Controllers\Admin\InvoiceBooksController::class, 'updateBookSerials'])->name('invoiceBooks.updateBookSerials');
     Route::resource('user', App\Http\Controllers\Admin\UserController::class);
     Route::resource('role', App\Http\Controllers\Admin\RoleController::class);
 	Route::resource('product', App\Http\Controllers\Admin\ProductController::class);
@@ -78,4 +76,5 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
     Route::get('report/accounts', [App\Http\Controllers\Admin\ReportController::class, 'accounts'])->name('report.accounts');
 	Route::get('report/sales', [App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('report.sales');
     Route::get('report/duplicates', [App\Http\Controllers\Admin\ReportController::class, 'duplicates'])->name('report.duplicates');
+    Route::get('report/missing', [App\Http\Controllers\Admin\ReportController::class, 'missings'])->name('report.missings');
 });

@@ -48,5 +48,6 @@ return [
     'accounts'						=> 'Accounts',
 	'sales'							=> 'Sales',
 	'duplicates'					=> 'Duplicate Bills',
+    'missing'   					=> 'Missing Bills',
 	'settings'						=> 'Settings'
 ];
