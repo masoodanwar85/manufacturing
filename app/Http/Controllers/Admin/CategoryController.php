@@ -22,13 +22,9 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-		abort_if(Gate::denies('product_category_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('product_category_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if ($request->ajax()) {
-            $query = DB::table('category')
-                        ->leftJoin('product','product.categoryID','=','category.categoryID')
-                        ->select(DB::raw('category.*,count(product.productID) as noOfProducts'))
-                        ->groupBy('category.categoryID')
-                        ->get();
+            $query = Category::withCount('products')->get();
             $table = Datatables::of($query);
 
             $table->addColumn('placeholder', '&nbsp;');
@@ -54,8 +50,8 @@ class CategoryController extends Controller
             $table->editColumn('categoryName', function ($row) {
                 return $row->categoryName ? $row->categoryName : "";
             });
-            $table->editColumn('noOfProducts', function ($row) {
-                return $row->noOfProducts ? $row->noOfProducts : "0";
+            $table->editColumn('products_count', function ($row) {
+                return $row->products_count ? $row->products_count : "0";
             });
             $table->editColumn('dateCreated', function ($row) {
                 return $row->dateCreated ? $row->dateCreated : "";

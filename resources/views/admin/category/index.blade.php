@@ -47,7 +47,7 @@
                 ajax: "{{ route('category.index') }}",
                 columns: [
                     { data: 'categoryName', name: 'categoryName' },
-                    { data: 'noOfProducts', name: 'noOfProducts' },
+                    { data: 'products_count', name: 'products_count' },
                     { data: 'dateCreated', name: 'dateCreated' },
                     { data: 'actions', name: 'Actions' }
                 ],
