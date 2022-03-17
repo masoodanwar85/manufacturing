@@ -2,6 +2,21 @@
 
 <script type="text/javascript">
     $(function() {
+        $('#bookType').change(function() {
+            var bookType = $(this).val();
+            $.ajax({
+				url: `/admin/invoiceBooks/${bookType}/nextSerial`,
+				success: function(returned) {
+                    console.log(returned);
+                    if (returned == '') {
+                        $('#bookSerial').removeAttr('readonly');
+                    } else {
+                        $('#bookSerial').attr('readonly',true);
+                        $('#bookSerial').val(returned);
+                    }
+				}
+			});
+        });
         $('select[name="customerID"]').focus();
         $('input.datepicker').daterangepicker({
             singleDatePicker: true,
@@ -24,6 +39,11 @@
 		@endif
     });
 
+    function voidThisSerial() {
+        var bookSerialNumber = $('#bookSerial').val();
+        // Show DialogBox for reason
+        // Make Void and then get the next serial number
+    }
 
     var productsInfo = {
         @foreach ($products as $product)

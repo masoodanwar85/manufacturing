@@ -201,4 +201,13 @@ class InvoiceBooksController extends Controller
 
         return redirect()->route('invoiceBooks.show',$request->get('invoiceBookID'));
 	}
+
+    public function getNextSerialNumber($bookType) {
+        $nextSerial = InvoiceBooks::getInvoiceBooksMissingSerialNumbers(['bookType' => $bookType, 'nextSerial' => 1]);
+        if (!empty($nextSerial)) {
+            return $nextSerial[0]->serial;
+        } else {
+            return NULL;
+        }
+	}
 }

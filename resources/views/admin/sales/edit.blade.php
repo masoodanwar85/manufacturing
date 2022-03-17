@@ -36,7 +36,7 @@
 						<span style="color:red;font-weight:bold;" id="customerBalance">Balance: {{ \App\Services\CurrencyService::getCurrencyFormatted($totalPayable) }}</span>
 					</div>
                     <div class="col-sm-3">
-                        <input type="text" placeholder="Bill Book Serial #" name="bookSerial" class="form-control" value="{{ old('bookSerial', $salesOrder->bookSerial) }}" />
+                        <input type="text" readonly placeholder="Bill Book Serial #" name="bookSerial" class="form-control" value="{{ old('bookSerial', $salesOrder->bookSerial) }}" />
                     </div>
 				</div>
                 <div class="form-group row {{ $errors->has('orderDate') ? 'has-error' : '' }}">

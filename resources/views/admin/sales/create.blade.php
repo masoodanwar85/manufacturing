@@ -34,8 +34,16 @@
 					<div class="col-sm-2">
 						<span style="color:red;font-weight:bold;" id="customerBalance"></span>
 					</div>
-                    <div class="col-sm-3">
-                        <input type="text" placeholder="Bill Book Serial #" name="bookSerial" class="form-control" value="{{ old('bookSerial')}}" />
+                    <div class="col-sm-1">
+                        <select name="bookType" id="bookType" class="form-control" required>
+                            <option value=""></option>
+                            <option value="BB">BB</option>
+                            <option value="CB">CB</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text" readonly placeholder="Bill Book Serial #" id="bookSerial" name="bookSerial" class="form-control" value="{{ old('bookSerial')}}" />
+                        <a href="javascript:void(0);" onclick="voidThisSerial();">Void</a>
                     </div>
 				</div>
 				<div class="form-group row {{ $errors->has('orderDate') ? 'has-error' : '' }}">
