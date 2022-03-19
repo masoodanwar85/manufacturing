@@ -22,6 +22,7 @@ class InvoiceBooksController extends Controller
      */
     public function index(Request $request)
     {
+		abort_if(Gate::denies('invoice_books_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if ($request->ajax()) {
             $query = InvoiceBooks::withCount('serials')->get();
             $table = Datatables::of($query);
@@ -173,7 +174,7 @@ class InvoiceBooksController extends Controller
     }
 
     public function updateBookSerials(Request $request) {
-		abort_if(Gate::denies('account_head_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+		abort_if(Gate::denies('invoice_books_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $invoiceBook = InvoiceBooks::find($request->get('invoiceBookID'));
         if ($request->serialNumber != null) {
             $aryBookSerials = [];
@@ -203,11 +204,23 @@ class InvoiceBooksController extends Controller
 	}
 
     public function getNextSerialNumber($bookType) {
+		abort_if(Gate::denies('invoice_books_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $nextSerial = InvoiceBooks::getInvoiceBooksMissingSerialNumbers(['bookType' => $bookType, 'nextSerial' => 1]);
-        if (!empty($nextSerial)) {
+		if (!empty($nextSerial)) {
             return $nextSerial[0]->serial;
         } else {
             return NULL;
         }
+	}
+
+	public function voidSerialNumber(Request $request) {
+		$aryInvoiceBookNumber = explode('-',$request->get('invoiceBookNumber'));
+		$invoiceBook = InvoiceBooks::where('bookType',$aryInvoiceBookNumber[0])->where('bookNumber',$aryInvoiceBookNumber[1])->first();
+		$invoiceBook->serials()->create([
+			'serialNumber' => $aryInvoiceBookNumber[2],
+			'reason' => $request->get('reason'),
+			'createdByUserID' => Auth::id()
+		]);
+		return NULL;
 	}
 }

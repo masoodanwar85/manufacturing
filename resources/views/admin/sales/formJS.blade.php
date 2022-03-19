@@ -4,18 +4,7 @@
     $(function() {
         $('#bookType').change(function() {
             var bookType = $(this).val();
-            $.ajax({
-				url: `/admin/invoiceBooks/${bookType}/nextSerial`,
-				success: function(returned) {
-                    console.log(returned);
-                    if (returned == '') {
-                        $('#bookSerial').removeAttr('readonly');
-                    } else {
-                        $('#bookSerial').attr('readonly',true);
-                        $('#bookSerial').val(returned);
-                    }
-				}
-			});
+			getNextSerial(bookType);
         });
         $('select[name="customerID"]').focus();
         $('input.datepicker').daterangepicker({
@@ -39,10 +28,42 @@
 		@endif
     });
 
+	function getNextSerial(bookType) {
+		$.ajax({
+			url: `/admin/invoiceBooks/${bookType}/nextSerial`,
+			success: function(returned) {
+				$('#reason').text('');
+				if (returned == '') {
+					$('#bookSerial').removeAttr('readonly');
+					$('#invoiceBookNum').val();
+					$('#invoiceBookNumber').val();
+				} else {
+					$('#bookSerial').attr('readonly',true);
+					$('#bookSerial').val(returned);
+					$('#invoiceBookNum').val(returned);
+					$('#invoiceBookNumber').val(returned);
+				}
+			}
+		});
+	}
+
     function voidThisSerial() {
-        var bookSerialNumber = $('#bookSerial').val();
-        // Show DialogBox for reason
-        // Make Void and then get the next serial number
+        var bookSerialNumber = $('#invoiceBookNumber').val();
+		var reason = $('#reason').val();
+		if (bookSerialNumber.length && reason.length) {
+			var bookType = bookSerialNumber.substring(0,2);
+			$.ajax({
+				url: '{{ route('invoiceBooks.voidSerial') }}',
+				type: 'POST',
+				data: $('#frmVoidSerial').serialize(),
+				success: function(returned) {
+					console.log(returned);
+					getNextSerial(bookType);
+				}
+			});
+		} else {
+			alert('Invalid Book Serial to Void or Reason required');
+		}
     }
 
     var productsInfo = {
