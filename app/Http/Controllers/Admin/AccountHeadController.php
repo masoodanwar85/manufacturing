@@ -255,7 +255,7 @@ class AccountHeadController extends Controller
 
         }
 
-        $transactions = $transactionQuery->orderBy('transactionDate', 'desc')->get();
+        $transactions = $transactionQuery->orderBy('transactionDate', 'desc')->orderBy('transactionTypeNumber','desc')->get();
 
         $customers = \App\Models\Customer::orderBy('customerName','asc')->get();
 
