@@ -65,22 +65,6 @@ class ReportController extends Controller
                             ->whereBetween('transaction.transactionDate',[$obFromDate,$obToDate->format('Y-m-d')])
                             ->first()->openingBalance;
 
-        // $openingBalance = \App\Models\TransactionDetail::whereIn('headID',$aryCashAllHeadIDs)->with(['transaction' =>
-        //                                                                                                     function($query) use ($obFromDate,$obToDate) {
-        //                                                                                                         return $query->whereBetween('transactionDate',[$obFromDate,$obToDate]);
-        //                                                                                                     }
-        //                                                                                                 ])->get()->map(function($item,$key) {
-        //     return ($item->isDebit == 1 ? $item->amount : $item->amount * -1);
-        // })->sum();
-        //
-        // $openingBalance2 = \App\Models\Transaction::whereBetween('transactionDate',[$obFromDate,$obToDate])->with(['transactionDetails' => function($query) {
-        //
-        // }]);
-
-
-
-        // dd($openingBalance2);
-
         $allTransactions = \App\Models\Transaction::with('transactionDetails')->whereBetween('transactionDate',[$fromDate,$toDate])->whereHas('transactionDetails', function($query) use ($aryCashAllHeadIDs) {
             return $query->whereIn('headID',$aryCashAllHeadIDs);
         })->orderBy('transactionID', 'desc')->get();
