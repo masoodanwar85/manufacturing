@@ -51,11 +51,35 @@ class ReportController extends Controller
 
         // TODO:: Convert amount into its exchange rate based on config settings
 
-        $obFromDate = date('Y-m-d',strtotime('2000-01-01'));
+        $obFromDate = date('Y-m-d',strtotime('2018-01-01'));
         $obToDate = date_add(new \DateTime(date("Y-m-d H:i:s", $tsFromDate)),date_interval_create_from_date_string("-1 days"));
-        $openingBalance = \App\Models\TransactionDetail::whereIn('headID',$aryCashAllHeadIDs)->whereIn('transactionID',\App\Models\Transaction::whereBetween('transactionDate',[$obFromDate,$obToDate])->pluck('transactionID')->toArray())->get()->map(function($item,$key) {
-            return ($item->isDebit == 1 ? $item->amount : $item->amount * -1);
-        })->sum();
+
+        // $openingBalance = \App\Models\TransactionDetail::whereIn('headID',$aryCashAllHeadIDs)->whereIn('transactionID',\App\Models\Transaction::whereBetween('transactionDate',[$obFromDate,$obToDate])->pluck('transactionID')->toArray())->get()->map(function($item,$key) {
+        //     return ($item->isDebit == 1 ? $item->amount : $item->amount * -1);
+        // })->sum();
+
+        $openingBalance = DB::table('transaction')
+                            ->join('transactionDetail','transaction.transactionID','=','transactionDetail.transactionID')
+                            ->select(DB::raw('SUM(CASE WHEN transactionDetail.isDebit THEN transactionDetail.amount ELSE (transactionDetail.amount*-1) END) AS openingBalance'))
+                            ->whereIn('transactionDetail.headID',$aryCashAllHeadIDs)
+                            ->whereBetween('transaction.transactionDate',[$obFromDate,$obToDate->format('Y-m-d')])
+                            ->first()->openingBalance;
+
+        // $openingBalance = \App\Models\TransactionDetail::whereIn('headID',$aryCashAllHeadIDs)->with(['transaction' =>
+        //                                                                                                     function($query) use ($obFromDate,$obToDate) {
+        //                                                                                                         return $query->whereBetween('transactionDate',[$obFromDate,$obToDate]);
+        //                                                                                                     }
+        //                                                                                                 ])->get()->map(function($item,$key) {
+        //     return ($item->isDebit == 1 ? $item->amount : $item->amount * -1);
+        // })->sum();
+        //
+        // $openingBalance2 = \App\Models\Transaction::whereBetween('transactionDate',[$obFromDate,$obToDate])->with(['transactionDetails' => function($query) {
+        //
+        // }]);
+
+
+
+        // dd($openingBalance2);
 
         $allTransactions = \App\Models\Transaction::with('transactionDetails')->whereBetween('transactionDate',[$fromDate,$toDate])->whereHas('transactionDetails', function($query) use ($aryCashAllHeadIDs) {
             return $query->whereIn('headID',$aryCashAllHeadIDs);
