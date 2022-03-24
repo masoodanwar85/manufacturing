@@ -34,23 +34,26 @@
 					<div class="col-sm-2">
 						<span style="color:red;font-weight:bold;" id="customerBalance"></span>
 					</div>
-                    <div class="col-sm-1">
-                        <select name="bookType" id="bookType" class="form-control" required>
-                            <option value=""></option>
-                            <option value="BB">BB</option>
-                            <option value="CB">CB</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-1">
-                        <input type="text" readonly placeholder="Book Serial #" id="bookSerial" name="bookSerial" class="form-control" value="{{ old('bookSerial')}}" />
-                    </div>
-					<div class="col-sm-1">
-                        @can('invoice_books_create')
-							<button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#exampleModal" style="color:white;" title="Stock Transfer">
-								<i class="fas fa-times"></i>
-								Void
-							</button>
-						@endcan
+                    <div class="col-sm-3">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <select name="bookType" id="bookType" class="form-control" required>
+                                    <option value=""></option>
+                                    <option value="BB">BB</option>
+                                    <option value="CB">CB</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" readonly placeholder="Book Serial #" id="bookSerial" name="bookSerial" class="form-control" value="{{ old('bookSerial')}}" />
+                            </div>
+                            <div class="col-sm-2">
+                                @can('invoice_books_create')
+                                    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#exampleModal" style="color:white;" title="Stock Transfer">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                @endcan
+                            </div>
+                        </div>
                     </div>
 				</div>
 				<div class="form-group row {{ $errors->has('orderDate') ? 'has-error' : '' }}">

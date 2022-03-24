@@ -24,7 +24,7 @@ class InvoiceBooksController extends Controller
     {
 		abort_if(Gate::denies('invoice_books_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if ($request->ajax()) {
-            $query = InvoiceBooks::withCount('serials')->get();
+            $query = InvoiceBooks::withCount('serials')->orderBy('bookType','ASC')->orderBy('bookNumber','DESC')->get();
             $table = Datatables::of($query);
 
             $table->addColumn('placeholder', '&nbsp;');
