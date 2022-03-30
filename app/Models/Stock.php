@@ -381,7 +381,7 @@ class Stock extends Model
 			INNER JOIN measurementUnit ON measurementUnit.unitID = Temp.maximumUnitID
 			GROUP BY Temp.unitsInProduct,measurementUnit.symbol,Temp.productID,Temp.godownID,Temp.productName,Temp.purchasePrice,category.categoryName
 			HAVING unitsAvailable > 0
-			ORDER BY Temp.productName";
+			ORDER BY Temp.productName,godown.saleSortOrder";
 
 		return DB::select($rawSQL);
 	}

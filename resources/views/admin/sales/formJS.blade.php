@@ -269,6 +269,7 @@
 			unitsInProduct = productsInfo[productID].unitsInProduct;
 		}
 		trElem.find('.godown').html(godownHTML);
+        trElem.find('select[name="godownID[]"]').prop('selectedIndex',1);
 		trElem.find('input[name="unitsAvailable[]"]').val(unitsAvailable);
 		trElem.find('input[name="unitsInProduct[]"]').val(unitsInProduct);
 		trElem.find('.totalUnitsAvailable').text(totalUnitsAvailableText);
