@@ -157,8 +157,8 @@
 												<td>
 													<div class="form-group">
 														<div class="col-sm-12 godown text-center">
-															{{ $stockDetailStatus->stockDetail->godown->name }}
-															<input type="hidden" name="godownID[]" value="{{$stockDetailStatus->stockDetail->godownID}}" />
+															{{ $stockDetailStatus->godown->name }}
+															<input type="hidden" name="godownID[]" value="{{$stockDetailStatus->godownID}}" />
 														</div>
 													</div>
 												</td>

@@ -119,7 +119,7 @@ class SalesOrderController extends Controller
     public function show(SalesOrder $sale)
     {
 		abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		$salesOrder = SalesOrder::with(['transactions.transactionDetails','stockDetailStatuses.stockDetail.product'])->find($sale->salesOrderID);
+		$salesOrder = SalesOrder::with(['transactions.transactionDetails','stockDetailStatuses.stockDetail.product','stockDetailStatuses.godown'])->find($sale->salesOrderID);
 		$cashHeadID = \Config::get('constants.account_heads.cash');
 		return view('admin.sales.show', compact('salesOrder','cashHeadID'));
     }
@@ -166,8 +166,8 @@ class SalesOrderController extends Controller
         $customers = \App\Models\Customer::all()->sortBy('customerName');
 		$cashHeadID = \Config::get('constants.account_heads.cash');
 		$totalPayable = \App\Models\Customer::getBalance($sale->customerID)[0]->totalPayable;
-		$salesOrder = SalesOrder::with(['transactions.transactionDetails','stockDetailStatuses.stockDetail.product'])->find($sale->salesOrderID);
-		return view('admin.sales.edit', compact('salesOrder','products','customers','cashHeadID','totalPayable','godownProducts','flattenedStockProducts'));
+		$salesOrder = SalesOrder::with(['transactions.transactionDetails','stockDetailStatuses.stockDetail.product','stockDetailStatuses.godown'])->find($sale->salesOrderID);
+        return view('admin.sales.edit', compact('salesOrder','products','customers','cashHeadID','totalPayable','godownProducts','flattenedStockProducts'));
     }
 
     /**

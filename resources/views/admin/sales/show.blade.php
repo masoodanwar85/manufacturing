@@ -76,7 +76,7 @@
 							<td>{{$stockDetailStatus->stockDetail->product->productName}} ({{$stockDetailStatus->stockDetail->product->category->categoryName}})</td>
 							<td>{{$stockDetailStatus->quantity }}</td>
 							<td>{{$stockDetailStatus->quantityUnits }} @if ($stockDetailStatus->stockDetail->product->maximumUnit->symbol == 'Qty') items @else {{ $stockDetailStatus->stockDetail->product->maximumUnit->symbol }} @endif </td>
-							<td>{{$stockDetailStatus->stockDetail->godown->name}}</td>
+							<td>{{$stockDetailStatus->godown->name}}</td>
 							<td>@money('$stockDetailStatus->salePrice') / {{ $stockDetailStatus->stockDetail->product->maximumUnit->symbol }} </td>
 							<td>@money('$stockDetailStatus->salePrice * $stockDetailStatus->stockDetail->product->unitsInProduct') / Qty</td>
 							<td>@money('$stockDetailStatus->quantityUnits * $stockDetailStatus->salePrice')</td>
