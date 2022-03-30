@@ -406,7 +406,7 @@ class Stock extends Model
 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 				INNER JOIN product ON product.productID = stockDetail.productID
 				WHERE stockDetailStatus.statusID IN (" . \Config::get('constants.stock_status.isAvailableForSale') . ")" . $whereClause . "
-				GROUP BY stockDetail.stockDetailID
+				GROUP BY stockDetailStatus.godownID,stockDetail.stockDetailID
 				UNION
 				SELECT
 					stockDetail.stockDetailID,
@@ -419,7 +419,7 @@ class Stock extends Model
 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 				INNER JOIN product ON product.productID = stockDetail.productID
 				WHERE stockDetailStatus.statusID IN (" . \Config::get('constants.stock_status.isNotAvailableForSale') . ")" . $whereClause . "
-				GROUP BY stockDetail.stockDetailID
+				GROUP BY stockDetailStatus.godownID,stockDetail.stockDetailID
 			) AS temp
             LEFT JOIN godown ON godown.godownID = temp.godownID
 			GROUP BY temp.stockDetailID,temp.godownID
