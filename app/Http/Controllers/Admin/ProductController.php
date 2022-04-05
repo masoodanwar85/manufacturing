@@ -87,7 +87,11 @@ class ProductController extends Controller
 		abort_if(Gate::denies('product_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $categories = \App\Models\Category::all()->sortBy('categoryName');
 		$measurementUnits = \App\Models\MeasurementUnit::all()->sortBy('unitID');
-		return view('admin.product.create',compact('categories','measurementUnits'));
+
+		$products = \App\Models\Product::all()->sortBy('productName');
+		$BOMExpense = \App\Models\AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.expense') . ' AND isShowForBOMExpense = 1')->get();
+
+		return view('admin.product.create',compact('categories','measurementUnits','products','BOMExpense'));
     }
 
     /**
@@ -130,7 +134,9 @@ class ProductController extends Controller
 		abort_if(Gate::denies('product_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $categories = \App\Models\Category::all()->sortBy('categoryName');
 		$measurementUnits = \App\Models\MeasurementUnit::all()->sortBy('unitID');
-        return view('admin.product.edit', compact('product','categories','measurementUnits'));
+		$products = \App\Models\Product::all()->sortBy('productName');
+		$BOMExpense = \App\Models\AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.expense') . ' AND isShowForBOMExpense = 1')->get();
+        return view('admin.product.edit', compact('product','categories','measurementUnits','products','BOMExpense'));
     }
 
     /**

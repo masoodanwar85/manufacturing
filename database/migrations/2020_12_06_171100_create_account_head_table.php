@@ -23,6 +23,7 @@ class CreateAccountHeadTable extends Migration
 			$table->tinyInteger('isShowForPurchaseOrderExpense')->default(0);
 			$table->tinyInteger('isShowForPayment')->default(0);
 			$table->tinyInteger('isShowForReceipt')->default(0);
+			$table->tinyInteger('isShowForBOMExpense')->default(0);
 			$table->tinyInteger('isShowForOpeningBalance')->default(0);
 			$table->unsignedBigInteger('createdByUserID');
             $table->timestamp('dateCreated')->useCurrent();

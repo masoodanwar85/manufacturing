@@ -24,6 +24,7 @@ class CreateProductTable extends Migration
             $table->string('image')->nullable();
             $table->integer('thresholdUnit')->unsigned()->default(0);
 			$table->tinyInteger('isSoldPackOrLoose')->default(1);
+			$table->tinyInteger('isBOM')->default(0);
 			$table->decimal('unitPurchasePrice',18,4);
             $table->decimal('unitSalePrice',18,4);
             $table->unsignedBigInteger('createdByUserID');
