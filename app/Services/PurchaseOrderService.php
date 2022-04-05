@@ -45,7 +45,12 @@ class PurchaseOrderService {
 			$purchaseOrderDetail->quantityUnits = $qtyUnits;
 			$purchaseOrderDetail->damaged = $request->damaged[$i];
 			$purchaseOrderDetail->exchangeRate = $request->exchangeRate[$i];
-			$purchaseOrderDetail->perUnitPrice = $request->perUnitPrice[$i];
+			if ($request->perUnitPrice[$i] > 0) {
+				$purchaseOrderDetail->perUnitPrice = $request->perUnitPrice[$i];
+			} else {
+				$purchaseOrderDetail->perUnitPrice = \App\Models\Product::find($request->productID[$i])->first()->unitPurchasePrice;
+			}
+
 			$purchaseOrderDetail->purchaseOrderID = $purchaseOrder->purchaseOrderID;
 			$purchaseOrderDetail->save();
 
@@ -155,11 +160,19 @@ class PurchaseOrderService {
 			$stockDetail->quantity = $purchaseOrderDetail->quantity;
 			$stockDetail->quantityUnits = $purchaseOrderDetail->quantityUnits;
 		}
-		$stockDetail->purchasePrice = $perUnitPurchasePrice;
+
+		if ($perUnitPurchasePrice > 0) {
+			$stockDetail->purchasePrice = $perUnitPurchasePrice;
+		} else {
+			$stockDetail->purchasePrice = \App\Models\Product::find($purchaseOrderDetail->productID)->first()->unitPurchasePrice;
+		}
+
 		$stockDetail->save();
 
 		// Update Product Table by this purchase price
-		\App\Models\Product::find($purchaseOrderDetail->productID)->update(['unitPurchasePrice' => $perUnitPurchasePrice]);
+		if ($perUnitPurchasePrice > 0) {
+			\App\Models\Product::find($purchaseOrderDetail->productID)->update(['unitPurchasePrice' => $perUnitPurchasePrice]);
+		}
 
 		// Add in stockDetailStatus table
 		$stockDetailStatus = new \App\Models\StockDetailStatus();

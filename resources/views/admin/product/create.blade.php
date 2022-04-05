@@ -91,6 +91,17 @@
 						@endif
 					</div>
 				</div>
+				<div class="form-group row {{ $errors->has('unitPurchasePrice') ? 'has-error' : '' }}">
+					<label for="unitPurchasePrice" class="col-sm-2 col-form-label">Purchase Price: *</label>
+					<div class="col-sm-10">
+						<input type="number" name="unitPurchasePrice" class="form-control @if($errors->has('unitPurchasePrice')) is-invalid @endif" value="{{ old('unitPurchasePrice', $product->unitPurchasePrice) }}" required>
+						@if($errors->has('unitPurchasePrice'))
+							<em class="invalid-feedback">
+								{{ $errors->first('unitPurchasePrice') }}
+							</em>
+						@endif
+					</div>
+				</div>
 				<div>
 					<input class="btn btn-primary" type="submit" value="Save">
 				</div>

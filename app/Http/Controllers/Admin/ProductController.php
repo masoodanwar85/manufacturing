@@ -100,7 +100,6 @@ class ProductController extends Controller
     {
         $request->request->add(['createdByUserID' => Auth::id()]);
         $request->request->add(['minimumUnitID' => $request->maximumUnitID]);
-        $request->request->add(['unitPurchasePrice' => 0]);
         $request->request->add(['unitSalePrice' => 0]);
         $product = Product::create($request->all());
         $request->session()->flash('message', 'Product added successfully!');

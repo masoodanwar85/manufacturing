@@ -37,6 +37,10 @@
 					{{ $product->unitsInProduct }}
 				</div>
 				<div class="col">
+					<div class="font-weight-bold">Purchase Price:</div>
+					{{ $product->unitPurchasePrice }}
+				</div>
+				<div class="col">
 					<div class="font-weight-bold">Alert Quantity:</div>
 					{{ $product->thresholdUnit }}
 				</div>
