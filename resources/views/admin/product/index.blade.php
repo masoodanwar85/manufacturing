@@ -24,8 +24,8 @@
 					<tr>
 						<th>Name</th>
 						<th>Category</th>
-						<th>Product Unit</th>
-						<th>Units in Product</th>
+						<th>Unit</th>
+						<th>Purchase Price</th>
 						<th>Alert Quantity</th>
 						<th>Date Created</th>
 						<th>Action</th>
@@ -53,7 +53,7 @@
                     { data: 'productName', name: 'productName' },
                     { data: 'categoryName', name: 'categoryName' },
                     { data: 'maximumUnitSymbol', name: 'maximumUnitSymbol' },
-					{ data: 'unitsInProduct', name: 'unitsInProduct' },
+					{ data: 'unitPurchasePrice', name: 'unitPurchasePrice' },
 					{ data: 'thresholdUnit', name: 'thresholdUnit' },
                     { data: 'dateCreated', name: 'dateCreated' },
                     { data: 'actions', name: 'Actions' }

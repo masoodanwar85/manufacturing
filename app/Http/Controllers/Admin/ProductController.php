@@ -54,8 +54,8 @@ class ProductController extends Controller
             $table->editColumn('productName', function ($row) {
                 return $row->productName ? $row->productName : "";
             });
-			$table->editColumn('unitsInProduct', function ($row) {
-                return $row->unitsInProduct ? $row->unitsInProduct : "0";
+			$table->editColumn('unitPurchasePrice', function ($row) {
+                return $row->unitPurchasePrice ? $row->unitPurchasePrice : "0";
             });
             $table->editColumn('categoryName', function ($row) {
                 return $row->categoryName ? $row->categoryName : "";
