@@ -171,7 +171,7 @@ class StockController extends Controller
 		foreach ($saleOrderIDs as $saleOrderID) {
 			$arySaleOrderIDs[] = $saleOrderID->salesOrderID;
 		}
-		$saleOrders = \App\Models\SalesOrder::with('customer','stockDetailStatuses.stockDetail')->find($arySaleOrderIDs);
+		$saleOrders = \App\Models\SalesOrder::with('customer','stockDetailStatuses.stockDetail')->find($arySaleOrderIDs)->sortByDesc('orderDate');
 		$soldStatusID = \Config::get('constants.stock_status.sold');
 		$goodSalesReturnStatusID = \Config::get('constants.stock_status.good_sales_return');
 		$badSalesReturnStatusID = \Config::get('constants.stock_status.bad_sales_return');

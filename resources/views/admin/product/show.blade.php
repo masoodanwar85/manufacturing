@@ -127,7 +127,11 @@
 @section('js')
     <script>
         $(function () {
-            $('.datatable-history').DataTable();
+            $('.datatable-history').DataTable({
+				pageLength: 100,
+				columnDefs: [ { type: 'date', 'targets': [0] } ],
+				order: [[ 0, 'desc' ]]
+			});
             $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
                 $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
             });
