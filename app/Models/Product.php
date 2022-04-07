@@ -40,6 +40,10 @@ class Product extends Model
         return $this->hasMany('App\Models\StockDetail','productID','productID');
     }
 
+    public function BOMs() {
+        return $this->hasMany('App\Models\ProductBOM','productID','productID');
+    }
+
 	public static function getHistory($productID) {
 		DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
 		$rawSQL = "

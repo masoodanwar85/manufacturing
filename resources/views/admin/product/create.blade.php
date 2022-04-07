@@ -123,7 +123,7 @@
 										<div class="clearfix"></div>
 									</div>
 									<div class="x_content">
-										<table class="table">
+										<table class="table" id="myTable">
 											<thead>
 												<tr class="text-center">
 													<th style="text-align:center;width:25%;">Product Name</th>

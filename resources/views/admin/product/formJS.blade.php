@@ -6,7 +6,7 @@
         @foreach ($products as $product)
         "{{$product->productID}}" : {
             "productName" : "{{$product->productName}}",
-            "purchasePrice" : "@money('$product->purchasePrice','')",
+            "purchasePrice" : "{{$product->unitPurchasePrice}}",
             "unitsAvailable" : "{{$product->unitsAvailable}}",
 			"unitsInProduct" : "{{$product->unitsInProduct}}",
 			"areUnitsFixed" : "{{$product->isUnitsInProductFixed}}",
@@ -88,14 +88,13 @@
         var productID = jQElem.find(':selected').val();
         if (checkProductSelected(productID)) {
 			var trElem = jQElem.parent().parent().parent().parent();
-            var unitsInProduct = '';
+            var unitPrice = '';
 			var productUnit = '';
             if (productID != '') {
-                unitsInProduct = productsInfo[productID].unitsInProduct;
+                unitPrice = productsInfo[productID].purchasePrice;
 				productUnit = productsInfo[productID].symbol;
             }
-            trElem.find('input[name="unitsInProduct[]"]').val(unitsInProduct);
-			trElem.find('input[name="totalUnits[]"]').val(unitsInProduct);
+            trElem.find('input[name="perUnitPrice[]"]').val(unitPrice);
 			trElem.find('input[name="productUnit[]"]').text(productUnit+'(s)');
 			calculateProductRowTotal(selectProduct);
         }
@@ -129,22 +128,16 @@
 		var trElem = jQElem.parent().parent().parent().parent();
 		var areAllValuesFilled = true;
 		var productID = 0;
-		var areUnitsFixed = 0;
-		var quantity, exchangeRate, unitsInProduct, perUnitPrice, total, totalInPKR, totalUnits;
+		var quantity, perUnitPrice, totalInPKR, totalUnits;
 
 		if (!isNaN(parseInt(trElem.find('select[name="productID[]"]').val()))) {
 			productID = trElem.find('select[name="productID[]"]').val();
-			areUnitsFixed = parseInt(productsInfo[productID].areUnitsFixed);
 		}
 
 		if (isNaN(parseInt(trElem.find('input[name="quantity[]"]').val()))) {
 			areAllValuesFilled = false;
 		} else {
 			quantity = parseInt(trElem.find('input[name="quantity[]"]').val());
-			unitsInProduct = parseInt(trElem.find('input[name="unitsInProduct[]"]').val());
-		}
-		if (isNaN(parseFloat(trElem.find('input[name="exchangeRate[]"]').val()))) {
-			areAllValuesFilled = false;
 		}
 		if (isNaN(parseFloat(trElem.find('input[name="perUnitPrice[]"]').val()))) {
 			areAllValuesFilled = false;
@@ -153,42 +146,18 @@
 		if (isNaN(quantity)) {
 			totalUnits = 0;
 		} else {
-			totalUnits = quantity * unitsInProduct;
+			totalUnits = quantity;
 		}
 
-		@if ($globalSettings['client_settings.is_units_in_product_fixed'] == 0)
-			var prevQty = 0;
-			if (!isNaN(parseInt(trElem.find('input[name="prevQty[]"]').val()))) {
-				prevQty = trElem.find('input[name="prevQty[]"]').val();
-			}
-			if (prevQty == quantity) {
-				var prevTotalUnits = trElem.find('input[name="totalUnits[]"]').val();
-				if (prevTotalUnits != 0) {
-					totalUnits = trElem.find('input[name="totalUnits[]"]').val();
-				}
-			}
-
-			trElem.find('input[name="totalUnits[]"]').attr('readonly',true);
-
-			if (areUnitsFixed == 0) {
-				trElem.find('input[name="totalUnits[]"]').removeAttr('readonly');
-			}
-		@endif
-
 		if (areAllValuesFilled === true) {
-			exchangeRate = parseFloat(trElem.find('input[name="exchangeRate[]"]').val());
 			perUnitPrice = parseFloat(trElem.find('input[name="perUnitPrice[]"]').val());
 			total = totalUnits * perUnitPrice;
-			totalInPKR = convertToPKR(exchangeRate, total);
 		} else {
 			total = 0;
-			totalInPKR = 0;
 		}
 
 		trElem.find('input[name="totalUnits[]"]').val(totalUnits);
 		trElem.find('input[name="total[]"]').val(total);
-		trElem.find('input[name="totalInPKR[]"]').val(totalInPKR);
-		trElem.find('input[name="prevQty[]"]').val(quantity);
 		if (isNaN(parseInt(perUnitPrice))) {
 			trElem.find('div.perUnitPriceInUrdu').html('');
 		} else {
@@ -200,7 +169,6 @@
 
 	function calculateGrandTotal() {
 		var totalFields = $('input[name="total[]"]');
-		var totalInPKRFields = $('input[name="totalInPKR[]"]');
 		var total = 0;
 		var totalInPKR = 0;
 		$(totalFields).each(function(x,y){
@@ -209,14 +177,7 @@
 			}
 		});
 
-		$(totalInPKRFields).each(function(x,y){
-			if (!isNaN(parseFloat($(y).val()))) {
-				totalInPKR+=parseFloat($(y).val());
-			}
-		});
-
 		$('#gTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + total);
-		$('#gTotalInPKR').html('&nbsp;&nbsp;&nbsp;&nbsp;Rs. ' + totalInPKR.toFixed({{\Config::get('constants.client_settings.decimal_places')}}));
 		$('#moneyInUrdu').html('&nbsp;&nbsp;&nbsp;&nbsp;' + translate(totalInPKR));
 	}
 
@@ -234,33 +195,11 @@
 		bindExpenseRemoveClick();
 	}
 
-	function getTotalUnits() {
-		var totalUnits = 0;
-		$('input[name="totalUnits[]"]').each(function() {
-			var currentUnit = parseInt(this.value);
-			if (!isNaN(currentUnit)) {
-				totalUnits += currentUnit;
-			}
-		});
-		return totalUnits;
-	}
-
 	function calculateRowPerUnitExpense(elem) {
 		var jQElem = $(elem);
 		var trElem = jQElem.parent().parent().parent().parent();
-		var totalUnits = getTotalUnits();
 		var expenseAmount = trElem.find('input[name="amount[]"]').val();
-		trElem.find('input[name="perUnitExpense[]"]').val(expenseAmount/totalUnits);
 		trElem.find('div.expenseAmountInUrdu').html(translate(expenseAmount));
-		calculateExpenseRowTotal(elem);
-	}
-
-	function calculateRowExpenseAmount(elem) {
-		var jQElem = $(elem);
-		var trElem = jQElem.parent().parent().parent().parent();
-		var totalUnits = getTotalUnits();
-		var perUnitExpense = trElem.find('input[name="perUnitExpense[]"]').val();
-		trElem.find('input[name="amount[]"]').val(totalUnits*perUnitExpense);
 		calculateExpenseRowTotal(elem);
 	}
 
@@ -268,30 +207,23 @@
 		var jQElem = $(elem);
 		var trElem = jQElem.parent().parent().parent().parent();
 		var areAllValuesFilled = true;
-		var exchangeRate, amount, totalInPKR;
+		var amount;
 
-		if (isNaN(parseFloat(trElem.find('input[name="expenseExchangeRate[]"]').val()))) {
-			areAllValuesFilled = false;
-		}
 		if (isNaN(parseFloat(trElem.find('input[name="amount[]"]').val()))) {
 			areAllValuesFilled = false;
 		}
 
 		if (areAllValuesFilled === true) {
-			exchangeRate = parseFloat(trElem.find('input[name="expenseExchangeRate[]"]').val());
 			amount = parseFloat(trElem.find('input[name="amount[]"]').val());
-			totalInPKR = convertToPKR(exchangeRate, amount);
 		} else {
-			totalInPKR = 0;
+			amount = 0;
 		}
-
-		trElem.find('input[name="totalExpenseInPKR[]"]').val(totalInPKR);
 
 		calculateExpenseGrandTotal();
 	}
 
 	function calculateExpenseGrandTotal() {
-		var totalInPKRFields = $('input[name="totalExpenseInPKR[]"]');
+		var totalInPKRFields = $('input[name="amount[]"]');
 		var totalInPKR = 0;
 		$(totalInPKRFields).each(function(x,y){
 			if (!isNaN(parseFloat($(y).val()))) {
@@ -301,33 +233,5 @@
 
 		$('#expenseGTotalInPKR').html('&nbsp;&nbsp;&nbsp;&nbsp;Rs. ' + totalInPKR.toFixed({{\Config::get('constants.client_settings.decimal_places')}}));
 		$('#expenseInUrdu').html('&nbsp;&nbsp;&nbsp;&nbsp;' + translate(totalInPKR));
-	}
-
-	function getSupplierBalance(supplierID) {
-		$('#supplierBalance').text('');
-		if (!isNaN(parseInt(supplierID))) {
-			//{{ route("customer.balance",1) }}
-			$.ajax({
-				url: `/admin/supplier/${supplierID}/balance`,
-				success: function(returnedBalance) {
-					var amount = parseFloat(returnedBalance[0].totalPayable) * -1;
-					$('#supplierBalance').text('Balance: ' + amount.toFixed({{\Config::get('constants.client_settings.decimal_places')}}));
-				}
-			});
-		}
-	}
-
-	function getCustomerBalance(customerID) {
-		$('#customerBalance').text('');
-		if (!isNaN(parseInt(customerID))) {
-			//{{ route("customer.balance",1) }}
-			$.ajax({
-				url: `/admin/customer/${customerID}/balance`,
-				success: function(returnedBalance) {
-					var amount = parseFloat(returnedBalance[0].totalPayable) * -1;
-					$('#customerBalance').text('Balance: ' + amount.toFixed({{\Config::get('constants.client_settings.decimal_places')}}));
-				}
-			});
-		}
 	}
 </script>

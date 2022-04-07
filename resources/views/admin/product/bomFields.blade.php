@@ -39,23 +39,12 @@
 <div id="bom-expense-row" style="display:none;">
 	<div class="form-group">
 		<div class="col-sm-12">
-			@include('partials.accountHeadsDropdown',['accountHeads' => $BOMExpense,'name' => 'headID[]', 'value' => 0,'isRequired' => true])
-			{{--<select name="headID[]" class="form-control" required>
+			<select name="headID[]" class="form-control" required>
 				<option value=""></option>
-				@foreach ($aryPOExpenseHeads as $key => $value)
-					<option @if (sizeof($value['children'])) style="color:red;" disabled @else style="color:green;" @endif value="{{$value['headID']}}">{{$value['headName']}}</option>
-					@if (sizeof($value['children']))
-						@foreach ($value['children'] as $childKey => $childValue)
-							<option @if (sizeof($childValue['children'])) style="color:red;" disabled @else style="color:green;" @endif value="{{$childValue['headID']}}">----> {{$childValue['headName']}}</option>
-							@if (sizeof($childValue['children']))
-							@foreach ($childValue['children'] as $childLevel2Key => $childLevel2Value)
-									<option @if (sizeof($childLevel2Value['children'])) style="color:red;" disabled @else style="color:green;" @endif value="{{$childLevel2Value['headID']}}">---->----> {{$childLevel2Value['headName']}}</option>
-								@endforeach
-							@endif
-						@endforeach
-					@endif
+				@foreach ($BOMExpense as $key => $value)
+					<option value="{{$value['headID']}}">{{$value['headName']}}</option>
 				@endforeach
-			</select>--}}
+			</select>
 		</div>
 	</div>
 	<span class="separator"></span>
@@ -68,7 +57,7 @@
 		</div>
 	</div>
 	<span class="separator"></span>
-	<button class="btn btn-danger btn-sm pull-right removePOExpenseRow" type="button" title="Delete BOM Expense Item">
+	<button class="btn btn-danger btn-sm pull-right removeBOMExpenseRow" type="button" title="Delete BOM Expense Item">
 		<i class="nav-icon fas fa-fw fa-trash"></i>
 	</button>
 </div>

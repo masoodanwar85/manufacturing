@@ -89,7 +89,7 @@ class ProductController extends Controller
 		$measurementUnits = \App\Models\MeasurementUnit::all()->sortBy('unitID');
 
 		$products = \App\Models\Product::all()->sortBy('productName');
-		$BOMExpense = \App\Models\AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.expense') . ' AND isShowForBOMExpense = 1')->get();
+        $BOMExpense = \App\Models\AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.expense') . ' AND isShowForBOMExpense = 1')->get();
 
 		return view('admin.product.create',compact('categories','measurementUnits','products','BOMExpense'));
     }
@@ -102,11 +102,43 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        $request->request->add(['createdByUserID' => Auth::id()]);
-        $request->request->add(['minimumUnitID' => $request->maximumUnitID]);
-        $request->request->add(['unitSalePrice' => 0]);
-        $product = Product::create($request->all());
-        $request->session()->flash('message', 'Product added successfully!');
+        DB::beginTransaction();
+
+        try {
+            $request->request->add(['createdByUserID' => Auth::id()]);
+            $request->request->add(['minimumUnitID' => $request->maximumUnitID]);
+            $request->request->add(['unitSalePrice' => 0]);
+            $product = Product::create($request->all());
+
+            if ($request->get('isBOM') == 1) {
+                // Add BOM Product Items
+                $productBOM = \App\Models\ProductBOM::create(['productID' => $product->productID, 'createdByUserID' => Auth::id()]);
+                foreach ($request->productID as $key => $value) {
+                    \App\Models\ProductBOMItem::create([
+                        'productBOMID' => $productBOM->productBOMID,
+                        'productID' => $value,
+                        'quantity' => $request->quantity[$key],
+                        'isConsumeable' => 1,
+                        'createdByUserID' => Auth::id()
+                    ]);
+                }
+
+                foreach ($request->headID as $key => $value) {
+                    \App\Models\ProductBOMExpense::create([
+                        'productBOMID' => $productBOM->productBOMID,
+                        'expenseHeadID' => $value,
+                        'amount' => $request->amount[$key],
+                        'createdByUserID' => Auth::id()
+                    ]);
+                }
+            }
+            DB::commit();
+            $request->session()->flash('message', 'Product added successfully!');
+        } catch (Exception $e) {
+            DB::rollBack();
+            dd($e);
+            $request->session()->flash('error', 'An Error Occurred while adding Product!');
+        }
         return redirect()->route('product.index');
     }
 
