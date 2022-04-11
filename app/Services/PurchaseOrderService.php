@@ -48,7 +48,7 @@ class PurchaseOrderService {
 			if ($request->perUnitPrice[$i] > 0) {
 				$purchaseOrderDetail->perUnitPrice = $request->perUnitPrice[$i];
 			} else {
-				$purchaseOrderDetail->perUnitPrice = \App\Models\Product::find($request->productID[$i])->first()->unitPurchasePrice;
+				$purchaseOrderDetail->perUnitPrice = \App\Models\Product::find($request->productID[$i])->unitPurchasePrice;
 			}
 
 			$purchaseOrderDetail->purchaseOrderID = $purchaseOrder->purchaseOrderID;
@@ -164,7 +164,7 @@ class PurchaseOrderService {
 		if ($perUnitPurchasePrice > 0) {
 			$stockDetail->purchasePrice = $perUnitPurchasePrice;
 		} else {
-			$stockDetail->purchasePrice = \App\Models\Product::find($purchaseOrderDetail->productID)->first()->unitPurchasePrice;
+			$stockDetail->purchasePrice = \App\Models\Product::find($purchaseOrderDetail->productID)->unitPurchasePrice;
 		}
 
 		$stockDetail->save();
