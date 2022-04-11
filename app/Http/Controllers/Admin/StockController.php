@@ -225,14 +225,18 @@ class StockController extends Controller
                             $quantityRemaining -= $firstStockDetailStatus->quantity;
                             $unitsRemaining -= $firstStockDetailStatus->quantityUnits;
 
-                            $firstStockDetailStatus->quantity = abs($quantityRemaining);
-                            $firstStockDetailStatus->quantityUnits = abs($unitsRemaining);
+                            $firstStockDetailStatus->quantity = $quantityRemaining;
+                            $firstStockDetailStatus->quantityUnits = $unitsRemaining;
                             $firstStockDetailStatus->save();
 
-                            if ($quantityRemaining < 0 && $unitsRemaining < 0) {
-                                $quantityRemaining = 0;
-                                $unitsRemaining = 0;
-                            }
+                            // $firstStockDetailStatus->quantity = abs($quantityRemaining);
+                            // $firstStockDetailStatus->quantityUnits = abs($unitsRemaining);
+                            // $firstStockDetailStatus->save();
+                            //
+                            // if ($quantityRemaining < 0 && $unitsRemaining < 0) {
+                            //     $quantityRemaining = 0;
+                            //     $unitsRemaining = 0;
+                            // }
                         }
                         if ($quantityRemaining == 0) {
                             break;
