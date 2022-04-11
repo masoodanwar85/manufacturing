@@ -179,162 +179,232 @@ class StockController extends Controller
 		return view('admin.stock.view', compact('product','stockInfo','saleOrders','soldStatusID','goodSalesReturnStatusID','badSalesReturnStatusID','godowns'));
     }
 
-    public function transfer(Request $request) {
+    // public function transfer(Request $request) {
+	// 	abort_if(Gate::denies('stock_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+    //     DB::beginTransaction();
+	// 	try {
+    //         if ($request->previousGodownID != $request->newGodownID) {
+    //             $stockDetails = \App\Models\Stock::getProductStockDetails($request->productID,$request->previousGodownID);
+    //             $quantityRemaining = $request->quantityToMove;
+    //             $unitsRemaining = $request->unitsToMove;
+    //             foreach ($stockDetails as $stockDetail) {
+    //                 $oldStockDetail = \App\Models\StockDetail::find($stockDetail->stockDetailID);
+    //                 $oldStockDetailStatuses = \App\Models\StockDetailStatus::where('stockDetailID',$stockDetail->stockDetailID)->where('godownID',$request->previousGodownID)->get();
+	//
+    //                 $allSoldQty = $oldStockDetailStatuses->where('statusID',\Config::get('constants.stock_status.sold'))->sum('quantity');
+    //                 $allSoldUnits = $oldStockDetailStatuses->where('statusID',\Config::get('constants.stock_status.sold'))->sum('quantityUnits');
+	//
+    //                 // $allNAQty = $oldStockDetailStatuses->whereIn('statusID',explode(',',\Config::get('constants.stock_status.isNotAvailableForSale')))->sum('quantity');
+    //                 // $allNAUnits = $oldStockDetailStatuses->whereIn('statusID',explode(',',\Config::get('constants.stock_status.isNotAvailableForSale')))->sum('quantityUnits');
+    //                 //
+    //                 //
+    //                 // $allGoodReturnQty = $oldStockDetailStatuses->where('statusID',\Config::get('constants.stock_status.good_sales_return'))->sum('quantity');
+    //                 // $allGoodReturnUnits = $oldStockDetailStatuses->where('statusID',\Config::get('constants.stock_status.good_sales_return'))->sum('quantityUnits');
+    //                 //
+    //                 // $allAvailableQty = $oldStockDetail->quantity - $allNAQty + $allGoodReturnQty;
+    //                 // $allAvailableUnits = $oldStockDetail->quantityUnits - $allNAUnits + $allGoodReturnUnits;
+	//
+    //                 // If Not Sold
+    //                 if ($oldStockDetailStatuses->count() == 1) {
+    //                     // If all qty being moved
+    //                     $firstStockDetailStatus = $oldStockDetailStatuses->first();
+    //                     if ($oldStockDetail->quantity <= $quantityRemaining) {
+    //                         $firstStockDetailStatus->godownID = $request->newGodownID;
+    //                         $firstStockDetailStatus->save();
+    //                         $quantityRemaining -= $oldStockDetail->quantity;
+    //                         $unitsRemaining -= $oldStockDetail->quantityUnits;
+    //                     } else {
+    //                         // If some qty being moved
+    //                         $newStockDetailStatus = $firstStockDetailStatus->replicate()->fill([
+    //                             'quantity' => $quantityRemaining,
+    //                             'quantityUnits' => $unitsRemaining,
+    //                             'godownID' => $request->newGodownID
+    //                         ]);
+    //                         $newStockDetailStatus->save();
+	//
+    //                         $quantityRemaining -= $firstStockDetailStatus->quantity;
+    //                         $unitsRemaining -= $firstStockDetailStatus->quantityUnits;
+	//
+    //                         $firstStockDetailStatus->quantity = $quantityRemaining;
+    //                         $firstStockDetailStatus->quantityUnits = $unitsRemaining;
+    //                         $firstStockDetailStatus->save();
+	//
+    //                         // $firstStockDetailStatus->quantity = abs($quantityRemaining);
+    //                         // $firstStockDetailStatus->quantityUnits = abs($unitsRemaining);
+    //                         // $firstStockDetailStatus->save();
+    //                         //
+    //                         // if ($quantityRemaining < 0 && $unitsRemaining < 0) {
+    //                         //     $quantityRemaining = 0;
+    //                         //     $unitsRemaining = 0;
+    //                         // }
+    //                     }
+    //                     if ($quantityRemaining == 0) {
+    //                         break;
+    //                     } else {
+    //                         continue;
+    //                     }
+    //                 } else {
+    //                     $oldStockDetailStatusesAvailableForSale = $oldStockDetailStatuses->whereIn('statusID',explode(',',\Config::get('constants.stock_status.isAvailableForSale')));
+	//
+    //                     foreach ($oldStockDetailStatusesAvailableForSale as $oldStockDetailStatus) {
+    //                         $remainingStockDetailStatusQty = $oldStockDetailStatus->quantity - $allSoldQty;
+    //                         $remainingStockDetailStatusUnits = $oldStockDetailStatus->quantityUnits - $allSoldUnits;
+	//
+    //                         $newStockDetailStatus = $oldStockDetailStatus->replicate()->fill([
+    //                             'quantity' => $remainingStockDetailStatusQty,
+    //                             'quantityUnits' => $remainingStockDetailStatusUnits,
+    //                             'godownID' => $request->newGodownID
+    //                         ]);
+	//
+    //                         $salesOrderDetail = null;
+	//
+    //                         if ($oldStockDetailStatus->statusID == \Config::get('constants.stock_status.quetta_godown')) {
+    //                             if ($remainingStockDetailStatusQty == 0) {
+    //                                 continue;
+    //                             }
+    //                             if ($remainingStockDetailStatusQty <= $quantityRemaining) {
+	//
+    //                                 $oldStockDetailStatus->quantity = $allSoldQty;
+    //                                 $oldStockDetailStatus->quantityUnits = $allSoldUnits;
+	//
+    //                                 $quantityRemaining -= $remainingStockDetailStatusQty;
+    //                                 $unitsRemaining -= $remainingStockDetailStatusUnits;
+	//
+    //                             } elseif ($remainingStockDetailStatusQty > $quantityRemaining) {
+	//
+    //                                 $newStockDetailStatus->quantity = $quantityRemaining;
+    //                                 $newStockDetailStatus->quantityUnits = $unitsRemaining;
+	//
+    //                                 $oldStockDetailStatus->quantity = $oldStockDetailStatus->quantity - $quantityRemaining;
+    //                                 $oldStockDetailStatus->quantityUnits = $oldStockDetailStatus->quantityUnits - $unitsRemaining;
+	//
+    //                                 $quantityRemaining = 0;
+    //                                 $unitsRemaining = 0;
+    //                             }
+	//
+    //                         } else {
+	//
+    //                             if ($oldStockDetailStatus->quantity <= $quantityRemaining) {
+    //                                 $newStockDetailStatus = null;
+    //                                 $oldStockDetailStatus->godownID = $request->newGodownID;
+	//
+    //                                 $quantityRemaining -= $oldStockDetailStatus->quantity;
+    //                                 $unitsRemaining -= $oldStockDetailStatus->quantityUnits;
+	//
+    //                             } elseif ($oldStockDetailStatus->quantity > $quantityRemaining) {
+	//
+    //                                 $newStockDetailStatus->quantity = $quantityRemaining;
+    //                                 $newStockDetailStatus->quantityUnits = $unitsRemaining;
+	//
+    //                                 $oldStockDetailStatus->quantity = $oldStockDetailStatus->quantity - $quantityRemaining;
+    //                                 $oldStockDetailStatus->quantityUnits = $oldStockDetailStatus->quantityUnits - $unitsRemaining;
+	//
+    //                                 $quantityRemaining = 0;
+    //                                 $unitsRemaining = 0;
+	//
+    //                                 $salesOrderDetail = \App\Models\SalesOrderDetail::where('stockDetailStatusID',$oldStockDetailStatus->stockDetailStatusID)->first();
+    //                             }
+    //                         }
+	//
+    //                         if ($newStockDetailStatus != null) {
+    //                             $newStockDetailStatus->save();
+	//
+    //                             if ($salesOrderDetail != null) {
+    //                                 $salesOrderDetail->replicate()->fill([
+    //                                     'stockDetailStatusID' => $newStockDetailStatus->id
+    //                                 ]);
+    //                                 $salesOrderDetail->save();
+    //                             }
+    //                         }
+	//
+    //                         $oldStockDetailStatus->save();
+	//
+    //                         if ($quantityRemaining == 0) {
+    //                             break;
+    //                         } else {
+    //                             continue;
+    //                         }
+    //                     }
+    //                 }
+	//
+    //                 if ($quantityRemaining == 0) {
+    //                     break;
+    //                 }
+    //             }
+	//
+    //             $deletedRows = \App\Models\StockDetailStatus::where('quantity',0)->where('quantityUnits', 0)->delete();
+	//
+    //             if ($quantityRemaining != 0 || $unitsRemaining != 0) {
+    //                 DB::rollback();
+    //                 $request->session()->flash('error', 'Stock does not match!');
+    //             } else {
+    //                 DB::commit();
+    //                 $request->session()->flash('message', 'Stock transferred successfully!');
+    //             }
+    //         }
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         dd($e);
+    //         $request->session()->flash('error', 'An error occurred while transferring stock!');
+    //     }
+    //     return redirect()->route('stock.view',$request->productID);
+    // }
+
+	// =============== Working ==================== //
+
+// 				stockDetailID -- StockDetailStatusID -- statusID -- Quantity --	GodownID
+// 					2					2					1			15			1
+// 					2					28					1			10			1
+// 					3					3					1			10			1
+// 					2					144					3			5			1
+// 					3					159					3			5			1
+// 					2					777					3			2			1
+// 			------------------------------------------------------------------------------
+// Case 1:	LT			2					988					1			3			2	(New Entry + Update stockDetailStatus with ID 2 to quantity - 3)
+// Case 2:	EQ			2					1010				1			15			2	(No New Entry Just Update GodownID to New GodownID)
+// Case 3:	GT			2					1020				1			15			2	(No New Entry Just Update GodownID to New GodownID)
+// 					2					1030				1			1			2	(New Entry + Update stockDetailStatus with ID 28 to quantity - 1)
+//
+// 					2 = Remaining (18) = 2,28	= 	1	=	25
+// 					3 = Remaining (5)  = 3		=	1	=	10
+//
+// 					Shift - 3 - 15 - 16
+
+	public function transfer(Request $request) {
 		abort_if(Gate::denies('stock_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         DB::beginTransaction();
 		try {
             if ($request->previousGodownID != $request->newGodownID) {
-                $stockDetails = \App\Models\Stock::getProductStockDetails($request->productID,$request->previousGodownID);
-                $quantityRemaining = $request->quantityToMove;
-                $unitsRemaining = $request->unitsToMove;
-                foreach ($stockDetails as $stockDetail) {
-                    $oldStockDetail = \App\Models\StockDetail::find($stockDetail->stockDetailID);
-                    $oldStockDetailStatuses = \App\Models\StockDetailStatus::where('stockDetailID',$stockDetail->stockDetailID)->where('godownID',$request->previousGodownID)->get();
+				$quantityRemaining = $request->quantityToMove;
+				$stockDetails = \App\Models\Stock::getProductStockDetails($request->productID,$request->previousGodownID);
+				foreach ($stockDetails as $stockDetail) {
+					$stockDetailStatuses = \App\Models\StockDetailStatus::where('stockDetailID',$stockDetail->stockDetailID)->where('godownID',$request->previousGodownID)->get();
+					foreach ($stockDetailStatuses as $stockDetailStatus) {
+						if ($stockDetailStatus->quantity <= $quantityRemaining) {
+							$quantityRemaining -= $stockDetailStatus->quantity;
+							\App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->update([
+								'godownID' => $request->newGodownID
+							]);
+						} else {
+							\App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->replicate()->fill([
+								'quantity' => $quantityRemaining,
+								'quantityUnits' => $quantityRemaining,
+								'godownID' => $request->newGodownID
+							])->save();
 
-                    $allSoldQty = $oldStockDetailStatuses->where('statusID',\Config::get('constants.stock_status.sold'))->sum('quantity');
-                    $allSoldUnits = $oldStockDetailStatuses->where('statusID',\Config::get('constants.stock_status.sold'))->sum('quantityUnits');
+							\App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->update([
+								'quantity' => $stockDetailStatus->quantity - $quantityRemaining,
+								'quantityUnits' => $stockDetailStatus->quantity - $quantityRemaining
+							]);
+							$quantityRemaining = 0;
+						}
+						if ($quantityRemaining == 0) {
+							break;
+						}
+					}
+				}
 
-                    // $allNAQty = $oldStockDetailStatuses->whereIn('statusID',explode(',',\Config::get('constants.stock_status.isNotAvailableForSale')))->sum('quantity');
-                    // $allNAUnits = $oldStockDetailStatuses->whereIn('statusID',explode(',',\Config::get('constants.stock_status.isNotAvailableForSale')))->sum('quantityUnits');
-                    //
-                    //
-                    // $allGoodReturnQty = $oldStockDetailStatuses->where('statusID',\Config::get('constants.stock_status.good_sales_return'))->sum('quantity');
-                    // $allGoodReturnUnits = $oldStockDetailStatuses->where('statusID',\Config::get('constants.stock_status.good_sales_return'))->sum('quantityUnits');
-                    //
-                    // $allAvailableQty = $oldStockDetail->quantity - $allNAQty + $allGoodReturnQty;
-                    // $allAvailableUnits = $oldStockDetail->quantityUnits - $allNAUnits + $allGoodReturnUnits;
-
-                    // If Not Sold
-                    if ($oldStockDetailStatuses->count() == 1) {
-                        // If all qty being moved
-                        $firstStockDetailStatus = $oldStockDetailStatuses->first();
-                        if ($oldStockDetail->quantity <= $quantityRemaining) {
-                            $firstStockDetailStatus->godownID = $request->newGodownID;
-                            $firstStockDetailStatus->save();
-                            $quantityRemaining -= $oldStockDetail->quantity;
-                            $unitsRemaining -= $oldStockDetail->quantityUnits;
-                        } else {
-                            // If some qty being moved
-                            $newStockDetailStatus = $firstStockDetailStatus->replicate()->fill([
-                                'quantity' => $quantityRemaining,
-                                'quantityUnits' => $unitsRemaining,
-                                'godownID' => $request->newGodownID
-                            ]);
-                            $newStockDetailStatus->save();
-
-                            $quantityRemaining -= $firstStockDetailStatus->quantity;
-                            $unitsRemaining -= $firstStockDetailStatus->quantityUnits;
-
-                            $firstStockDetailStatus->quantity = $quantityRemaining;
-                            $firstStockDetailStatus->quantityUnits = $unitsRemaining;
-                            $firstStockDetailStatus->save();
-
-                            // $firstStockDetailStatus->quantity = abs($quantityRemaining);
-                            // $firstStockDetailStatus->quantityUnits = abs($unitsRemaining);
-                            // $firstStockDetailStatus->save();
-                            //
-                            // if ($quantityRemaining < 0 && $unitsRemaining < 0) {
-                            //     $quantityRemaining = 0;
-                            //     $unitsRemaining = 0;
-                            // }
-                        }
-                        if ($quantityRemaining == 0) {
-                            break;
-                        } else {
-                            continue;
-                        }
-                    } else {
-                        $oldStockDetailStatusesAvailableForSale = $oldStockDetailStatuses->whereIn('statusID',explode(',',\Config::get('constants.stock_status.isAvailableForSale')));
-
-                        foreach ($oldStockDetailStatusesAvailableForSale as $oldStockDetailStatus) {
-                            $remainingStockDetailStatusQty = $oldStockDetailStatus->quantity - $allSoldQty;
-                            $remainingStockDetailStatusUnits = $oldStockDetailStatus->quantityUnits - $allSoldUnits;
-
-                            $newStockDetailStatus = $oldStockDetailStatus->replicate()->fill([
-                                'quantity' => $remainingStockDetailStatusQty,
-                                'quantityUnits' => $remainingStockDetailStatusUnits,
-                                'godownID' => $request->newGodownID
-                            ]);
-
-                            $salesOrderDetail = null;
-
-                            if ($oldStockDetailStatus->statusID == \Config::get('constants.stock_status.quetta_godown')) {
-                                if ($remainingStockDetailStatusQty == 0) {
-                                    continue;
-                                }
-                                if ($remainingStockDetailStatusQty <= $quantityRemaining) {
-
-                                    $oldStockDetailStatus->quantity = $allSoldQty;
-                                    $oldStockDetailStatus->quantityUnits = $allSoldUnits;
-
-                                    $quantityRemaining -= $remainingStockDetailStatusQty;
-                                    $unitsRemaining -= $remainingStockDetailStatusUnits;
-
-                                } elseif ($remainingStockDetailStatusQty > $quantityRemaining) {
-
-                                    $newStockDetailStatus->quantity = $quantityRemaining;
-                                    $newStockDetailStatus->quantityUnits = $unitsRemaining;
-
-                                    $oldStockDetailStatus->quantity = $oldStockDetailStatus->quantity - $quantityRemaining;
-                                    $oldStockDetailStatus->quantityUnits = $oldStockDetailStatus->quantityUnits - $unitsRemaining;
-
-                                    $quantityRemaining = 0;
-                                    $unitsRemaining = 0;
-                                }
-
-                            } else {
-
-                                if ($oldStockDetailStatus->quantity <= $quantityRemaining) {
-                                    $newStockDetailStatus = null;
-                                    $oldStockDetailStatus->godownID = $request->newGodownID;
-
-                                    $quantityRemaining -= $oldStockDetailStatus->quantity;
-                                    $unitsRemaining -= $oldStockDetailStatus->quantityUnits;
-
-                                } elseif ($oldStockDetailStatus->quantity > $quantityRemaining) {
-
-                                    $newStockDetailStatus->quantity = $quantityRemaining;
-                                    $newStockDetailStatus->quantityUnits = $unitsRemaining;
-
-                                    $oldStockDetailStatus->quantity = $oldStockDetailStatus->quantity - $quantityRemaining;
-                                    $oldStockDetailStatus->quantityUnits = $oldStockDetailStatus->quantityUnits - $unitsRemaining;
-
-                                    $quantityRemaining = 0;
-                                    $unitsRemaining = 0;
-
-                                    $salesOrderDetail = \App\Models\SalesOrderDetail::where('stockDetailStatusID',$oldStockDetailStatus->stockDetailStatusID)->first();
-                                }
-                            }
-
-                            if ($newStockDetailStatus != null) {
-                                $newStockDetailStatus->save();
-
-                                if ($salesOrderDetail != null) {
-                                    $salesOrderDetail->replicate()->fill([
-                                        'stockDetailStatusID' => $newStockDetailStatus->id
-                                    ]);
-                                    $salesOrderDetail->save();
-                                }
-                            }
-
-                            $oldStockDetailStatus->save();
-
-                            if ($quantityRemaining == 0) {
-                                break;
-                            } else {
-                                continue;
-                            }
-                        }
-                    }
-
-                    if ($quantityRemaining == 0) {
-                        break;
-                    }
-                }
-
-                $deletedRows = \App\Models\StockDetailStatus::where('quantity',0)->where('quantityUnits', 0)->delete();
-
-                if ($quantityRemaining != 0 || $unitsRemaining != 0) {
+                if ($quantityRemaining != 0) {
                     DB::rollback();
                     $request->session()->flash('error', 'Stock does not match!');
                 } else {

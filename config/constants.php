@@ -68,6 +68,7 @@
 			'bad_sales_return' => 4,
 			'damaged' => 5,
 			'isAvailableForSale' => '1,2',
+			'aryIsAvailableForSale' => [1,2],
 			'isNotAvailableForSale' => '3,4,5',
 			'isIncludeCustomers' => '2,3,4'
 		],
