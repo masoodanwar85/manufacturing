@@ -186,6 +186,54 @@
                     </div>
                 </div>
             </div>
+			<div class="col-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Monthly Receivables Statistics &nbsp;&nbsp;</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="maximize"><i class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+						<div class="row">
+							<div class="col"></div>
+							<div class="col"></div>
+							<div class="col">
+								<form id="monthlyReceivables">
+									@csrf
+									<div class="input-group input-group-sm">
+					                    <input type="month" class="form-control" name="month" value="<?php echo date('Y-m'); ?>" />
+					                    <span class="input-group-append">
+					                        <button type="button" onclick="sendAjaxRequest('getReceivableInfo','monthlyReceivables')" class="btn btn-info btn-flat">Submit</button>
+					                    </span>
+					                </div>
+								</form>
+							</div>
+						</div>
+
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Party</th>
+									<th class="text-right">Receivables</th>
+									<th class="text-right">Received</th>
+									<th class="text-right">Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="receivable-customer-row">
+                                    <td>1.</td>
+                                    <td>Customer</td>
+                                    <td class="text-right receivables">0</td>
+									<td class="text-right received">0</td>
+									<td class="text-right balance">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="col">
             <div class="row">
@@ -254,16 +302,45 @@
     </div>
 @stop
 
-@section('css')
-    <link rel="stylesheet" href="/css/admin_custom.css">
-@stop
-
 @section('js')
     <script>
+		$(function() {
+			sendAjaxRequest('getReceivableInfo','monthlyReceivables');
+		});
 		function jumpToSales() {
 			var customerID = $('#customerID').val();
 			if (!isNaN(parseInt(customerID))) {
 				location.href = '/admin/customer/' + customerID;
+			}
+		}
+
+		function sendAjaxRequest(method, formID) {
+			$.ajax({
+				url: '/admin/ajax/'+method,
+				type: 'POST',
+				data: $('#'+formID).serialize(),
+				success: function(returned) {
+					handleResponse(method,returned);
+				}
+			});
+		}
+
+		function handleResponse(method,response) {
+			switch(method) {
+				case 'getReceivableInfo':
+					var customerRow = $('tr.receivable-customer-row');
+					var customerBalance = parseInt(response.customer.receivables) - parseInt(response.customer.received);
+					customerRow.find('td.receivables').html('Rs. ' + Number(response.customer.receivables).toFixed(0));
+					customerRow.find('td.received').html('Rs. ' + Number(response.customer.received).toFixed(0));
+					customerRow.find('td.balance').html('Rs. ' + Math.abs(Number(customerBalance).toFixed(0)));
+					if (Number(customerBalance) > 0) {
+						customerRow.find('td.balance').removeClass('table-success').addClass('table-danger');
+					} else {
+						customerRow.find('td.balance').removeClass('table-danger').addClass('table-success');
+					}
+					break;
+				default:
+					break;
 			}
 		}
     </script>
