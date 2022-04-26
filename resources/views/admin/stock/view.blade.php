@@ -178,12 +178,6 @@
 							</div>
 						</div>
                         <div class="form-group row">
-							<label for="qty" class="col-sm-4 col-form-label">Units to move:</label>
-							<div class="col-sm-8">
-								<input type="number" readonly class="form-control" id="unitsToMove" max="" name="unitsToMove" value="" />
-							</div>
-						</div>
-                        <div class="form-group row">
                             <label for="inputPassword" class="col-sm-4 col-form-label">New Godown:</label>
                             <div class="col-sm-8">
                                 <select class="select2 form-control" name="newGodownID">
@@ -282,15 +276,8 @@
 		function stockTransfer(prevGodownID,totalQty,totalUnits,godownName) {
 			$('#previousGodownID').val(prevGodownID);
 			$('#quantityToMove').val(totalQty);
-            $('#unitsToMove').val(totalUnits);
-			$('#prevGodown').val(godownName);
+            $('#prevGodown').val(godownName);
 			$('#quantityToMove').attr('max',totalQty);
-            $('#unitsToMove').attr('max',totalUnits);
 		}
-
-        $('input#quantityToMove').bind('keydown mouseup keypress blur keyup change', function(e) {
-            var quantity = $(e.target).val();
-			$('#unitsToMove').val(quantity*{{$stockInfo[0]->unitsInProduct}});
-        });
     </script>
 @stop

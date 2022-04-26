@@ -19,7 +19,7 @@ class CreateTransactionTable extends Migration
 			$table->unsignedBigInteger('batchID');
             $table->tinyInteger('isPaymentReceipt')->default(0);
             $table->date('transactionDate');
-            $table->string('transactionTypeNumber')->nullable();
+            $table->string('transactionTypeNumber')->nullable()->unique();
 			$table->unsignedDecimal('exchangeRate', 8, 2);
 			$table->unsignedBigInteger('createdByUserID');
             $table->timestamp('dateCreated')->useCurrent();

@@ -22,6 +22,7 @@ Route::redirect('/','/admin/dashboard');
 // });
 
 Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
+	Route::post('ajax/{method}', [App\Http\Controllers\Admin\AjaxController::class, 'handle'])->name('ajax.handle');
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/search', [App\Http\Controllers\Admin\DashboardController::class, 'search'])->name('dashboard.search');
     Route::get('/dashboard/test', [App\Http\Controllers\Admin\DashboardController::class, 'test'])->name('dashboard.test');

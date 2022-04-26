@@ -23,7 +23,7 @@ class DashboardController extends Controller
 		$receivables['suppliers'] = \App\Models\Supplier::getBalance()[0]->totalPayable;
         $customers = \App\Models\Customer::orderBy('customerName')->get();
         $attendance = \App\Models\Attendance::where('attendanceDate',$today->toDateString())->first();
-        return view('admin.dashboard',compact('totalPurchases','totalSales','thresholdStocks','receivables','customers','attendance'));
+		return view('admin.dashboard',compact('totalPurchases','totalSales','thresholdStocks','receivables','customers','attendance'));
     }
 
     public function search(Request $request)
