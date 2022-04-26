@@ -91,7 +91,7 @@ class SalesOrderService {
 		for ($i=0; $i < $count; $i++) {
 			// Get Product Stock Availability
 			$product = \App\Models\Stock::getProducts($request->productID[$i]);
-			$updatedQuantityUnits = $request->quantity[$i] * $product[0]->unitsInProduct;
+			$updatedQuantityUnits = $request->quantity[$i];
 			$updatedQuantity = $request->quantity[$i];
 			if (\Config::get('constants.client_settings.is_units_in_product_fixed') == 0) {
 				$updatedQuantityUnits = $request->quantityUnits[$i];

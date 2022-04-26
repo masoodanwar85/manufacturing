@@ -109,10 +109,10 @@ class StockController extends Controller
 			$stock = Stock::create($request->all());
 			foreach ($request->productID as $idx => $productID) {
 				$updatedQty = $request->quantity[$idx];
-				$updatedUnits = $request->quantity[$idx] * \App\Models\Product::find($productID)->unitsInProduct;
+				$updatedUnits = $request->quantity[$idx];
 				if (\Config::get('constants.client_settings.is_units_in_product_fixed') == 0) {
 					$updatedQty = $request->quantity[$idx];
-					$updatedUnits = $request->quantityUnits[$idx];
+					$updatedUnits = $request->quantity[$idx];
 				}
 				$stockDetail = $stock->stockDetails()->create([
 					'productID' => $productID,

@@ -32,7 +32,7 @@ class PurchaseOrderService {
 		$count = count($request->productID);
 		for ($i=0; $i < $count; $i++) {
 
-			$qtyUnits = $request->quantity[$i] * $request->unitsInProduct[$i];
+			$qtyUnits = $request->quantity[$i];
 			if (\Config::get('constants.client_settings.is_units_in_product_fixed') == 0 && \App\Models\Product::find($request->productID[$i])->isUnitsInProductFixed == 0) {
 				$qtyUnits = $request->totalUnits[$i];
 			}
@@ -42,7 +42,7 @@ class PurchaseOrderService {
 			$purchaseOrderDetail = new \App\Models\PurchaseOrderDetail();
 			$purchaseOrderDetail->productID = $request->productID[$i];
 			$purchaseOrderDetail->quantity = $request->quantity[$i];
-			$purchaseOrderDetail->quantityUnits = $qtyUnits;
+			$purchaseOrderDetail->quantityUnits = $request->quantity[$i];
 			$purchaseOrderDetail->damaged = $request->damaged[$i];
 			$purchaseOrderDetail->exchangeRate = $request->exchangeRate[$i];
 			if ($request->perUnitPrice[$i] > 0) {
@@ -155,10 +155,10 @@ class PurchaseOrderService {
 		if ($updatedQuantity > 0) {
 			$stockDetail->quantity = $updatedQuantity;
 			// TODO:: Quantity and Units should come from form
-			$stockDetail->quantityUnits = $purchaseOrderDetail->quantityUnits;
+			$stockDetail->quantityUnits = $updatedQuantity;
 		} else {
 			$stockDetail->quantity = $purchaseOrderDetail->quantity;
-			$stockDetail->quantityUnits = $purchaseOrderDetail->quantityUnits;
+			$stockDetail->quantityUnits = $purchaseOrderDetail->quantity;
 		}
 
 		if ($perUnitPurchasePrice > 0) {
@@ -185,7 +185,7 @@ class PurchaseOrderService {
 			// TODO:: Quantity and Units should come from form
 		} else {
 			$stockDetailStatus->quantity = $purchaseOrderDetail->quantity;
-			$stockDetailStatus->quantityUnits = $purchaseOrderDetail->quantityUnits;
+			$stockDetailStatus->quantityUnits = $purchaseOrderDetail->quantity;
 		}
 		$stockDetailStatus->salePrice = 0;
 		$stockDetailStatus->createdByUserID = Auth::id();
