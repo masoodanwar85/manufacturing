@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Gate;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -371,37 +373,60 @@ class StockController extends Controller
 // 					Shift - 3 - 15 - 16
 
 	public function transfer(Request $request) {
-		abort_if(Gate::denies('stock_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        dd("Debugging this function");
+        abort_if(Gate::denies('stock_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         DB::beginTransaction();
 		try {
+            // Log::info("================== Transferring " . $request->quantityToMove . " Products with ID = " . $request->productID . " from GodownID " . $request->previousGodownID . " to " . $request->newGodownID . "==============");
             if ($request->previousGodownID != $request->newGodownID) {
 				$quantityRemaining = $request->quantityToMove;
 				$stockDetails = \App\Models\Stock::getProductStockDetails($request->productID,$request->previousGodownID);
-				foreach ($stockDetails as $stockDetail) {
+                // Log::info("=========== Product Stock Details ===========");
+                // Log::info($stockDetails);
+                dump($stockDetails);
+				foreach ($stockDetails as $key => $stockDetail) {
 					$stockDetailStatuses = \App\Models\StockDetailStatus::where('stockDetailID',$stockDetail->stockDetailID)->where('godownID',$request->previousGodownID)->get();
+                    // whereIn('statusID',\Config::get('constants.stock_status.aryIsAvailableForSale'))->
+                    dump($stockDetailStatuses);
+                    // Log::info("=========== StockDetailStatus Loop Iteration # " . $key . " ===========");
+                    // Log::info($stockDetailStatuses);
 					foreach ($stockDetailStatuses as $stockDetailStatus) {
+                        dd($stockDetailStatus);
+                        // Log::info("Inside");
+                        // Log::info("=========== In Loop StockDetailStatusID ( " . $stockDetailStatus->stockDetailStatusID . " ) Condition Check stockDetailStatus->quantity ( " . $stockDetailStatus->quantity . " ) <= quantityRemaining (" . $quantityRemaining . ")  ===========");
 						if ($stockDetailStatus->quantity <= $quantityRemaining) {
 							$quantityRemaining -= $stockDetailStatus->quantity;
 							\App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->update([
 								'godownID' => $request->newGodownID
 							]);
+                            Log::info("Updated previous Godown to new Godown for stockDetailStatusID - QtyRemaining = " . $quantityRemaining);
 						} else {
-							\App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->replicate()->fill([
+                            Log::info("Quantity Remaining = " . $quantityRemaining);
+							$newStockDetailStatus = \App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->replicate()->fill([
 								'quantity' => $quantityRemaining,
 								'quantityUnits' => $quantityRemaining,
-								'godownID' => $request->newGodownID
+								'godownID' => $request->newGodownID,
+                                'createdByUserID' => Auth::id()
 							])->save();
+
+                            Log::info("========== Added New StockDetailStatus ==============");
+                            Log::info($newStockDetailStatus);
 
 							\App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->update([
 								'quantity' => $stockDetailStatus->quantity - $quantityRemaining,
 								'quantityUnits' => $stockDetailStatus->quantity - $quantityRemaining
 							]);
+
+                            Log::info("========== Updated Previous StockDetailStatusID " . $stockDetailStatus->stockDetailStatusID . " ==============");
 							$quantityRemaining = 0;
 						}
 						if ($quantityRemaining == 0) {
 							break;
 						}
 					}
+                    // if ($quantityRemaining == 0) {
+                    //     break;
+                    // }
 				}
 
                 if ($quantityRemaining != 0) {
