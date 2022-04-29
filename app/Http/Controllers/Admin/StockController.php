@@ -373,60 +373,68 @@ class StockController extends Controller
 // 					Shift - 3 - 15 - 16
 
 	public function transfer(Request $request) {
-        dd("Debugging this function");
         abort_if(Gate::denies('stock_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         DB::beginTransaction();
 		try {
-            // Log::info("================== Transferring " . $request->quantityToMove . " Products with ID = " . $request->productID . " from GodownID " . $request->previousGodownID . " to " . $request->newGodownID . "==============");
             if ($request->previousGodownID != $request->newGodownID) {
 				$quantityRemaining = $request->quantityToMove;
 				$stockDetails = \App\Models\Stock::getProductStockDetails($request->productID,$request->previousGodownID);
-                // Log::info("=========== Product Stock Details ===========");
-                // Log::info($stockDetails);
-                dump($stockDetails);
-				foreach ($stockDetails as $key => $stockDetail) {
+                foreach ($stockDetails as $key => $stockDetail) {
+
 					$stockDetailStatuses = \App\Models\StockDetailStatus::where('stockDetailID',$stockDetail->stockDetailID)->where('godownID',$request->previousGodownID)->get();
-                    // whereIn('statusID',\Config::get('constants.stock_status.aryIsAvailableForSale'))->
-                    dump($stockDetailStatuses);
-                    // Log::info("=========== StockDetailStatus Loop Iteration # " . $key . " ===========");
-                    // Log::info($stockDetailStatuses);
-					foreach ($stockDetailStatuses as $stockDetailStatus) {
-                        dd($stockDetailStatus);
-                        // Log::info("Inside");
-                        // Log::info("=========== In Loop StockDetailStatusID ( " . $stockDetailStatus->stockDetailStatusID . " ) Condition Check stockDetailStatus->quantity ( " . $stockDetailStatus->quantity . " ) <= quantityRemaining (" . $quantityRemaining . ")  ===========");
-						if ($stockDetailStatus->quantity <= $quantityRemaining) {
-							$quantityRemaining -= $stockDetailStatus->quantity;
+
+					$stockDetailStatusesAvailable = $stockDetailStatuses->whereIn('statusID',\Config::get('constants.stock_status.aryIsAvailableForSale'));
+					$stockDetailStatusTotal = $stockDetailStatusesAvailable->sum('quantity');
+					$stockDetailStatusTotalSold = $stockDetailStatuses->whereIn('statusID',\Config::get('constants.stock_status.aryIsNotAvailableForSale'))->sum('quantity');
+
+					$stockDetailStatusTotalAvailable = $stockDetailStatusTotal - $stockDetailStatusTotalSold;
+
+					if ($stockDetailStatusTotalAvailable == 0) {
+						continue;
+					}
+
+					if ($quantityRemaining == 0) {
+                        break;
+                    }
+
+					if ($stockDetailStatusTotalAvailable >= $quantityRemaining) {
+						$stockDetailStatusRemaining = $quantityRemaining;
+					} else {
+						$stockDetailStatusRemaining = $stockDetailStatusTotalAvailable;
+					}
+
+                    foreach ($stockDetailStatusesAvailable as $stockDetailStatus) {
+                        if ($stockDetailStatus->quantity <= $stockDetailStatusRemaining) {
+							$stockDetailStatusRemaining -= $stockDetailStatus->quantity;
 							\App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->update([
 								'godownID' => $request->newGodownID
 							]);
-                            Log::info("Updated previous Godown to new Godown for stockDetailStatusID - QtyRemaining = " . $quantityRemaining);
+							$quantityRemaining -= $stockDetailStatus->quantity;
 						} else {
-                            Log::info("Quantity Remaining = " . $quantityRemaining);
-							$newStockDetailStatus = \App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->replicate()->fill([
-								'quantity' => $quantityRemaining,
-								'quantityUnits' => $quantityRemaining,
+                            $newStockDetailStatus = \App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->replicate()->fill([
+								'quantity' => $stockDetailStatusRemaining,
+								'quantityUnits' => $stockDetailStatusRemaining,
 								'godownID' => $request->newGodownID,
                                 'createdByUserID' => Auth::id()
 							])->save();
 
-                            Log::info("========== Added New StockDetailStatus ==============");
-                            Log::info($newStockDetailStatus);
-
 							\App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->update([
-								'quantity' => $stockDetailStatus->quantity - $quantityRemaining,
-								'quantityUnits' => $stockDetailStatus->quantity - $quantityRemaining
+								'quantity' => $stockDetailStatus->quantity - $stockDetailStatusRemaining,
+								'quantityUnits' => $stockDetailStatus->quantity - $stockDetailStatusRemaining
 							]);
 
-                            Log::info("========== Updated Previous StockDetailStatusID " . $stockDetailStatus->stockDetailStatusID . " ==============");
-							$quantityRemaining = 0;
+							$quantityRemaining -= $stockDetailStatusRemaining;
+							$stockDetailStatusRemaining = 0;
+							break;
 						}
-						if ($quantityRemaining == 0) {
+
+						if ($stockDetailStatusRemaining == 0 || $quantityRemaining == 0) {
 							break;
 						}
 					}
-                    // if ($quantityRemaining == 0) {
-                    //     break;
-                    // }
+                    if ($quantityRemaining == 0) {
+                        break;
+                    }
 				}
 
                 if ($quantityRemaining != 0) {

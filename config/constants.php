@@ -69,6 +69,7 @@
 			'damaged' => 5,
 			'isAvailableForSale' => '1,2',
 			'aryIsAvailableForSale' => [1,2],
+			'aryIsNotAvailableForSale' => [3,4,5],
 			'isNotAvailableForSale' => '3,4,5',
 			'isIncludeCustomers' => '2,3,4'
 		],
