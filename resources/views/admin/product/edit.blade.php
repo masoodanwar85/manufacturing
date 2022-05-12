@@ -46,7 +46,7 @@
 				</div>
 				<div class="form-group row {{ $errors->has('maximumUnitID') ? 'has-error' : '' }}">
 					<label for="maximumUnitID" class="col-sm-2 col-form-label">Product Unit: *</label>
-					<div class="col-sm-10">
+					<div class="col-sm-4">
 						<select name="maximumUnitID" class="form-control select2 @if($errors->has('maximumUnitID')) is-invalid @endif" required>
 							@foreach($measurementUnits as $measurementUnit)
 								<option value="{{ $measurementUnit->unitID }}" {{ old('maximumUnitID',$product->maximumUnitID) == $measurementUnit->unitID ? 'selected' : '' }}>{{ $measurementUnit->unitName }} ({{ $measurementUnit->symbol }})</option>
@@ -58,29 +58,18 @@
 							</em>
 						@endif
 					</div>
-				</div>
-				<div class="form-group row {{ $errors->has('unitsInProduct') ? 'has-error' : '' }}">
-					<label for="unitsInProduct" class="col-sm-2 col-form-label">Units in Product: *</label>
-					<div class="{{$globalSettings['client_settings.is_units_in_product_fixed'] == 1 ? 'col-sm-10' : 'col-sm-4'}}">
-						<input type="number" name="unitsInProduct" class="form-control @if($errors->has('unitsInProduct')) is-invalid @endif" value="{{ old('unitsInProduct',$product->unitsInProduct) }}" required>
-						@if($errors->has('unitsInProduct'))
-							<em class="invalid-feedback">
-								{{ $errors->first('unitsInProduct') }}
-							</em>
-						@endif
-					</div>
-					@if ($globalSettings['client_settings.is_units_in_product_fixed'] == 0)
-					<label for="isUnitsInProductFixed" class="text-right col-sm-2 col-form-label">Are units fixed?:</label>
+                    <label for="isBOM" class="text-right col-sm-2 col-form-label">Is Bill of Material?:</label>
 					<div class="col-sm-4" style="padding-top:8px;">
 						<label class="radio-inline">
-							<input type="radio" name="isUnitsInProductFixed" value="1" {{ $product->isUnitsInProductFixed == 1 ? 'checked' : '' }}> Yes
+							<input type="radio" name="isBOM" value="1" {{ old('isBOM',$product->isBOM) == 1 ? 'checked' : '' }} /> Yes
 						</label>&nbsp;&nbsp;&nbsp;&nbsp;
 						<label class="radio-inline">
-							<input type="radio" name="isUnitsInProductFixed" value="0" {{ $product->isUnitsInProductFixed == 0 ? 'checked' : '' }} /> No
+							<input type="radio" name="isBOM" value="0" {{ old('isBOM',$product->isBOM) == 0 ? 'checked' : '' }} /> No
 						</label>
 					</div>
-					@endif
 				</div>
+                <input type="hidden" name="unitsInProduct" value="1" >
+                <input type="hidden" name="isUnitsInProductFixed" value="1">
 				<div class="form-group row {{ $errors->has('thresholdUnit') ? 'has-error' : '' }}">
 					<label for="unitsInProduct" class="col-sm-2 col-form-label">Alert Quantity: *</label>
 					<div class="col-sm-10">
@@ -103,14 +92,35 @@
 						@endif
 					</div>
 				</div>
-				<div>
+                @include('admin.product.bomRows')
+				<div class="mt-3 offset-2">
 					<input class="btn btn-primary" type="submit" value="Update">
 				</div>
             </form>
         </div>
     </div>
+    @include('admin.product.bomFields')
 @stop
 
 @section('css')
-    <link rel="stylesheet" href="/css/admin_custom.css">
+    <link rel="stylesheet" href="/css/_app.css">
+    <style>
+        @font-face {
+            font-family: '_pdms_jauhar_regular';
+            src: url('/fonts/_pdms_jauhar_regular.ttf');
+            font-weight: bold;
+        }
+
+        .font-urdu {
+            font-family: _pdms_jauhar_regular;
+            font-size: 25px;
+            line-height: 1.5;
+            letter-spacing: 3px;
+        }
+    </style>
+@stop
+
+@section('js')
+    <script src="/js/utils.js"></script>
+	@include('admin.product.formJS', ['isNew' => false])
 @stop

@@ -16,11 +16,18 @@
     };
 
 	$(function() {
+		$('input[name="isBOM"]').change(function() {
+			if ($('input[name="isBOM"]:checked').val() == 1) {
+				$('#bom-product').show();
+			} else {
+				$('#bom-product').hide();
+			}
+		});
+
 		@if ($isNew == 1)
 			addBOMRow();
 			addBOMExpenseRow();
 		@else
-			// For Translation of money into URDU
 			calculateGrandTotal();
 			calculateExpenseGrandTotal();
 			$('button.removeBOMRow').bind('click', function() {
@@ -35,25 +42,7 @@
 
 		bindQuantityChanged();
 
-		$('select.select2').select2();
-
-		$('input[name="isSupplier"]').bind('change', function(event) {
-			if ($(event.target).val() == 1) {
-				$('.supplierDiv').show();
-				$('.customerDiv').hide();
-				$('select[name="supplierID"]').attr("required","true");
-				$('select[name="customerID"]').removeAttr("required");
-				$('select[name="customerID"] option:eq(0)').prop("selected", true).trigger('change');
-				$('select[name="supplierID"]').select2({ width: 'resolve' });
-			} else {
-				$('.customerDiv').show();
-				$('.supplierDiv').hide();
-				$('select[name="customerID"]').attr("required","true");
-				$('select[name="supplierID"]').removeAttr("required");
-				$('select[name="supplierID"] option:eq(0)').prop("selected", true).trigger('change');
-				$('select[name="customerID"]').select2({ width: 'resolve' });
-			}
-		});
+		$('select.select2').select2({ width: 'resolve' });
 	});
 
 	function bindQuantityChanged() {
@@ -114,13 +103,13 @@
 		$('table#myTable tbody').append('<tr><td>' + strBOMRowHTML + '</td></tr>');
 		bindRemoveClick();
 		bindQuantityChanged();
-		var isSelect2Implemented = false;
-		$('select[name="productID[]"]').map(function(){
-			if(!$(this).hasClass('select2-hidden-accessible') && !isSelect2Implemented) {
-				$(this).select2();
-				isSelect2Implemented = true;
-			}
-		});
+		// var isSelect2Implemented = false;
+		// $('select[name="productID[]"]').map(function(){
+		// 	if(!$(this).hasClass('select2-hidden-accessible') && !isSelect2Implemented) {
+		// 		$(this).select2({ width: 'resolve' });
+		// 		isSelect2Implemented = true;
+		// 	}
+		// });
 	}
 
 	function calculateProductRowTotal(elem) {
@@ -158,11 +147,11 @@
 
 		trElem.find('input[name="totalUnits[]"]').val(totalUnits);
 		trElem.find('input[name="total[]"]').val(total);
-		if (isNaN(parseInt(perUnitPrice))) {
-			trElem.find('div.perUnitPriceInUrdu').html('');
-		} else {
-			trElem.find('div.perUnitPriceInUrdu').html(translate(perUnitPrice));
-		}
+		// if (isNaN(parseInt(perUnitPrice))) {
+		// 	trElem.find('div.perUnitPriceInUrdu').html('');
+		// } else {
+		// 	trElem.find('div.perUnitPriceInUrdu').html(translate(perUnitPrice));
+		// }
 
 		calculateGrandTotal();
 	}
@@ -178,7 +167,7 @@
 		});
 
 		$('#gTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + total);
-		$('#moneyInUrdu').html('&nbsp;&nbsp;&nbsp;&nbsp;' + translate(totalInPKR));
+		// $('#moneyInUrdu').html('&nbsp;&nbsp;&nbsp;&nbsp;' + translate(totalInPKR));
 	}
 
 	function bindExpenseRemoveClick() {
@@ -199,7 +188,7 @@
 		var jQElem = $(elem);
 		var trElem = jQElem.parent().parent().parent().parent();
 		var expenseAmount = trElem.find('input[name="amount[]"]').val();
-		trElem.find('div.expenseAmountInUrdu').html(translate(expenseAmount));
+		// trElem.find('div.expenseAmountInUrdu').html(translate(expenseAmount));
 		calculateExpenseRowTotal(elem);
 	}
 
@@ -232,6 +221,6 @@
 		});
 
 		$('#expenseGTotalInPKR').html('&nbsp;&nbsp;&nbsp;&nbsp;Rs. ' + totalInPKR.toFixed({{\Config::get('constants.client_settings.decimal_places')}}));
-		$('#expenseInUrdu').html('&nbsp;&nbsp;&nbsp;&nbsp;' + translate(totalInPKR));
+		// $('#expenseInUrdu').html('&nbsp;&nbsp;&nbsp;&nbsp;' + translate(totalInPKR));
 	}
 </script>

@@ -18,10 +18,7 @@
 	<span class="separator"></span>
 	<div class="form-group">
 		<div class="col-sm-12">
-			<input type="text" onkeyUp="calculateProductRowTotal(this);" name="perUnitPrice[]" value="" class="form-control" min="1" placeholder="Unit Price" required>
-			<div class="font-urdu perUnitPriceInUrdu">
-
-			</div>
+			<input type="text" onkeyUp="calculateProductRowTotal(this);" name="perUnitPrice[]" value="" class="form-control" min="1" placeholder="Unit Price" readonly>
 		</div>
 	</div>
 	<span class="separator"></span>
@@ -51,9 +48,6 @@
 	<div class="form-group">
 		<div class="col-sm-12">
 			<input type="text" onkeyUp="calculateRowPerUnitExpense(this);" name="amount[]" value="" min="1" class="form-control" placeholder="Expense Amount" required />
-			<div class="font-urdu expenseAmountInUrdu">
-
-			</div>
 		</div>
 	</div>
 	<span class="separator"></span>

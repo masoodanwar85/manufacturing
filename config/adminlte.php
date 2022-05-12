@@ -301,6 +301,13 @@ return [
                     'icon' => 'fas fa-fw fa-cube',
                     'can'  => ['stock_create'],
 					'active' => ['admin/stock/create']
+                ],
+				[
+                    'text' => 'production',
+                    'url'  => 'admin/production',
+                    'icon' => 'fas fa-fw fa-cube',
+                    'can'  => ['production_create'],
+					'active' => ['admin/production']
                 ]
             ],
         ],

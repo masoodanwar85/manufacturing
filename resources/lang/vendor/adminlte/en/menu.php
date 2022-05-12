@@ -32,6 +32,7 @@ return [
     'stock_management'				=> ' ---- STOCK ----',
 	'stock'							=> 'Stock',
 	'opening_stock'					=> 'Opening Stock',
+    'production'					=> 'Production',
 	// 'sales_management'				=> 'SALES MANAGEMENT',
     'sales_management'				=> ' ---- SALES ----',
 	'sales_order'					=> 'Sales Order',

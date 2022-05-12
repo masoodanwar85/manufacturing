@@ -88,7 +88,7 @@ class ProductController extends Controller
         $categories = \App\Models\Category::all()->sortBy('categoryName');
 		$measurementUnits = \App\Models\MeasurementUnit::all()->sortBy('unitID');
 
-		$products = \App\Models\Product::all()->sortBy('productName');
+		$products = \App\Models\Product::with('maximumUnit')->get()->sortBy('productName');
         $BOMExpense = \App\Models\AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.expense') . ' AND isShowForBOMExpense = 1')->get();
 
 		return view('admin.product.create',compact('categories','measurementUnits','products','BOMExpense'));
@@ -123,13 +123,15 @@ class ProductController extends Controller
                     ]);
                 }
 
-                foreach ($request->headID as $key => $value) {
-                    \App\Models\ProductBOMExpense::create([
-                        'productBOMID' => $productBOM->productBOMID,
-                        'expenseHeadID' => $value,
-                        'amount' => $request->amount[$key],
-                        'createdByUserID' => Auth::id()
-                    ]);
+                if ($request->get('headID') != NULL) {
+                    foreach ($request->headID as $key => $value) {
+                        \App\Models\ProductBOMExpense::create([
+                            'productBOMID' => $productBOM->productBOMID,
+                            'expenseHeadID' => $value,
+                            'amount' => $request->amount[$key],
+                            'createdByUserID' => Auth::id()
+                        ]);
+                    }
                 }
             }
             DB::commit();
@@ -166,8 +168,11 @@ class ProductController extends Controller
 		abort_if(Gate::denies('product_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $categories = \App\Models\Category::all()->sortBy('categoryName');
 		$measurementUnits = \App\Models\MeasurementUnit::all()->sortBy('unitID');
-		$products = \App\Models\Product::all()->sortBy('productName');
-		$BOMExpense = \App\Models\AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.expense') . ' AND isShowForBOMExpense = 1')->get();
+		$products = \App\Models\Product::with('maximumUnit')->get()->sortBy('productName');
+        if ($product->isBOM == 1) {
+            $product->load(['BOMs.items','BOMs.expenses']);
+        }
+        $BOMExpense = \App\Models\AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.expense') . ' AND isShowForBOMExpense = 1')->get();
         return view('admin.product.edit', compact('product','categories','measurementUnits','products','BOMExpense'));
     }
 
@@ -180,8 +185,47 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        $product->update($request->all());
-        $request->session()->flash('message', 'Product updated successfully!');
+        DB::beginTransaction();
+
+        try {
+            $product->update($request->all());
+
+            $product->BOMs->items()->delete();
+            $product->BOMs->expenses()->delete();
+            $product->BOMs->delete();
+
+            if ($request->get('isBOM') == 1) {
+                // Add BOM Product Items
+                $productBOM = \App\Models\ProductBOM::create(['productID' => $product->productID, 'createdByUserID' => Auth::id()]);
+                foreach ($request->productID as $key => $value) {
+                    \App\Models\ProductBOMItem::create([
+                        'productBOMID' => $productBOM->productBOMID,
+                        'productID' => $value,
+                        'quantity' => $request->quantity[$key],
+                        'isConsumeable' => 1,
+                        'createdByUserID' => Auth::id()
+                    ]);
+                }
+
+                if ($request->get('headID') != NULL) {
+                    foreach ($request->headID as $key => $value) {
+                        \App\Models\ProductBOMExpense::create([
+                            'productBOMID' => $productBOM->productBOMID,
+                            'expenseHeadID' => $value,
+                            'amount' => $request->amount[$key],
+                            'createdByUserID' => Auth::id()
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+            $request->session()->flash('message', 'Product updated successfully!');
+        } catch (Exception $e) {
+            DB::rollBack();
+            dd($e);
+            $request->session()->flash('error', 'An Error Occurred while updating Product!');
+        }
         return redirect()->route('product.index');
     }
 
@@ -194,11 +238,19 @@ class ProductController extends Controller
     public function destroy(Product $product,Request $request)
     {
 		abort_if(Gate::denies('product_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        if ($product->delete()) {
-			$request->session()->flash('message', 'Product deleted successfully!');
-		} else {
-			$request->session()->flash('error', 'An error occurred while deleting product!');
-		}
+        DB::beginTransaction();
+
+        try {
+            $product->BOMs->items()->delete();
+            $product->BOMs->expenses()->delete();
+            $product->BOMs->delete();
+            $product->delete();
+            DB::commit();
+            $request->session()->flash('message', 'Product deleted successfully!');
+        } catch (Exception $e) {
+            DB::rollBack();
+            $request->session()->flash('error', 'An error occurred while deleting product!');
+        }
         return redirect()->route('product.index');
     }
 }

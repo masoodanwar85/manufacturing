@@ -13,7 +13,7 @@ class Product extends Model
     protected $primaryKey = 'productID';
 	protected $with = ['category'];
     public $timestamps = false;
-    protected $fillable = ['productName','categoryID','unitsInProduct','isUnitsInProductFixed','unitPurchasePrice','unitSalePrice','maximumUnitID','minimumUnitID','thresholdUnit','isSoldPackOrLoose','image','createdByUserID'];
+    protected $fillable = ['productName','categoryID','unitsInProduct','isUnitsInProductFixed','unitPurchasePrice','unitSalePrice','isBOM','maximumUnitID','minimumUnitID','thresholdUnit','isSoldPackOrLoose','image','createdByUserID'];
 
     public function category()
     {
@@ -41,7 +41,7 @@ class Product extends Model
     }
 
     public function BOMs() {
-        return $this->hasMany('App\Models\ProductBOM','productID','productID');
+        return $this->hasOne('App\Models\ProductBOM','productID','productID');
     }
 
 	public static function getHistory($productID) {

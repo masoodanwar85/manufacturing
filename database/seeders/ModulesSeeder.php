@@ -33,7 +33,8 @@ class ModulesSeeder extends Seeder
 			['moduleID' => 17, 'moduleCode' => 'REPORT','moduleName' => 'Reports Module'],
 			['moduleID' => 18, 'moduleCode' => 'SETTING','moduleName' => 'Settings Module'],
             ['moduleID' => 19, 'moduleCode' => 'INVOICE_BOOKS','moduleName' => 'Invoice Books Module'],
-            ['moduleID' => 20, 'moduleCode' => 'ATTENDANCE','moduleName' => 'Staff Attendance Module']
+            ['moduleID' => 20, 'moduleCode' => 'ATTENDANCE','moduleName' => 'Staff Attendance Module'],
+            ['moduleID' => 21, 'moduleCode' => 'PRODUCTION','moduleName' => 'Production Module']
         ];
         foreach ($aryModules as $module) {
             \Illuminate\Support\Facades\DB::table('modules')->insert(['moduleCode' => $module['moduleCode'],'moduleName' => $module['moduleName'],'moduleID' => $module['moduleID']]);

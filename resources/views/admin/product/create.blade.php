@@ -67,28 +67,8 @@
 						</label>
 					</div>
 				</div>
-				<div class="form-group row {{ $errors->has('unitsInProduct') ? 'has-error' : '' }}">
-					<label for="unitsInProduct" class="col-sm-2 col-form-label">Units in Product: *</label>
-					<div class="{{$globalSettings['client_settings.is_units_in_product_fixed'] == 1 ? 'col-sm-10' : 'col-sm-4'}}">
-						<input type="number" name="unitsInProduct" class="form-control @if($errors->has('unitsInProduct')) is-invalid @endif" value="{{ old('unitsInProduct') }}" required>
-						@if($errors->has('unitsInProduct'))
-							<em class="invalid-feedback">
-								{{ $errors->first('unitsInProduct') }}
-							</em>
-						@endif
-					</div>
-					@if ($globalSettings['client_settings.is_units_in_product_fixed'] == 0)
-					<label for="isUnitsInProductFixed" class="text-right col-sm-2 col-form-label">Are units fixed?:</label>
-					<div class="col-sm-4" style="padding-top:8px;">
-						<label class="radio-inline">
-							<input type="radio" name="isUnitsInProductFixed" value="1" checked> Yes
-						</label>&nbsp;&nbsp;&nbsp;&nbsp;
-						<label class="radio-inline">
-							<input type="radio" name="isUnitsInProductFixed" value="0" /> No
-						</label>
-					</div>
-					@endif
-				</div>
+                <input type="hidden" name="unitsInProduct" value="1" >
+                <input type="hidden" name="isUnitsInProductFixed" value="1">
 				<div class="form-group row {{ $errors->has('thresholdUnit') ? 'has-error' : '' }}">
 					<label for="unitsInProduct" class="col-sm-2 col-form-label">Alert Quantity: *</label>
 					<div class="col-sm-10">
@@ -111,97 +91,8 @@
 						@endif
 					</div>
 				</div>
-				<div id="bom-product" class="row">
-					<div class="col-sm-2"><h3>BOM Details</h3></div>
-					<div class="col-sm-10">
-						<hr />
-						<div class="row">
-							<div class="col-md-12 col-xs-12">
-								<div class="x_panel">
-									<div class="x_title">
-										<h3>Product Items</h3>
-										<div class="clearfix"></div>
-									</div>
-									<div class="x_content">
-										<table class="table" id="myTable">
-											<thead>
-												<tr class="text-center">
-													<th style="text-align:center;width:25%;">Product Name</th>
-													<th style="text-align:center;width:10%;">Quantity</th>
-													<th style="text-align:center;width:15%;">Per Unit Price</th>
-													<th style="text-align:center;width:15%;">Total</th>
-													<th style="text-align:center;width:5%;">Action</th>
-												</tr>
-											</thead>
-											<tbody>
-
-											</tbody>
-											<tfoot>
-												<tr>
-													<td colspan="2" class="font-weight-bold text-right font-urdu" id="moneyInUrdu"></td>
-													<td class="font-weight-bold text-right">Total:</td>
-													<td id="gTotal" class="font-weight-bold"></td>
-													<td id="gTotalInPKR" class="font-weight-bold"></td>
-												</tr>
-												<tr id="actionRow">
-													<td colspan="4"></td>
-													<td>
-														<button class="btn btn-primary btn-sm pull-right " onclick="addBOMRow()" type="button" title="Add New BOM Item">
-															<i class="nav-icon fas fa-fw fa-plus"></i>
-														</button>
-													</td>
-												</tr>
-											</tfoot>
-										</table>
-									</div>
-								</div>
-							</div>
-							<hr>
-						</div>
-
-						<div class="row">
-							<div class="col-md-12 col-xs-12">
-								<div class="x_panel">
-									<div class="x_title">
-										<h3>Expenses</h3>
-										<div class="clearfix"></div>
-									</div>
-									<div class="x_content">
-										<table class="table" id="expenseTable">
-											<thead>
-												<tr class="text-center">
-													<th style="text-align:center;">Expense</th>
-													<th style="text-align:center;">Amount</th>
-													<th style="text-align:center;">Action</th>
-												</tr>
-											</thead>
-											<tbody>
-
-											</tbody>
-											<tfoot>
-												<tr>
-													<td class="font-weight-bold text-right font-urdu" id="expenseInUrdu"></td>
-													<td class="font-weight-bold text-right">Total:</td>
-													<td id="expenseGTotalInPKR" class="font-weight-bold"></td>
-												</tr>
-												<tr>
-													<td colspan="2"></td>
-													<td>
-														<button class="btn btn-primary btn-sm pull-right " onclick="addBOMExpenseRow()" type="button" title="Add New BOM Expense">
-															<i class="nav-icon fas fa-fw fa-plus"></i>
-														</button>
-													</td>
-												</tr>
-											</tfoot>
-										</table>
-									</div>
-								</div>
-							</div>
-							<hr>
-						</div>
-					</div>
-				</div>
-				<div>
+				@include('admin.product.bomRows')
+				<div class="mt-3 offset-2">
 					<input class="btn btn-primary" type="submit" value="Save">
 				</div>
             </form>
