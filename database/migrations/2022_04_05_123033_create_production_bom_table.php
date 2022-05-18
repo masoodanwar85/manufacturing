@@ -17,6 +17,7 @@ class CreateProductionBOMTable extends Migration
 			$table->bigIncrements('productionBOMID');
 			$table->unsignedBigInteger('productID');
 			$table->integer('quantity')->default(1);
+            $table->integer('productionStageID')->default(0);
 			$table->unsignedBigInteger('createdByUserID');
 			$table->timestamp('dateCreated')->useCurrent();
 			$table->foreign('productID')->references('productID')->on('product');

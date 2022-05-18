@@ -170,7 +170,7 @@ class ProductController extends Controller
 		$measurementUnits = \App\Models\MeasurementUnit::all()->sortBy('unitID');
 		$products = \App\Models\Product::with('maximumUnit')->get()->sortBy('productName');
         if ($product->isBOM == 1) {
-            $product->load(['BOMs.items','BOMs.expenses']);
+            $product->load(['BOM.items','BOM.expenses']);
         }
         $BOMExpense = \App\Models\AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.expense') . ' AND isShowForBOMExpense = 1')->get();
         return view('admin.product.edit', compact('product','categories','measurementUnits','products','BOMExpense'));

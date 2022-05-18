@@ -22,8 +22,8 @@
 							</thead>
 							<tbody>
 								@if (isset($product) && $product->isBOM == 1)
-									<input type="hidden" name="productBOMID" value="{{ $product->BOM->productBOMID }}" />
-									@foreach ($product->BOM->items as $productBOMItem)
+									<input type="hidden" name="productBOMID" value="{{ $product->BOMs->productBOMID }}" />
+									@foreach ($product->BOMs->items as $productBOMItem)
 										<tr>
 											<td>
 												<div class="form-group">
@@ -107,7 +107,7 @@
 							</thead>
 							<tbody>
 								@if (isset($product) && $product->isBOM == 1)
-									@foreach ($product->BOM->expenses as $productBOMExpense)
+									@foreach ($product->BOMs->expenses as $productBOMExpense)
 										<tr>
 											<td>
 												<div class="form-group">

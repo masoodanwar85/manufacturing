@@ -19,18 +19,14 @@
 		$('input[name="isBOM"]').change(function() {
 			if ($('input[name="isBOM"]:checked').val() == 1) {
 				$('#bom-product').show();
-				addBOMRow();
-				addBOMExpenseRow();
 			} else {
 				$('#bom-product').hide();
-				$('#myTable tbody tr').remove();
-				$('#expenseTable tbody tr').remove();
 			}
 		});
 
 		@if ($isNew == 1)
-			// addBOMRow();
-			// addBOMExpenseRow();
+			addBOMRow();
+			addBOMExpenseRow();
 		@else
 			calculateGrandTotal();
 			calculateExpenseGrandTotal();

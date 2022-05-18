@@ -40,8 +40,12 @@ class Product extends Model
         return $this->hasMany('App\Models\StockDetail','productID','productID');
     }
 
-    public function BOMs() {
+    public function BOM() {
         return $this->hasOne('App\Models\ProductBOM','productID','productID');
+    }
+
+    public function BOMProducts() {
+        return $this->hasMany('App\Models\ProductBOM','productID','productID');
     }
 
 	public static function getHistory($productID) {

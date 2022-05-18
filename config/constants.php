@@ -73,6 +73,11 @@
 			'isNotAvailableForSale' => '3,4,5',
 			'isIncludeCustomers' => '2,3,4'
 		],
+        'production_stages' => [
+			'draft' => 0,
+			'in_process' => 1,
+			'finished' => 2
+		],
         'bank_instrument' => [
             'type' => [
                 'cheque' => 1
