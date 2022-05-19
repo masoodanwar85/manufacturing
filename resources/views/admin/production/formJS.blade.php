@@ -5,34 +5,52 @@
 
 	var productsInfo = {
         @foreach ($BOMProducts as $product)
-        "{{$product->productID}}" : {
-            "productName" : "{{ $product->productName }}",
-            "items" : {
-				@foreach ($product->BOMProducts->items as $BOMProductItem)
-					"productID" : "{{ $BOMProductItem->productID }}",
-					"productName" : "{{ $BOMProductItem->product->productName }}",
-					"quantity" : "{{ $BOMProductItem->quantity }}",
-					"price" : "{{ $BOMProductItem->product->unitPurchasePrice }}"
-				@endforeach
-			},
-			"expenses" : {
-				@foreach ($product->BOMProducts->expenses as $BOMProductExpenses)
-					"headID" : "{{ $BOMProductExpenses->expenseHeadID }}",
-					"headName" : "{{ $BOMProductExpenses->head->headName }}",
-					"price" : "{{ $BOMProductExpenses->amount }}"
-				@endforeach
-			}
-        },
+			"{{$product->productID}}" : {
+	            "productName" : "{{ $product->productName }}",
+	            "items" : [
+					@foreach ($product->BOM->items as $BOMProductItem)
+						{
+							"productID" : "{{ $BOMProductItem->productID }}",
+							"productName" : "{{ $BOMProductItem->product->productName }}",
+							"quantity" : "{{ $BOMProductItem->quantity }}",
+							"price" : "{{ round($BOMProductItem->product->unitPurchasePrice,2) }}"
+						},
+					@endforeach
+				],
+				"expenses" : [
+					@foreach ($product->BOM->expenses as $BOMProductExpenses)
+						{
+							"headID" : "{{ $BOMProductExpenses->expenseHeadID }}",
+							"headName" : "{{ $BOMProductExpenses->head->headName }}",
+							"price" : "{{ round($BOMProductExpenses->amount,2) }}"
+						},
+					@endforeach
+				]
+	        },
         @endforeach
     };
 
 	function BOMProductChanged(productID) {
-		$('#product-bom-items').html('');
-		$('#product-bom-expenses').html('');
+		var strItemsHTML = "";
+		var strExpensesHTML = "";
+		productsInfo[productID].items.forEach(function(val,idx) {
+			strItemsHTML += "<tr>";
+			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12">'+val.productName+'</div><input type="hidden" name="productItemID[]" value="'+val.productID+'" /></div></td>';
+			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12">'+val.quantity+'</div><input type="hidden" name="productItemQuantity[]" value="'+val.quantity+'" /></div></td>';
+			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12">'+val.price+'</div><input type="hidden" name="productItemPrice[]" value="'+val.price+'" /></div></td>';
+			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12">'+(val.price * val.quantity)+'</div></div></td>';
+			strItemsHTML += "</tr>";
+		});
+		$('#product-bom-items').html(strItemsHTML);
 
-		var strItemsHTML = "<tr>";
-		
-		strItemsHTML += "</tr>";
+		productsInfo[productID].expenses.forEach(function(val,idx) {
+			strExpensesHTML += "<tr>";
+			strExpensesHTML += '<td><div class="form-group"><div class="col-sm-12">'+val.headName+'</div><input type="hidden" name="expenseHeadID[]" value="'+val.headID+'" /></div></td>';
+			strExpensesHTML += '<td><div class="form-group"><div class="col-sm-12">'+val.price+'</div><input type="hidden" name="productItemPrice[]" value="'+val.price+'" /></div></td>';
+			strExpensesHTML += "</tr>";
+		});
+		$('#product-bom-expenses').html(strExpensesHTML);
+
 	}
 
 	function bindQuantityChanged() {
