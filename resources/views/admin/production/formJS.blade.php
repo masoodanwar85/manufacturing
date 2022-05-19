@@ -2,48 +2,38 @@
 
 <script type="text/javascript">
 	{{ \App\Services\CurrencyService::strJSConvertToPKR() }}
+
 	var productsInfo = {
-        @foreach ($products as $product)
+        @foreach ($BOMProducts as $product)
         "{{$product->productID}}" : {
-            "productName" : "{{$product->productName}}",
-            "purchasePrice" : "{{$product->unitPurchasePrice}}",
-            "unitsAvailable" : "{{$product->unitsAvailable}}",
-			"unitsInProduct" : "{{$product->unitsInProduct}}",
-			"areUnitsFixed" : "{{$product->isUnitsInProductFixed}}",
-			"symbol" : "{{ $product->maximumUnit->symbol }}"
+            "productName" : "{{ $product->productName }}",
+            "items" : {
+				@foreach ($product->BOMProducts->items as $BOMProductItem)
+					"productID" : "{{ $BOMProductItem->productID }}",
+					"productName" : "{{ $BOMProductItem->product->productName }}",
+					"quantity" : "{{ $BOMProductItem->quantity }}",
+					"price" : "{{ $BOMProductItem->product->unitPurchasePrice }}"
+				@endforeach
+			},
+			"expenses" : {
+				@foreach ($product->BOMProducts->expenses as $BOMProductExpenses)
+					"headID" : "{{ $BOMProductExpenses->expenseHeadID }}",
+					"headName" : "{{ $BOMProductExpenses->head->headName }}",
+					"price" : "{{ $BOMProductExpenses->amount }}"
+				@endforeach
+			}
         },
         @endforeach
     };
 
-	$(function() {
-		$('input[name="isBOM"]').change(function() {
-			if ($('input[name="isBOM"]:checked').val() == 1) {
-				$('#bom-product').show();
-			} else {
-				$('#bom-product').hide();
-			}
-		});
+	function BOMProductChanged(productID) {
+		$('#product-bom-items').html('');
+		$('#product-bom-expenses').html('');
 
-		@if ($isNew == 1)
-			addBOMRow();
-			addBOMExpenseRow();
-		@else
-			calculateGrandTotal();
-			calculateExpenseGrandTotal();
-			$('button.removeBOMRow').bind('click', function() {
-				$(this).parent().parent().remove();
-				calculateGrandTotal();
-			});
-			$('button.removeBOMExpenseRow').bind('click', function() {
-				$(this).parent().parent().remove();
-				calculateExpenseGrandTotal();
-			});
-		@endif
-
-		bindQuantityChanged();
-
-		$('select.select2').select2({ width: 'resolve' });
-	});
+		var strItemsHTML = "<tr>";
+		
+		strItemsHTML += "</tr>";
+	}
 
 	function bindQuantityChanged() {
         $('input[name="quantity[]"]').bind('keydown mouseup keypress blur keyup change', function(e) {

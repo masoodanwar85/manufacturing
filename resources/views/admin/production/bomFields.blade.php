@@ -1,12 +1,7 @@
 <div id="bom-row" style="display:none;">
 	<div class="form-group">
 		<div class="col-sm-12">
-			<select name="productID[]" class="form-control" onChange="productChanged(this);" required>
-				<option value=""></option>
-				@foreach ($products as $product)
-					<option value="{{$product->productID}}">{{$product->productName}} ( {{$product->category->categoryName}} ) @if ($product->unitsInProduct > 1) - {{ $product->unitsInProduct}} {{$product->maximumUnit->symbol}} / unit @endif</option>
-				@endforeach
-			</select>
+
 		</div>
 	</div>
 	<span class="separator"></span>
@@ -36,12 +31,7 @@
 <div id="bom-expense-row" style="display:none;">
 	<div class="form-group">
 		<div class="col-sm-12">
-			<select name="headID[]" class="form-control" required>
-				<option value=""></option>
-				@foreach ($BOMExpense as $key => $value)
-					<option value="{{$value['headID']}}">{{$value['headName']}}</option>
-				@endforeach
-			</select>
+			
 		</div>
 	</div>
 	<span class="separator"></span>

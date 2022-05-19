@@ -75,7 +75,8 @@ class ProductionController extends Controller
     {
         abort_if(Gate::denies('production_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $BOMProducts = \App\Models\Product::with(['BOMProducts.items','BOMProducts.expenses'])->where('isBOM',1)->get()->sortBy('productName');
+        $BOMProducts = \App\Models\Product::with(['BOMProducts.items','BOMProducts.expenses.head'])->where('isBOM',1)->get()->sortBy('productName');
+        dd($BOMProducts);
 		return view('admin.production.create',compact('BOMProducts'));
     }
 

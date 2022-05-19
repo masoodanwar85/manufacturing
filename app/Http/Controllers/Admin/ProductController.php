@@ -190,9 +190,9 @@ class ProductController extends Controller
         try {
             $product->update($request->all());
 
-            $product->BOMs->items()->delete();
-            $product->BOMs->expenses()->delete();
-            $product->BOMs->delete();
+            $product->BOM->items()->delete();
+            $product->BOM->expenses()->delete();
+            $product->BOM->delete();
 
             if ($request->get('isBOM') == 1) {
                 // Add BOM Product Items
