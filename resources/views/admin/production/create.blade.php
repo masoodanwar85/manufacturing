@@ -35,7 +35,7 @@
                 <div class="form-group row {{ $errors->has('quantity') ? 'has-error' : '' }}">
 					<label for="quantity" class="col-sm-2 col-form-label">Quantity: *</label>
 					<div class="col-sm-10">
-						<input type="number" name="quantity" class="form-control @if($errors->has('quantity')) is-invalid @endif" value="{{ old('quantity') }}" required>
+						<input type="number" name="quantity" class="form-control @if($errors->has('quantity')) is-invalid @endif" value="{{ old('quantity', '1') }}" required>
 						@if($errors->has('quantity'))
 							<em class="invalid-feedback">
 								{{ $errors->first('quantity') }}
@@ -50,10 +50,10 @@
                 <table class="table table-striped table-bordered table-sm">
                     <thead>
                         <tr>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Unit Price</th>
-                            <th>Total</th>
+                            <th width="50%">Item</th>
+                            <th width="15%">Quantity</th>
+                            <th width="15%">Unit Price</th>
+                            <th width="15%">Total</th>
                         </tr>
                     </thead>
                     <tbody id="product-bom-items">
@@ -64,8 +64,10 @@
                 <table class="table table-striped table-bordered table-sm">
                     <thead>
                         <tr>
-                            <th>Expense</th>
-                            <th>Amount</th>
+                            <th width="50%">Expense</th>
+                            <th width="15%">Quantity</th>
+                            <th width="15%">Amount</th>
+                            <th width="15%">Total</th>
                         </tr>
                     </thead>
                     <tbody id="product-bom-expenses">
@@ -83,7 +85,6 @@
 @endsection
 
 @section('css')
-    <link rel="stylesheet" href="/css/_app.css">
     <style>
         @font-face {
             font-family: '_pdms_jauhar_regular';
@@ -102,5 +103,5 @@
 
 @section('js')
     <script src="/js/utils.js"></script>
-	@include('admin.production.formJS', ['isNew' => true])
+    @include('admin.production.formJS', ['isNew' => true])
 @stop

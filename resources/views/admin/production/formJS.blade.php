@@ -3,6 +3,10 @@
 <script type="text/javascript">
 	{{ \App\Services\CurrencyService::strJSConvertToPKR() }}
 
+	$(function() {
+		bindQuantityChanged();
+	});
+
 	var productsInfo = {
         @foreach ($BOMProducts as $product)
 			"{{$product->productID}}" : {
@@ -36,8 +40,8 @@
 		productsInfo[productID].items.forEach(function(val,idx) {
 			strItemsHTML += "<tr>";
 			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12">'+val.productName+'</div><input type="hidden" name="productItemID[]" value="'+val.productID+'" /></div></td>';
-			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12">'+val.quantity+'</div><input type="hidden" name="productItemQuantity[]" value="'+val.quantity+'" /></div></td>';
-			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12">'+val.price+'</div><input type="hidden" name="productItemPrice[]" value="'+val.price+'" /></div></td>';
+			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12"><input type="number" class="form-control" name="productItemQuantity[]" value="'+val.quantity+'" /></div></div></td>';
+			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12"><input type="number" class="form-control" name="productItemPrice[]" value="'+val.price+'" /></div></div></td>';
 			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12">'+(val.price * val.quantity)+'</div></div></td>';
 			strItemsHTML += "</tr>";
 		});
@@ -46,7 +50,9 @@
 		productsInfo[productID].expenses.forEach(function(val,idx) {
 			strExpensesHTML += "<tr>";
 			strExpensesHTML += '<td><div class="form-group"><div class="col-sm-12">'+val.headName+'</div><input type="hidden" name="expenseHeadID[]" value="'+val.headID+'" /></div></td>';
-			strExpensesHTML += '<td><div class="form-group"><div class="col-sm-12">'+val.price+'</div><input type="hidden" name="productItemPrice[]" value="'+val.price+'" /></div></td>';
+			strExpensesHTML += '<td><div class="form-group"><div class="col-sm-12"><input type="number" class="form-control" value="1" name="expenseQuantity[]" /></div></div></td>';
+			strExpensesHTML += '<td><div class="form-group"><div class="col-sm-12"><input type="number" class="form-control" name="productItemPrice[]" value="'+val.price+'" /></div></div></td>';
+			strExpensesHTML += '<td><div class="form-group"><div class="col-sm-12">'+val.price+'</div></div></td>';
 			strExpensesHTML += "</tr>";
 		});
 		$('#product-bom-expenses').html(strExpensesHTML);
@@ -54,10 +60,71 @@
 	}
 
 	function bindQuantityChanged() {
-        $('input[name="quantity[]"]').bind('keydown mouseup keypress blur keyup change', function(e) {
-			calculateProductRowTotal(e.target);
+        $('input[name="quantity"]').bind('keydown mouseup keypress blur keyup change', function(e) {
+			calculateProductRowTotal();
         });
     }
+
+	function calculateProductRowTotal() {
+		var quantity = $('input[name="quantity"]').val();
+		var itemsTotal = expensesTotal = 0;
+
+		var bomItemRows = $('#product-bom-items tr');
+		var bomExpenseRows = $('#product-bom-expenses tr');
+
+		bomItemRows.each(function(idx) {
+			$(this).find('td:not(:first)').each(function() {
+				if (elem = $(this).find('input')) {
+					console.log((typeof elem) === undefined);
+					console.log($(elem).val());
+				}
+			});
+		});
+
+		// if (!isNaN(parseInt(trElem.find('select[name="productID[]"]').val()))) {
+		// 	productID = trElem.find('select[name="productID[]"]').val();
+		// }
+		//
+		// if (isNaN(parseInt(trElem.find('input[name="quantity[]"]').val()))) {
+		// 	areAllValuesFilled = false;
+		// } else {
+		// 	quantity = parseInt(trElem.find('input[name="quantity[]"]').val());
+		// }
+		// if (isNaN(parseFloat(trElem.find('input[name="perUnitPrice[]"]').val()))) {
+		// 	areAllValuesFilled = false;
+		// }
+		//
+		// if (isNaN(quantity)) {
+		// 	totalUnits = 0;
+		// } else {
+		// 	totalUnits = quantity;
+		// }
+		//
+		// if (areAllValuesFilled === true) {
+		// 	perUnitPrice = parseFloat(trElem.find('input[name="perUnitPrice[]"]').val());
+		// 	total = totalUnits * perUnitPrice;
+		// } else {
+		// 	total = 0;
+		// }
+		//
+		// trElem.find('input[name="totalUnits[]"]').val(totalUnits);
+		// trElem.find('input[name="total[]"]').val(total);
+		// calculateGrandTotal();
+	}
+
+	function calculateGrandTotal() {
+		var totalFields = $('input[name="total[]"]');
+		var total = 0;
+		var totalInPKR = 0;
+		$(totalFields).each(function(x,y){
+			if (!isNaN(parseFloat($(y).val()))) {
+				total+=parseFloat($(y).val());
+			}
+		});
+
+		$('#gTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + total);
+		// $('#moneyInUrdu').html('&nbsp;&nbsp;&nbsp;&nbsp;' + translate(totalInPKR));
+	}
 
 	function checkProductSelected(productID) {
         var productFields = $('select[name="productID[]"]');
@@ -77,23 +144,6 @@
             return false;
         } else {
             return true;
-        }
-    }
-
-	function productChanged(selectProduct) {
-        var jQElem = $(selectProduct);
-        var productID = jQElem.find(':selected').val();
-        if (checkProductSelected(productID)) {
-			var trElem = jQElem.parent().parent().parent().parent();
-            var unitPrice = '';
-			var productUnit = '';
-            if (productID != '') {
-                unitPrice = productsInfo[productID].purchasePrice;
-				productUnit = productsInfo[productID].symbol;
-            }
-            trElem.find('input[name="perUnitPrice[]"]').val(unitPrice);
-			trElem.find('input[name="productUnit[]"]').text(productUnit+'(s)');
-			calculateProductRowTotal(selectProduct);
         }
     }
 
@@ -118,64 +168,6 @@
 		// 		isSelect2Implemented = true;
 		// 	}
 		// });
-	}
-
-	function calculateProductRowTotal(elem) {
-		var jQElem = $(elem);
-		var trElem = jQElem.parent().parent().parent().parent();
-		var areAllValuesFilled = true;
-		var productID = 0;
-		var quantity, perUnitPrice, totalInPKR, totalUnits;
-
-		if (!isNaN(parseInt(trElem.find('select[name="productID[]"]').val()))) {
-			productID = trElem.find('select[name="productID[]"]').val();
-		}
-
-		if (isNaN(parseInt(trElem.find('input[name="quantity[]"]').val()))) {
-			areAllValuesFilled = false;
-		} else {
-			quantity = parseInt(trElem.find('input[name="quantity[]"]').val());
-		}
-		if (isNaN(parseFloat(trElem.find('input[name="perUnitPrice[]"]').val()))) {
-			areAllValuesFilled = false;
-		}
-
-		if (isNaN(quantity)) {
-			totalUnits = 0;
-		} else {
-			totalUnits = quantity;
-		}
-
-		if (areAllValuesFilled === true) {
-			perUnitPrice = parseFloat(trElem.find('input[name="perUnitPrice[]"]').val());
-			total = totalUnits * perUnitPrice;
-		} else {
-			total = 0;
-		}
-
-		trElem.find('input[name="totalUnits[]"]').val(totalUnits);
-		trElem.find('input[name="total[]"]').val(total);
-		// if (isNaN(parseInt(perUnitPrice))) {
-		// 	trElem.find('div.perUnitPriceInUrdu').html('');
-		// } else {
-		// 	trElem.find('div.perUnitPriceInUrdu').html(translate(perUnitPrice));
-		// }
-
-		calculateGrandTotal();
-	}
-
-	function calculateGrandTotal() {
-		var totalFields = $('input[name="total[]"]');
-		var total = 0;
-		var totalInPKR = 0;
-		$(totalFields).each(function(x,y){
-			if (!isNaN(parseFloat($(y).val()))) {
-				total+=parseFloat($(y).val());
-			}
-		});
-
-		$('#gTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + total);
-		// $('#moneyInUrdu').html('&nbsp;&nbsp;&nbsp;&nbsp;' + translate(totalInPKR));
 	}
 
 	function bindExpenseRemoveClick() {
