@@ -23,7 +23,7 @@ class ProductFactory extends Factory
     public function definition()
     {
         return [
-			'categoryID' => $this->faker->numberBetween(1,5),
+			'categoryID' => 1,
 			'minimumUnitID' => $this->faker->numberBetween(1,2),
 			'maximumUnitID' => $this->faker->numberBetween(1,2),
 			'productName' => $this->faker->word,

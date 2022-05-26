@@ -188,11 +188,15 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
+			$product->load('BOM');
             $product->update($request->all());
 
-            $product->BOM->items()->delete();
-            $product->BOM->expenses()->delete();
-            $product->BOM->delete();
+			if ($product->BOM != NULL) {
+				$product->BOM->items()->delete();
+				$product->BOM->expenses()->delete();
+				$product->BOM->delete();	
+			}
+
 
             if ($request->get('isBOM') == 1) {
                 // Add BOM Product Items

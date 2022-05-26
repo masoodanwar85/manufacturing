@@ -9,9 +9,10 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Models\ProductionBOM;
 use App\Models\ProductionBOMItem;
 use App\Models\ProductionBOMExpense;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
-class ProductionController extends Controller
+class ProductionBOMController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -20,7 +21,7 @@ class ProductionController extends Controller
      */
     public function index(Request $request)
     {
-        abort_if(Gate::denies('production_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+		abort_if(Gate::denies('production_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if ($request->ajax()) {
 
             $query = ProductionBOM::with(['product','items','expenses'])->get();
@@ -34,8 +35,8 @@ class ProductionController extends Controller
                 $viewGate      = 'production_read';
                 $editGate      = 'production_update';
                 $deleteGate    = 'production_delete';
-                $crudRoutePart = 'production';
-                $primaryKey = 'productBOMID';
+                $crudRoutePart = 'productionBOM';
+                $primaryKey = 'productionBOMID';
                 return view('partials.datatablesActions', compact(
                     'viewGate',
                     'editGate',
@@ -86,11 +87,11 @@ class ProductionController extends Controller
      */
     public function store(Request $request)
     {
-        $request->merge(['createdByUserID' => Auth::id()]);
+		$request->merge(['createdByUserID' => Auth::id()]);
 
         $productionBOM = ProductionBOM::create($request->all());
 
-        foreach ($request->productionItemID as $idx => $thisProductItemID) {
+        foreach ($request->productItemID as $idx => $thisProductItemID) {
             $productionBOMItem = ProductionBOMItem::create([
                 'productionBOMID' => $productionBOM->productionBOMID,
                 'productID' => $thisProductItemID,
@@ -110,27 +111,27 @@ class ProductionController extends Controller
         }
 
         $request->session()->flash('message', 'Production created successfully!');
-        return redirect()->route('production.index');
+        return redirect()->route('productionBOM.index');
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+      * Display the specified resource.
+      *
+      * @param  \App\Models\ProductionBOM  $productionBOM
+      * @return \Illuminate\Http\Response
+      */
+    public function show(ProductionBOM $productionBOM)
     {
-        //
+        dd($productionBOM);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\ProductionBOM  $productionBOM
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(ProductionBOM $productionBOM)
     {
         //
     }
@@ -139,10 +140,10 @@ class ProductionController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Models\ProductionBOM  $productionBOM
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, ProductionBOM $productionBOM)
     {
         //
     }
@@ -150,10 +151,10 @@ class ProductionController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\ProductionBOM  $productionBOM
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(ProductionBOM $productionBOM)
     {
         //
     }

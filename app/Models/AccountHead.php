@@ -14,7 +14,7 @@ class AccountHead extends Model
     protected $table = 'accountHead';
     protected $primaryKey = 'headID';
 	public $timestamps = false;
-    protected $fillable = ['headID','parentHeadID','rootHeadID','headName','isSystemGenerated','isEditable','isShowForPurchaseOrderExpense','isShowForPayment','isShowForReceipt','isShowForOpeningBalance','createdByUserID'];
+    protected $fillable = ['headID','parentHeadID','rootHeadID','headName','isSystemGenerated','isEditable','isShowForPurchaseOrderExpense','isShowForPayment','isShowForReceipt','isShowForOpeningBalance','isShowForBOMExpense','createdByUserID'];
 
 	public function heads()
 	{

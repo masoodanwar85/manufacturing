@@ -43,16 +43,16 @@ class AccountHeadSeeder extends Seeder
 			['parentHeadID' => 13, 'rootHeadID' => 1, 'headName' => 'Salaries Advance', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 0, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
 			['parentHeadID' => 13, 'rootHeadID' => 1, 'headName' => 'Cash Advance', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 0, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
 			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Bank Charges', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
-			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Conveyance Expense', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
-			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Electricity Expense', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
+			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Conveyance Expense', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0, 'isShowForBOMExpense' => 1],
+			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Electricity Expense', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0, 'isShowForBOMExpense' => 1],
 			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Godown Rent', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 1, 'isShowForPayment' => 0, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
 			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Office Equipment', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
 			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Office Maintenace/Repair', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
-			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Miscellaneous Expense', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
+			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Miscellaneous Expense', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0, 'isShowForBOMExpense' => 1],
 			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Daily Expense', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
 			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Iran Expense', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
 			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Purchase Expense', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 1, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
-			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Transport Expense', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 1, 'isShowForPayment' => 0, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
+			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Transport Expense', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 1, 'isShowForPayment' => 0, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0, 'isShowForBOMExpense' => 1],
 			['parentHeadID' => 1, 'rootHeadID' => 1, 'headName' => 'Loan to Staff', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 0, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
 			['parentHeadID' => 5, 'rootHeadID' => 5, 'headName' => 'Sales Tax', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 0, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
 			['parentHeadID' => 38, 'rootHeadID' => 5, 'headName' => 'Custom Tax', 'isSystemGenerated' => 0, 'isEditable' => 0, 'isShowForPurchaseOrderExpense' => 1, 'isShowForPayment' => 1, 'isShowForReceipt' => 0,'isShowForOpeningBalance' => 0],
@@ -84,6 +84,7 @@ class AccountHeadSeeder extends Seeder
 				'isShowForPurchaseOrderExpense' => $accountHead['isShowForPurchaseOrderExpense'],
 				'isShowForPayment' => $accountHead['isShowForPayment'],
 				'isShowForOpeningBalance' => $accountHead['isShowForOpeningBalance'],
+				'isShowForBOMExpense' => isset($accountHead['isShowForBOMExpense']) ? $accountHead['isShowForBOMExpense'] : 0,
 				'createdByUserID' => 1
 			]);
         }

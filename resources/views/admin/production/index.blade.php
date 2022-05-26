@@ -13,7 +13,7 @@
 				<i class="fas fa-list"></i> Productions
 			</h3>
 			@can('production_create')
-			<a class="btn btn-primary btn-sm float-right" href="{{ route('production.create') }}">
+			<a class="btn btn-primary btn-sm float-right" href="{{ route('productionBOM.create') }}">
 				<i class="fas fa-plus-circle"></i> New Production
 			</a>
 			@endcan
@@ -44,7 +44,7 @@
                 serverSide: true,
                 retrieve: true,
                 aaSorting: [],
-                ajax: "{{ route('production.index') }}",
+                ajax: "{{ route('productionBOM.index') }}",
                 columns: [
                     { data: 'productName', name: 'productName' },
                     { data: 'quantity', name: 'quantity' },
