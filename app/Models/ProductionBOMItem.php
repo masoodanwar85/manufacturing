@@ -13,7 +13,7 @@ class ProductionBOMItem extends Model
     protected $primaryKey = 'productionBOMItemID';
 	protected $with = ['product'];
     public $timestamps = false;
-    protected $fillable = ['productionBOMID','productID','quantity','consumed','createdByUserID'];
+    protected $fillable = ['productionBOMID','productID','quantity','unitPrice','consumed','createdByUserID'];
 
     public function productionBOM()
     {
