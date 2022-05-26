@@ -74,9 +74,7 @@ class ProductionController extends Controller
     public function create()
     {
         abort_if(Gate::denies('production_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-
         $BOMProducts = \App\Models\Product::with(['BOM.items','BOM.expenses.head'])->where('isBOM',1)->get()->sortBy('productName');
-        // dd($BOMProducts);
         return view('admin.production.create',compact('BOMProducts'));
     }
 
@@ -88,7 +86,31 @@ class ProductionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->merge(['createdByUserID' => Auth::id()]);
+
+        $productionBOM = ProductionBOM::create($request->all());
+
+        foreach ($request->productionItemID as $idx => $thisProductItemID) {
+            $productionBOMItem = ProductionBOMItem::create([
+                'productionBOMID' => $productionBOM->productionBOMID,
+                'productID' => $thisProductItemID,
+                'quantity' => $request->productItemQuantity[$idx],
+                'unitPrice' => $request->productItemPrice[$idx],
+                'createdByUserID' => Auth::id()
+            ]);
+        }
+
+        foreach ($request->expenseHeadID as $idx => $thisExpenseHeadID) {
+            $productionBOMExpense = ProductionBOMExpense::create([
+                'productionBOMID' => $productionBOM->productionBOMID,
+                'expenseHeadID' => $thisExpenseHeadID,
+                'amount' => $request->expenseAmount[$idx],
+                'createdByUserID' => Auth::id()
+            ]);
+        }
+
+        $request->session()->flash('message', 'Production created successfully!');
+        return redirect()->route('production.index');
     }
 
     /**

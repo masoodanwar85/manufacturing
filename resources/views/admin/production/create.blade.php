@@ -14,7 +14,7 @@
 			</h3>
 		</div>
 		<div class="card-body">
-			<form class="form-horizontal" action="{{ route('product.store') }}" method="POST">
+			<form class="form-horizontal" action="{{ route('production.store') }}" method="POST">
 				@csrf
 				<div class="form-group row {{ $errors->has('productName') ? 'has-error' : '' }}">
 					<label for="productName" class="col-sm-2 col-form-label">Product: *</label>
@@ -59,6 +59,12 @@
                     <tbody id="product-bom-items">
 
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-right font-weight-bold">Total:</td>
+                            <td class="font-weight-bold" id="product-bom-item-total"></td>
+                        </tr>
+                    </tfoot>
                 </table>
                 <h4>Expenses</h4>
                 <table class="table table-striped table-bordered table-sm">
@@ -73,6 +79,16 @@
                     <tbody id="product-bom-expenses">
 
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-right font-weight-bold">Total:</td>
+                            <td class="font-weight-bold" id="product-bom-expense-total"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-right font-weight-bold">Grand Total:</td>
+                            <td class="font-weight-bold" id="product-bom-item-expense-grand-total"></td>
+                        </tr>
+                    </tfoot>
                 </table>
 
 				<div class="mt-3 offset-2">

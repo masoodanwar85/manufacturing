@@ -19,6 +19,7 @@ class CreateProductionBOMItemTable extends Migration
 			$table->unsignedBigInteger('productID');
 			$table->integer('quantity')->default(1);
 			$table->decimal('consumed',18,4)->default(1);
+            $table->decimal('unitPrice',18,4)->default(0);
 			$table->timestamp('dateCreated')->useCurrent();
 			$table->unsignedBigInteger('createdByUserID');
 			$table->foreign('productionBOMID')->references('productionBOMID')->on('productionBOM');
