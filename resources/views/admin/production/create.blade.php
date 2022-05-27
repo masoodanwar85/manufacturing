@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'New Productionion')
+@section('title', 'New Production')
 
 @section('content_header')
     <h1>New Production</h1>
@@ -14,7 +14,7 @@
 			</h3>
 		</div>
 		<div class="card-body">
-			<form class="form-horizontal" action="{{ route('productionBOM.store') }}" method="POST">
+			<form class="form-horizontal" action="{{ route('production.store') }}" method="POST">
 				@csrf
 				<div class="form-group row {{ $errors->has('productName') ? 'has-error' : '' }}">
 					<label for="productName" class="col-sm-2 col-form-label">Product: *</label>

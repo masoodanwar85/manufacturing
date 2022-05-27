@@ -57,7 +57,7 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
     Route::resource('user', App\Http\Controllers\Admin\UserController::class);
     Route::resource('role', App\Http\Controllers\Admin\RoleController::class);
 	Route::resource('product', App\Http\Controllers\Admin\ProductController::class);
-	Route::resource('productionBOM', App\Http\Controllers\Admin\ProductionBOMController::class);
+	Route::resource('production', App\Http\Controllers\Admin\ProductionController::class);
 	Route::resource('category', App\Http\Controllers\Admin\CategoryController::class);
 	Route::resource('supplier', App\Http\Controllers\Admin\SupplierController::class);
 	Route::resource('batch', App\Http\Controllers\Admin\BatchController::class);

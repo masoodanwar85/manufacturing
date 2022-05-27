@@ -304,10 +304,10 @@ return [
                 ],
 				[
                     'text' => 'production',
-                    'url'  => 'admin/productionBOM',
+                    'url'  => 'admin/production',
                     'icon' => 'fas fa-fw fa-cube',
                     'can'  => ['production_create'],
-					'active' => ['admin/productionBOM']
+					'active' => ['admin/production']
                 ]
             ],
         ],

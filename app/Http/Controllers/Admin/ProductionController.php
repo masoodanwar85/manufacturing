@@ -12,7 +12,7 @@ use App\Models\ProductionBOMExpense;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
-class ProductionBOMController extends Controller
+class ProductionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -35,7 +35,7 @@ class ProductionBOMController extends Controller
                 $viewGate      = 'production_read';
                 $editGate      = 'production_update';
                 $deleteGate    = 'production_delete';
-                $crudRoutePart = 'productionBOM';
+                $crudRoutePart = 'production';
                 $primaryKey = 'productionBOMID';
                 return view('partials.datatablesActions', compact(
                     'viewGate',
@@ -111,7 +111,7 @@ class ProductionBOMController extends Controller
         }
 
         $request->session()->flash('message', 'Production created successfully!');
-        return redirect()->route('productionBOM.index');
+        return redirect()->route('production.index');
     }
 
     /**
