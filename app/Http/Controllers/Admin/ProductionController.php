@@ -82,6 +82,7 @@ class ProductionController extends Controller
      */
     public function store(Request $request)
     {
+        abort_if(Gate::denies('production_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 		$request->merge(['createdByUserID' => Auth::id()]);
 
         $productionBOM = ProductionBOM::create($request->all());
@@ -117,6 +118,7 @@ class ProductionController extends Controller
       */
     public function show(ProductionBOM $production)
     {
+        abort_if(Gate::denies('production_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         dd($production);
     }
 
@@ -128,8 +130,9 @@ class ProductionController extends Controller
      */
     public function edit(ProductionBOM $production)
     {
+        abort_if(Gate::denies('production_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 		$BOMProducts = \App\Models\Product::with(['BOM.items','BOM.expenses.head'])->where('isBOM',1)->get()->sortBy('productName');
-		$production->load(['items','expenses']);
+		$production->load(['items','expenses.head']);
         return view('admin.production.edit',compact('BOMProducts','production'));
     }
 
@@ -142,7 +145,41 @@ class ProductionController extends Controller
      */
     public function update(Request $request, ProductionBOM $production)
     {
-        //
+        abort_if(Gate::denies('production_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+		DB::beginTransaction();
+		try {
+            $production->update($request->all());
+
+			$production->expenses()->delete();
+			$production->items()->delete();
+
+            foreach ($request->productItemID as $idx => $thisProductItemID) {
+                $productionBOMItem = ProductionBOMItem::create([
+                    'productionBOMID' => $production->productionBOMID,
+                    'productID' => $thisProductItemID,
+                    'quantity' => $request->productItemQuantity[$idx],
+                    'unitPrice' => $request->productItemPrice[$idx],
+                    'createdByUserID' => Auth::id()
+                ]);
+            }
+
+            foreach ($request->expenseHeadID as $idx => $thisExpenseHeadID) {
+                $productionBOMExpense = ProductionBOMExpense::create([
+                    'productionBOMID' => $production->productionBOMID,
+                    'expenseHeadID' => $thisExpenseHeadID,
+                    'amount' => $request->expenseAmount[$idx],
+                    'createdByUserID' => Auth::id()
+                ]);
+            }
+
+			DB::commit();
+			$request->session()->flash('message', 'Production updated successfully!');
+		} catch (Exception $e) {
+			DB::rollback();
+			$request->session()->flash('error', 'An error occurred while updating production!');
+		}
+
+        return redirect()->route('production.index');
     }
 
     /**

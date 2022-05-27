@@ -51,7 +51,7 @@
                     <thead>
                         <tr>
                             <th width="50%">Item</th>
-                            <th width="15%">Quantity</th>
+                            <th width="15%">Quantity Per Unit</th>
                             <th width="15%">Unit Price</th>
                             <th width="15%">Total</th>
                         </tr>
@@ -71,7 +71,7 @@
                     <thead>
                         <tr>
                             <th width="50%">Expense</th>
-                            <th width="15%">Quantity</th>
+                            <th width="15%">Quantity Per Unit</th>
                             <th width="15%">Amount</th>
                             <th width="15%">Total</th>
                         </tr>

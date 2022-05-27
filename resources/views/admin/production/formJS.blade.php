@@ -40,7 +40,7 @@
 		productsInfo[productID].items.forEach(function(val,idx) {
 			strItemsHTML += "<tr>";
 			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12">'+val.productName+'</div><input type="hidden" name="productItemID[]" value="'+val.productID+'" /></div></td>';
-			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12"><input type="hidden" class="form-control" name="baseQty[]" value="'+val.quantity+'" /><input type="number" class="form-control" name="productItemQuantity[]" value="'+val.quantity+'" /></div></div></td>';
+			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12"><input type="number" class="form-control" onchange="calculateProductRowTotal();" name="productItemQuantity[]" value="'+val.quantity+'" /></div></div></td>';
 			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12"><input type="number" class="form-control" name="productItemPrice[]" onchange="calculateProductRowTotal();" value="'+val.price+'" /></div></div></td>';
 			strItemsHTML += '<td><div class="form-group"><div class="col-sm-12">'+(val.price * val.quantity)+'</div></div></td>';
 			strItemsHTML += "</tr>";
@@ -76,9 +76,9 @@
 			var rowTotal = 0;
 			$(this).find('td:odd').each(function(index) {
 				if (index == 0) {
-					let baseQty = $(this).find('input[name="baseQty[]"]').val();
+					let baseQty = $(this).find('input[name="productItemQuantity[]"]').val();
 					rowTotal = baseQty*quantity;
-					$(this).find('input[name="productItemQuantity[]"]').val(rowTotal);
+					// $(this).find('input[name="productItemQuantity[]"]').val(rowTotal);
 				} else if (index == 1) {
 					let unitPrice = $(this).prev().find('input').val();
 					itemsTotal += unitPrice * rowTotal;
@@ -95,7 +95,7 @@
 				if (index == 0) {
 					let baseQty = $(this).find('input[name="baseExpenseQty[]"]').val();
 					rowTotal = baseQty*quantity;
-					$(this).find('input[name="expenseQuantity[]"]').val(rowTotal);
+					// $(this).find('input[name="expenseQuantity[]"]').val(rowTotal);
 				} else if (index == 1) {
 					let unitPrice = $(this).prev().find('input').val();
 					expensesTotal += unitPrice * rowTotal;

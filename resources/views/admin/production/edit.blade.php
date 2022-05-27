@@ -16,6 +16,7 @@
 		<div class="card-body">
 			<form class="form-horizontal" action="{{ route('production.update', $production->productionBOMID) }}" method="POST">
 				@csrf
+                @method('PUT')
 				<div class="form-group row {{ $errors->has('productName') ? 'has-error' : '' }}">
 					<label for="productName" class="col-sm-2 col-form-label">Product: *</label>
 					<div class="col-sm-10">
@@ -35,7 +36,7 @@
                 <div class="form-group row {{ $errors->has('quantity') ? 'has-error' : '' }}">
 					<label for="quantity" class="col-sm-2 col-form-label">Quantity: *</label>
 					<div class="col-sm-10">
-						<input type="number" name="quantity" class="form-control @if($errors->has('quantity')) is-invalid @endif" value="{{ old('quantity', '1') }}" required>
+						<input type="number" name="quantity" class="form-control @if($errors->has('quantity')) is-invalid @endif" value="{{ old('quantity', $production->quantity) }}" required>
 						@if($errors->has('quantity'))
 							<em class="invalid-feedback">
 								{{ $errors->first('quantity') }}
@@ -57,12 +58,49 @@
                         </tr>
                     </thead>
                     <tbody id="product-bom-items">
-
+                        @php
+                            $itemTotal = 0;
+                            $expenseTotal = 0;
+                            $grandTotal = 0;
+                        @endphp
+                        @foreach ($production->items as $key => $productionItem)
+                            <tr>
+                    			<td>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">{{ $productionItem->product->productName }}</div>
+                                        <input type="hidden" name="productItemID[]" value="{{ $productionItem->productID }}" />
+                                    </div>
+                                </td>
+                    			<td>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="number" class="form-control" onchange="calculateProductRowTotal();"name="productItemQuantity[]" value="{{ $productionItem->quantity  }}" />
+                                        </div>
+                                    </div>
+                                </td>
+                    			<td>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="number" class="form-control" name="productItemPrice[]" onchange="calculateProductRowTotal();" value="{{ round($productionItem->unitPrice,2) }}" />
+                                        </div>
+                                    </div>
+                                </td>
+                                @php
+                                    $itemTotal = $productionItem->quantity * $production->quantity * $productionItem->unitPrice;
+                                    $grandTotal += $itemTotal;
+                                @endphp
+                    			<td>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">{{ $itemTotal }}</div>
+                                    </div>
+                                </td>
+                			</tr>
+                        @endforeach
                     </tbody>
                     <tfoot>
                         <tr>
                             <td colspan="3" class="text-right font-weight-bold">Total:</td>
-                            <td class="font-weight-bold" id="product-bom-item-total"></td>
+                            <td class="font-weight-bold" id="product-bom-item-total">{{ $grandTotal }}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -77,16 +115,49 @@
                         </tr>
                     </thead>
                     <tbody id="product-bom-expenses">
-
+                        @foreach ($production->expenses as $key => $productionExpense)
+                            @php
+                                $itemTotal = $production->quantity * $productionExpense->amount;
+                                $expenseTotal += $itemTotal;
+                            @endphp
+                            <tr>
+                                <td>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">{{ $productionExpense->head->headName }}</div>
+                                        <input type="hidden" name="expenseHeadID[]" value="{{ $productionExpense->expenseHeadID }}" />
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="hidden" class="form-control" value="1" name="baseExpenseQty[]" />
+                                            <input type="number" readonly class="form-control" value="1" name="expenseQuantity[]" />
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="number" class="form-control" name="expenseAmount[]" onchange="calculateProductRowTotal();" value="{{ $productionExpense->amount }}" />
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">{{ $itemTotal }}</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                     <tfoot>
                         <tr>
                             <td colspan="3" class="text-right font-weight-bold">Total:</td>
-                            <td class="font-weight-bold" id="product-bom-expense-total"></td>
+                            <td class="font-weight-bold" id="product-bom-expense-total">{{ $expenseTotal }}</td>
                         </tr>
                         <tr>
                             <td colspan="3" class="text-right font-weight-bold">Grand Total:</td>
-                            <td class="font-weight-bold" id="product-bom-item-expense-grand-total"></td>
+                            <td class="font-weight-bold" id="product-bom-item-expense-grand-total">{{ $grandTotal + $expenseTotal }}</td>
                         </tr>
                     </tfoot>
                 </table>
