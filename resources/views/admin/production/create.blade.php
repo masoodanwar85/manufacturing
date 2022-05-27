@@ -97,7 +97,6 @@
             </form>
         </div>
     </div>
-	@include('admin.production.bomFields')
 @endsection
 
 @section('css')

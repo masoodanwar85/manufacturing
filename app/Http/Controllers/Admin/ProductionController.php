@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Gate;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\ProductionBOM;
 use App\Models\ProductionBOMItem;
@@ -50,14 +51,8 @@ class ProductionController extends Controller
             $table->editColumn('productName', function ($row) {
                 return $row->product->productName;
             });
-			$table->editColumn('quantity', function ($row) {
-                return $row->quantity;
-            });
-            $table->editColumn('productionStage', function ($row) {
-                return $row->productionStageID == 1 ? "Draft" : ($row->productionStageID == 2 ? "In-Process" : "Finished");
-            });
-            $table->editColumn('dateCreated', function ($row) {
-                return $row->dateCreated ? $row->dateCreated : "";
+			$table->editColumn('productionStage', function ($row) {
+                return $row->productionStageID == 0 ? "Draft" : ($row->productionStageID == 1 ? "In-Process" : "Finished");
             });
             $table->rawColumns(['actions', 'placeholder']);
 
@@ -120,9 +115,9 @@ class ProductionController extends Controller
       * @param  \App\Models\ProductionBOM  $productionBOM
       * @return \Illuminate\Http\Response
       */
-    public function show(ProductionBOM $productionBOM)
+    public function show(ProductionBOM $production)
     {
-        dd($productionBOM);
+        dd($production);
     }
 
     /**
@@ -131,9 +126,11 @@ class ProductionController extends Controller
      * @param  \App\Models\ProductionBOM  $productionBOM
      * @return \Illuminate\Http\Response
      */
-    public function edit(ProductionBOM $productionBOM)
+    public function edit(ProductionBOM $production)
     {
-        //
+		$BOMProducts = \App\Models\Product::with(['BOM.items','BOM.expenses.head'])->where('isBOM',1)->get()->sortBy('productName');
+		$production->load(['items','expenses']);
+        return view('admin.production.edit',compact('BOMProducts','production'));
     }
 
     /**
@@ -143,7 +140,7 @@ class ProductionController extends Controller
      * @param  \App\Models\ProductionBOM  $productionBOM
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, ProductionBOM $productionBOM)
+    public function update(Request $request, ProductionBOM $production)
     {
         //
     }
@@ -154,8 +151,21 @@ class ProductionController extends Controller
      * @param  \App\Models\ProductionBOM  $productionBOM
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ProductionBOM $productionBOM)
+    public function destroy(ProductionBOM $production,Request $request)
     {
-        //
+		abort_if(Gate::denies('production_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+		DB::beginTransaction();
+		try {
+			$production->expenses()->delete();
+			$production->items()->delete();
+			$production->delete();
+			DB::commit();
+			$request->session()->flash('message', 'Production deleted successfully!');
+		} catch (Exception $e) {
+			DB::rollback();
+			$request->session()->flash('error', 'An error occurred while deleting production!');
+		}
+
+        return redirect()->route('production.index');
     }
 }
