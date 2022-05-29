@@ -217,15 +217,14 @@ class ProductionController extends Controller
 		DB::beginTransaction();
 		try {
             $production->load('items');
-            if ($production->productionStageID == 0) {
+            if ($production->productionStageID == \Config::get('constants.production_stages.draft')) {
                 foreach ($production->items as $productionBOMItem) {
                     // Check for stock for this product
-                    $productStockQty = \App\Models\Stock::getStock($productID = $productionBOMItem->productID,false,true,2);
-                    dd($productStockQty);
-                    if ($productStockQty >= $productionBOMItem->quantity) {
+                    $productStockQty = \App\Models\Stock::getStock($productID = $productionBOMItem->productID,false,true,\Config::get('constants.production_stages.default_factory_id'));
+                    dd($production,$productionBOMItem,$productStockQty);
+                    if ($productStockQty >= ($productionBOMItem->quantity * $production->quantity)) {
                         // Change stock status to manufacturing
 
-                        
                     } else {
                         DB::rollback();
                         $is_success = false;
@@ -233,7 +232,7 @@ class ProductionController extends Controller
                         break;
                     }
                 }
-            } elseif ($production->productionStageID == 1) {
+            } elseif ($production->productionStageID == \Config::get('constants.production_stages.in_process')) {
 
             } else {
                 dd('Please Contact Admin!');

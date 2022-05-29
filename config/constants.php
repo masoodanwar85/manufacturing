@@ -77,7 +77,8 @@
         'production_stages' => [
 			'draft' => 0,
 			'in_process' => 1,
-			'finished' => 2
+			'finished' => 2,
+            'default_factory_id' => 2
 		],
         'bank_instrument' => [
             'type' => [

@@ -26,7 +26,7 @@ class Stock extends Model
     }
 
 	public static function getStock($productID = null,$isThresholdStock = FALSE,$isGroupByGodown = FALSE, $godownID = null) {
-	    DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+        DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
 		$whereClause = "WHERE 1=1";
 
 		if (is_numeric($productID) && $productID > 0) {
@@ -55,10 +55,10 @@ class Stock extends Model
 				totalBadSalesReturnUnits,
 				totalGoodSalesReturnQuantity,
 				totalGoodSalesReturnUnits,
-				(totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity) AS inStockQuantity,
-				(totalPurchasedUnits + totalGoodSalesReturnUnits - totalSoldUnits - totalDamagedUnits - totalBadSalesReturnUnits) AS inStockUnits,
+				(totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity - totalManufacturingQuantity) AS inStockQuantity,
+				(totalPurchasedUnits + totalGoodSalesReturnUnits - totalSoldUnits - totalDamagedUnits - totalBadSalesReturnUnits - totalManufacturingQuantity) AS inStockUnits,
 				lastPurchasePrice,
-                ((totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity) * lastPurchasePrice) AS inStockTotalPrice
+                ((totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity - totalManufacturingQuantity) * lastPurchasePrice) AS inStockTotalPrice
 			FROM (
 				SELECT
 					measurementUnit.symbol,
@@ -77,6 +77,7 @@ class Stock extends Model
 					SUM(temp.unitsBadSalesReturn) AS totalBadSalesReturnUnits,
 					SUM(temp.quantityGoodSalesReturn) AS totalGoodSalesReturnQuantity,
 					SUM(temp.unitsGoodSalesReturn) AS totalGoodSalesReturnUnits,
+                    SUM(temp.quantityManufacturing) AS totalManufacturingQuantity,
 					product.unitPurchasePrice AS lastPurchasePrice
 				FROM (
 					SELECT
@@ -91,7 +92,8 @@ class Stock extends Model
 						0 AS quantityBadSalesReturn,
 						0 AS unitsBadSalesReturn,
 						0 AS quantityGoodSalesReturn,
-						0 AS unitsGoodSalesReturn
+						0 AS unitsGoodSalesReturn,
+                        0 AS quantityManufacturing
 					FROM stockDetail
 					INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 					WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.quetta_godown') . "
@@ -109,7 +111,8 @@ class Stock extends Model
 						0 AS quantityBadSalesReturn,
 						0 AS unitsBadSalesReturn,
 						SUM(stockDetailStatus.quantity) AS quantityGoodSalesReturn,
-						SUM(stockDetailStatus.quantityUnits) AS unitsGoodSalesReturn
+						SUM(stockDetailStatus.quantityUnits) AS unitsGoodSalesReturn,
+                        0 AS quantityManufacturing
 					FROM stockDetail
 					INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 					WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.good_sales_return') . "
@@ -127,7 +130,8 @@ class Stock extends Model
 						0 AS quantityBadSalesReturn,
 						0 AS unitsBadSalesReturn,
 						0 AS quantityGoodSalesReturn,
-						0 AS unitsGoodSalesReturn
+						0 AS unitsGoodSalesReturn,
+                        0 AS quantityManufacturing
 					FROM stockDetail
 					INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 					WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.sold') . "
@@ -145,7 +149,8 @@ class Stock extends Model
 						SUM(stockDetailStatus.quantity) AS quantityBadSalesReturn,
 						SUM(stockDetailStatus.quantityUnits) AS unitsBadSalesReturn,
 						0 AS quantityGoodSalesReturn,
-						0 AS unitsGoodSalesReturn
+						0 AS unitsGoodSalesReturn,
+                        0 AS quantityManufacturing
 					FROM stockDetail
 					INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 					WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.bad_sales_return') . "
@@ -163,10 +168,30 @@ class Stock extends Model
 						0 AS quantityBadSalesReturn,
 						0 AS unitsBadSalesReturn,
 						0 AS quantityGoodSalesReturn,
-						0 AS unitsGoodSalesReturn
+						0 AS unitsGoodSalesReturn,
+                        0 AS quantityManufacturing
 					FROM stockDetail
 					INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 					WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.damaged') . "
+					GROUP BY stockDetail.productID" . ($isGroupByGodown == TRUE ? ',stockDetailStatus.godownID' : '') . "
+                    UNION
+                    SELECT
+						stockDetail.productID,
+						" . ($isGroupByGodown == TRUE ? 'stockDetailStatus.godownID,' : '') . "
+						0 AS totalQuantityPurchased,
+						0 AS totalUnitsPurchased,
+						0 AS quantitySold,
+						0 AS unitsSold,
+						0 AS quantityDamaged,
+						0 AS unitsDamaged,
+						0 AS quantityBadSalesReturn,
+						0 AS unitsBadSalesReturn,
+						0 AS quantityGoodSalesReturn,
+						0 AS unitsGoodSalesReturn,
+                        SUM(stockDetailStatus.quantity) AS quantityManufacturing
+					FROM stockDetail
+					INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
+					WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.manufacturing') . "
 					GROUP BY stockDetail.productID" . ($isGroupByGodown == TRUE ? ',stockDetailStatus.godownID' : '') . "
 				) AS temp
 				INNER JOIN product ON product.productID = temp.productID
@@ -199,8 +224,8 @@ class Stock extends Model
 				totalBadSalesReturnUnits,
 				totalGoodSalesReturnQuantity,
 				totalGoodSalesReturnUnits,
-				(totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity) AS inStockQuantity,
-				(totalPurchasedUnits + totalGoodSalesReturnUnits - totalSoldUnits - totalDamagedUnits - totalBadSalesReturnUnits) AS inStockUnits,
+				(totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity- totalManufacturingQuantity) AS inStockQuantity,
+				(totalPurchasedUnits + totalGoodSalesReturnUnits - totalSoldUnits - totalDamagedUnits - totalBadSalesReturnUnits - totalManufacturingQuantity) AS inStockUnits,
 				lastPurchasePrice
 			FROM (
 				SELECT
@@ -220,6 +245,7 @@ class Stock extends Model
 					SUM(temp.unitsBadSalesReturn) AS totalBadSalesReturnUnits,
 					SUM(temp.quantityGoodSalesReturn) AS totalGoodSalesReturnQuantity,
 					SUM(temp.unitsGoodSalesReturn) AS totalGoodSalesReturnUnits,
+                    SUM(temp.quantityManufacturing) AS totalManufacturingQuantity,
 					product.unitPurchasePrice AS lastPurchasePrice
 				FROM (
 					SELECT
@@ -234,7 +260,8 @@ class Stock extends Model
 						0 AS quantityBadSalesReturn,
 						0 AS unitsBadSalesReturn,
 						0 AS quantityGoodSalesReturn,
-						0 AS unitsGoodSalesReturn
+						0 AS unitsGoodSalesReturn,
+                        0 AS quantityManufacturing
 					FROM stockDetail
 					INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 					WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.quetta_godown') . "
@@ -252,7 +279,8 @@ class Stock extends Model
 						0 AS quantityBadSalesReturn,
 						0 AS unitsBadSalesReturn,
 						SUM(stockDetailStatus.quantity) AS quantityGoodSalesReturn,
-						SUM(stockDetailStatus.quantityUnits) AS unitsGoodSalesReturn
+						SUM(stockDetailStatus.quantityUnits) AS unitsGoodSalesReturn,
+                        0 AS quantityManufacturing
 					FROM stockDetail
 					INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 					INNER JOIN product ON product.productID = stockDetail.productID
@@ -271,7 +299,8 @@ class Stock extends Model
 						0 AS quantityBadSalesReturn,
 						0 AS unitsBadSalesReturn,
 						0 AS quantityGoodSalesReturn,
-						0 AS unitsGoodSalesReturn
+						0 AS unitsGoodSalesReturn,
+                        0 AS quantityManufacturing
 					FROM stockDetail
 					INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 					INNER JOIN product ON product.productID = stockDetail.productID
@@ -290,7 +319,8 @@ class Stock extends Model
 						SUM(stockDetailStatus.quantity) AS quantityBadSalesReturn,
 						SUM(stockDetailStatus.quantityUnits) AS unitsBadSalesReturn,
 						0 AS quantityGoodSalesReturn,
-						0 AS unitsGoodSalesReturn
+						0 AS unitsGoodSalesReturn,
+                        0 AS quantityManufacturing
 					FROM stockDetail
 					INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 					INNER JOIN product ON product.productID = stockDetail.productID
@@ -309,11 +339,32 @@ class Stock extends Model
 						0 AS quantityBadSalesReturn,
 						0 AS unitsBadSalesReturn,
 						0 AS quantityGoodSalesReturn,
-						0 AS unitsGoodSalesReturn
+						0 AS unitsGoodSalesReturn,
+                        0 AS quantityManufacturing
 					FROM stockDetail
 					INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 					INNER JOIN product ON product.productID = stockDetail.productID
 					WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.damaged') . "
+					GROUP BY stockDetail.productID,stockDetailStatus.godownID
+                    UNION
+                    SELECT
+						stockDetail.productID,
+						stockDetailStatus.godownID,
+						0 AS totalQuantityPurchased,
+						0 AS totalUnitsPurchased,
+						0 AS quantitySold,
+						0 AS unitsSold,
+						0 AS quantityManufacturing,
+						0 AS unitsDamaged,
+						0 AS quantityBadSalesReturn,
+						0 AS unitsBadSalesReturn,
+						0 AS quantityGoodSalesReturn,
+						0 AS unitsGoodSalesReturn,
+                        SUM(stockDetailStatus.quantity) AS quantityManufacturing
+					FROM stockDetail
+					INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
+					INNER JOIN product ON product.productID = stockDetail.productID
+					WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.manufacturing') . "
 					GROUP BY stockDetail.productID,stockDetailStatus.godownID
 				) AS temp
 				INNER JOIN product ON product.productID = temp.productID
