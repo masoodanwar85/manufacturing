@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Models\ProductionBOM;
 use App\Models\ProductionBOMItem;
 use App\Models\ProductionBOMExpense;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -38,7 +39,7 @@ class ProductionController extends Controller
                 $deleteGate    = 'production_delete';
                 $crudRoutePart = 'production';
                 $primaryKey = 'productionBOMID';
-                $startButton = '<a onclick="return confirm(\'Are you sure you want to delete this?\');" class="btn btn-warning btn-xs" href="' . route('production.nextStage', $row->productionBOMID) . '">Next Stage</a>';
+                $startButton = '<a onclick="return confirm(\'Are you sure you want to move it to next stage?\');" class="btn btn-warning btn-xs" href="' . route('production.nextStage', $row->productionBOMID) . '">Next Stage</a>';
                 return view('partials.datatablesActions', compact(
                     'startButton',
                     'viewGate',
@@ -210,6 +211,8 @@ class ProductionController extends Controller
 
     public function nextStage(ProductionBOM $production,Request $request)
     {
+        $errorMsg = "An error occurred while changing production stage!";
+        $is_success = true;
 		abort_if(Gate::denies('production_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 		DB::beginTransaction();
 		try {
@@ -217,21 +220,37 @@ class ProductionController extends Controller
             if ($production->productionStageID == 0) {
                 foreach ($production->items as $productionBOMItem) {
                     // Check for stock for this product
-                    $productStock = \App\Models\Stock::getStock($productID = $productionBOMItem->productID);
+                    $productStockQty = \App\Models\Stock::getStock($productID = $productionBOMItem->productID,false,true,2);
+                    dd($productStockQty);
+                    if ($productStockQty >= $productionBOMItem->quantity) {
+                        // Change stock status to manufacturing
+
+                        
+                    } else {
+                        DB::rollback();
+                        $is_success = false;
+                        $errorMsg = 'Required quantity for ' . $productionBOMItem->product->productName . ' is less in stock!';
+                        break;
+                    }
                 }
-                dd('Done');
             } elseif ($production->productionStageID == 1) {
 
             } else {
                 dd('Please Contact Admin!');
             }
 
-			DB::commit();
-			$request->session()->flash('message', 'Production stage changed successfully!');
+            if ($is_success == true) {
+                DB::commit();
+    			$request->session()->flash('message', 'Production stage changed successfully!');
+            }
 		} catch (Exception $e) {
+            $is_success = false;
 			DB::rollback();
-			$request->session()->flash('error', 'An error occurred while changing production stage!');
 		}
+
+        if (!$is_success) {
+            $request->session()->flash('error', $errorMsg);
+        }
 
         return redirect()->route('production.index');
     }

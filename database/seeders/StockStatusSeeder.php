@@ -18,7 +18,8 @@ class StockStatusSeeder extends Seeder
 			['status' => 'Good Sales Return', 'isAvailableForSale' => 1],
 			['status' => 'Sold', 'isAvailableForSale' => 0],
 			['status' => 'Bad Sales Return', 'isAvailableForSale' => 0],
-			['status' => 'Damaged', 'isAvailableForSale' => 0]
+			['status' => 'Damaged', 'isAvailableForSale' => 0],
+            ['status' => 'Manufacturing', 'isAvailableForSale' => 0]
         ];
         foreach ($aryStockStatus as $stockStatus) {
             \Illuminate\Support\Facades\DB::table('stockStatus')->insert([

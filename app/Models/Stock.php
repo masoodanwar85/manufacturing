@@ -25,7 +25,7 @@ class Stock extends Model
         return $this->belongsTo('App\Models\PurchaseOrder','purchaseOrderID','purchaseOrderID');
     }
 
-	public static function getStock($productID = null,$isThresholdStock = FALSE,$isGroupByGodown = FALSE) {
+	public static function getStock($productID = null,$isThresholdStock = FALSE,$isGroupByGodown = FALSE, $godownID = null) {
 	    DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
 		$whereClause = "WHERE 1=1";
 
@@ -34,6 +34,9 @@ class Stock extends Model
 		}
 		if ($isThresholdStock == TRUE) {
 			$whereClause .= " AND (totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity) < thresholdUnit";
+		}
+        if ($isGroupByGodown == TRUE && is_numeric($godownID) && $godownID > 0) {
+			$whereClause .= " AND godownID = " . (int) $godownID;
 		}
 		$rawSQL = "
 			SELECT
