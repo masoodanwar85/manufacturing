@@ -38,7 +38,9 @@ class ProductionController extends Controller
                 $deleteGate    = 'production_delete';
                 $crudRoutePart = 'production';
                 $primaryKey = 'productionBOMID';
+                $startButton = '<a onclick="return confirm(\'Are you sure you want to delete this?\');" class="btn btn-warning btn-xs" href="' . route('production.nextStage', $row->productionBOMID) . '">Next Stage</a>';
                 return view('partials.datatablesActions', compact(
+                    'startButton',
                     'viewGate',
                     'editGate',
                     'deleteGate',
@@ -201,6 +203,34 @@ class ProductionController extends Controller
 		} catch (Exception $e) {
 			DB::rollback();
 			$request->session()->flash('error', 'An error occurred while deleting production!');
+		}
+
+        return redirect()->route('production.index');
+    }
+
+    public function nextStage(ProductionBOM $production,Request $request)
+    {
+		abort_if(Gate::denies('production_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+		DB::beginTransaction();
+		try {
+            $production->load('items');
+            if ($production->productionStageID == 0) {
+                foreach ($production->items as $productionBOMItem) {
+                    // Check for stock for this product
+                    $productStock = \App\Models\Stock::getStock($productID = $productionBOMItem->productID);
+                }
+                dd('Done');
+            } elseif ($production->productionStageID == 1) {
+
+            } else {
+                dd('Please Contact Admin!');
+            }
+
+			DB::commit();
+			$request->session()->flash('message', 'Production stage changed successfully!');
+		} catch (Exception $e) {
+			DB::rollback();
+			$request->session()->flash('error', 'An error occurred while changing production stage!');
 		}
 
         return redirect()->route('production.index');
