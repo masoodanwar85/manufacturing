@@ -93,9 +93,6 @@ class SalesOrderService {
 			$product = \App\Models\Stock::getProducts($request->productID[$i]);
 			$updatedQuantityUnits = $request->quantity[$i];
 			$updatedQuantity = $request->quantity[$i];
-			if (\Config::get('constants.client_settings.is_units_in_product_fixed') == 0) {
-				$updatedQuantityUnits = $request->quantityUnits[$i];
-			}
 
 			if (!empty($product) && $product[0]->unitsAvailable >= $updatedQuantityUnits) {
 

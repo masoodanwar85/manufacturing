@@ -20,23 +20,31 @@
 				<div class="form-group row {{ $errors->has('productName') ? 'has-error' : '' }}">
 					<label for="productName" class="col-sm-2 col-form-label">Product: *</label>
 					<div class="col-sm-10">
-                        <select name="productID" class="form-control select2 @if($errors->has('productID')) is-invalid @endif" required onchange="BOMProductChanged(this.value);">
-							<option value="">Please Select Product</option>
-							@foreach($BOMProducts as $idx => $product)
-								<option value="{{ $product->productID }}" {{ old('productID', $production->productID) == $product->productID ? 'selected' : '' }}>{{ $product->productName }}</option>
-							@endforeach
-						</select>
-						@if($errors->has('productID'))
-							<em class="invalid-feedback">
-								{{ $errors->first('productID') }}
-							</em>
-						@endif
+                        @if ($production->productionStageID == 0)
+                            <select name="productID" class="form-control select2 @if($errors->has('productID')) is-invalid @endif" required onchange="BOMProductChanged(this.value);">
+    							<option value="">Please Select Product</option>
+    							@foreach($BOMProducts as $idx => $product)
+    								<option value="{{ $product->productID }}" {{ old('productID', $production->productID) == $product->productID ? 'selected' : '' }}>{{ $product->productName }}</option>
+    							@endforeach
+    						</select>
+    						@if($errors->has('productID'))
+    							<em class="invalid-feedback">
+    								{{ $errors->first('productID') }}
+    							</em>
+    						@endif
+                        @else
+                            <input type="text" class="form-control" disabled value="{{ $production->product->productName }}" />
+                            <input type="hidden" name="productID" value="{{ $production->productID }}" />
+                        @endif
 					</div>
 				</div>
                 <div class="form-group row {{ $errors->has('quantity') ? 'has-error' : '' }}">
 					<label for="quantity" class="col-sm-2 col-form-label">Quantity: *</label>
 					<div class="col-sm-10">
-						<input type="number" name="quantity" class="form-control @if($errors->has('quantity')) is-invalid @endif" value="{{ old('quantity', $production->quantity) }}" required>
+						<input type="number" @if ($production->productionStageID > 0) disabled @else required name="quantity" @endif class="form-control @if($errors->has('quantity')) is-invalid @endif" value="{{ old('quantity', $production->quantity) }}">
+                        @if ($production->productionStageID > 0)
+                            <input type="hidden" name="quantity" value="{{ $production->quantity }}" />
+                        @endif
 						@if($errors->has('quantity'))
 							<em class="invalid-feedback">
 								{{ $errors->first('quantity') }}
@@ -74,7 +82,7 @@
                     			<td>
                                     <div class="form-group">
                                         <div class="col-sm-12">
-                                            <input type="number" class="form-control" onchange="calculateProductRowTotal();"name="productItemQuantity[]" value="{{ $productionItem->quantity  }}" />
+                                            <input type="number" class="form-control" onchange="calculateProductRowTotal();" @if ($production->productionStageID > 0) min="{{ $productionItem->quantity }}" @endif name="productItemQuantity[]" value="{{ $productionItem->quantity }}" />
                                         </div>
                                     </div>
                                 </td>

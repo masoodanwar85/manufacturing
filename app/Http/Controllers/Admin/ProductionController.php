@@ -175,8 +175,21 @@ class ProductionController extends Controller
                 ]);
             }
 
-			DB::commit();
-			$request->session()->flash('message', 'Production updated successfully!');
+            $is_success = true;
+            if ($production->productionStageID == 1) {
+                \App\Models\StockDetailStatus::where('productionBOMID', $production->productionBOMID)->delete();
+                $is_success = $this->addStockDetailStatus($production->productionBOMID);
+            }
+
+            if ($is_success) {
+                DB::commit();
+    			$request->session()->flash('message', 'Production updated successfully!');
+            } else {
+                DB::rollback();
+                $request->session()->flash('error', 'An error occurred while updating production!');
+            }
+
+
 		} catch (Exception $e) {
 			DB::rollback();
 			$request->session()->flash('error', 'An error occurred while updating production!');
@@ -212,28 +225,13 @@ class ProductionController extends Controller
     public function nextStage(ProductionBOM $production,Request $request)
     {
         $errorMsg = "An error occurred while changing production stage!";
-        $is_success = true;
-		abort_if(Gate::denies('production_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('production_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 		DB::beginTransaction();
 		try {
-            $production->load('items');
             if ($production->productionStageID == \Config::get('constants.production_stages.draft')) {
-                foreach ($production->items as $productionBOMItem) {
-                    // Check for stock for this product
-                    $productStockQty = \App\Models\Stock::getStock($productID = $productionBOMItem->productID,false,true,\Config::get('constants.production_stages.default_factory_id'));
-                    dd($production,$productionBOMItem,$productStockQty);
-                    if ($productStockQty >= ($productionBOMItem->quantity * $production->quantity)) {
-                        // Change stock status to manufacturing
-
-                    } else {
-                        DB::rollback();
-                        $is_success = false;
-                        $errorMsg = 'Required quantity for ' . $productionBOMItem->product->productName . ' is less in stock!';
-                        break;
-                    }
-                }
+                $this->addStockDetailStatus($production->productionBOMID);
             } elseif ($production->productionStageID == \Config::get('constants.production_stages.in_process')) {
-
+                dd('In Process');
             } else {
                 dd('Please Contact Admin!');
             }
@@ -252,5 +250,69 @@ class ProductionController extends Controller
         }
 
         return redirect()->route('production.index');
+    }
+
+    public function addStockDetailStatus(int $productionBOMID): bool {
+        $is_success = true;
+        $production = ProductionBOM::with('items')->where('productionBOMID',$productionBOMID)->first();
+        foreach ($production->items as $productionBOMItem) {
+            // Check for stock for this product
+            $productStockQty = Arr::first(\App\Models\Stock::getStock($productID = $productionBOMItem->productID,false,true,\Config::get('constants.production_stages.default_factory_id')))->inStockQuantity;
+            // dd($productStockQty,$production,$productionBOMItem);
+            $quantityRemaining = $productionBOMItem->quantity * $production->quantity;
+            if ($productStockQty >= $quantityRemaining) {
+                // Change stock status to manufacturing
+                // Moving Stock to Manufacturing Status
+                $stockDetails = \App\Models\Stock::getProductStockDetails($productID = $productionBOMItem->productID,\Config::get('constants.production_stages.default_factory_id'));
+                foreach ($stockDetails as $stockDetailInfo) {
+                    // dd($stockDetailInfo);
+                    if ($quantityRemaining == 0) {
+                        break;
+                    } else {
+                        $stockDetailStatus = new \App\Models\StockDetailStatus();
+                        $stockDetailStatus->stockDetailID = $stockDetailInfo->stockDetailID;
+                        $stockDetailStatus->statusID = \Config::get('constants.stock_status.manufacturing');
+                        $stockDetailStatus->batchID = \App\Services\BatchService::getCurrentBatch()->batchID;
+                        $stockDetailStatus->godownID = \Config::get('constants.production_stages.default_factory_id');
+                        $stockDetailStatus->salePrice = null;
+                        $stockDetailStatus->createdByUserID = Auth::id();
+                    }
+                    if ($stockDetailInfo->quantityAvailable >= $quantityRemaining) {
+                        $stockDetailStatus->quantity = $quantityRemaining;
+                        $stockDetailStatus->quantityUnits = $quantityRemaining;
+                        $stockDetailStatus->productionBOMID = $production->productionBOMID;
+                        $stockDetailStatus->save();
+                        break;
+                    } else {
+                        if ($stockDetailInfo->quantityAvailable >= $quantityRemaining) {
+                            dd('Please contact Admin...');
+                            $stockDetailStatus->quantity = $quantityRemaining;
+                            $quantityRemaining = 0;
+                        } elseif ($stockDetailInfo->quantityAvailable == 0) {
+                            $stockDetailStatus->quantity = 0;
+                        } else {
+                            $quantityRemaining -= $stockDetailInfo->quantityAvailable;
+                            $stockDetailStatus->quantity = $stockDetailInfo->quantityAvailable;
+                        }
+
+                        $stockDetailStatus->quantityUnits = $stockDetailInfo->quantityAvailable;
+                        $stockDetailStatus->godownID = $stockDetailInfo->godownID;
+                        $stockDetailStatus->productionBOMID = $production->productionBOMID;
+                        $stockDetailStatus->save();
+                        // Insert stockDetailStatusID in salesOrderDetail
+                        $quantityUnitsRemaining-=$stockDetailInfo->quantityAvailable;
+                    }
+                }
+                // End
+
+                $production->update([
+                    'productionStageID' => \Config::get('constants.production_stages.in_process')
+                ]);
+            } else {
+                $is_success = false;
+                $errorMsg = 'Required quantity for ' . $productionBOMItem->product->productName . ' is ' . $productionBOMItem->quantity * $production->quantity  . ' and stock has ' . $productStockQty;                        break;
+            }
+        }
+        return $is_success;
     }
 }

@@ -16,6 +16,7 @@ class CreateStockDetailStatusTable extends Migration
         Schema::create('stockDetailStatus', function (Blueprint $table) {
 			$table->bigIncrements('stockDetailStatusID');
 			$table->unsignedBigInteger('stockDetailID');
+            $table->foreignId('productionBOMID')->nullable()->constrained('productionBOM','productionBOMID');
 			$table->unsignedInteger('statusID');
 			$table->unsignedBigInteger('batchID');
             $table->unsignedBigInteger('godownID');

@@ -481,6 +481,4 @@ class Stock extends Model
             ORDER BY godown.saleSortOrder";
 		return DB::select($rawSQL);
 	}
-
-    // public static function getStockTransferDetails($productID,$godownID)
 }
