@@ -141,7 +141,10 @@
 																		$unitsAvailable = $flattenedStockProducts['product_' . $stockDetailStatus->stockDetail->productID]->unitsAvailable;
 																	}
 																	//$unitsAvailable+=$stockDetailStatus->quantity;
-																	$totalUnitsAvailableText = $unitsAvailable / $stockDetailStatus->stockDetail->product->unitsInProduct;
+                                                                    $totalUnitsAvailableText = "0";
+                                                                    if ($unitsAvailable > 0 && $stockDetailStatus->stockDetail->product->unitsInProduct > 0) {
+                                                                        $totalUnitsAvailableText = $unitsAvailable / $stockDetailStatus->stockDetail->product->unitsInProduct;
+                                                                    }
 																	$totalUnitsAvailable = $unitsAvailable;
 																	if ($stockDetailStatus->stockDetail->product->unitsInProduct > 1) {
 																		$totalUnitsAvailableText .= " Qty -- ${totalUnitsAvailable}";
