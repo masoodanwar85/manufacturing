@@ -7,6 +7,14 @@
 @stop
 
 @section('content')
+    @php
+        $is_finished = false;
+    @endphp
+    @if ($production->productionStageID == \Config::get('constants.production_stages.finished'))
+        @php
+            $is_finished = true;
+        @endphp
+    @endif
 	<div class="card card-default color-palette-box">
 		<div class="card-header">
 			<h3 class="card-title">
@@ -17,6 +25,9 @@
 			<form class="form-horizontal" action="{{ route('production.update', $production->productionBOMID) }}" method="POST">
 				@csrf
                 @method('PUT')
+                @if ($is_finished == true)
+                    <input type="hidden" name="stage" value="finished" /> 
+                @endif
 				<div class="form-group row {{ $errors->has('productName') ? 'has-error' : '' }}">
 					<label for="productName" class="col-sm-2 col-form-label">Product: *</label>
 					<div class="col-sm-10">
@@ -61,6 +72,9 @@
                         <tr>
                             <th width="50%">Item</th>
                             <th width="15%">Quantity</th>
+                            @if ($is_finished == true)
+                                <th width="15%">Consumed Qty</th>
+                            @endif
                             <th width="15%">Unit Price</th>
                             <th width="15%">Total</th>
                         </tr>
@@ -82,14 +96,23 @@
                     			<td>
                                     <div class="form-group">
                                         <div class="col-sm-12">
-                                            <input type="number" class="form-control" onchange="calculateProductRowTotal();" @if ($production->productionStageID > 0) min="{{ $productionItem->quantity }}" @endif name="productItemQuantity[]" value="{{ $productionItem->quantity }}" />
+                                            <input type="number" class="form-control" onchange="calculateProductRowTotal();" @if ($production->productionStageID > 0) min="{{ $productionItem->quantity }}" @endif name="productItemQuantity[]" value="{{ $productionItem->quantity }}" @if ($is_finished == true) readonly @endif/>
                                         </div>
                                     </div>
                                 </td>
+                                @if ($is_finished == true)
+                                    <td>
+                                        <div class="form-group">
+                                            <div class="col-sm-12">
+                                                <input type="number" class="form-control" @if ($production->productionStageID > 0) min="1"  max="{{ $productionItem->quantity }}" @endif name="productItemQuantityConsumed[]" value="{{ $productionItem->quantity }}" />
+                                            </div>
+                                        </div>
+                                    </td>
+                                @endif
                     			<td>
                                     <div class="form-group">
                                         <div class="col-sm-12">
-                                            <input type="number" class="form-control" name="productItemPrice[]" onchange="calculateProductRowTotal();" value="{{ round($productionItem->unitPrice,2) }}" />
+                                            <input type="number" class="form-control" name="productItemPrice[]" onchange="calculateProductRowTotal();" value="{{ round($productionItem->unitPrice,2) }}" @if ($is_finished == true) readonly @endif />
                                         </div>
                                     </div>
                                 </td>
@@ -107,7 +130,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="3" class="text-right font-weight-bold">Total:</td>
+                            <td colspan="@if ($is_finished == true) 4 @else 3 @endif" class="text-right font-weight-bold">Total:</td>
                             <td class="font-weight-bold" id="product-bom-item-total">{{ $grandTotal }}</td>
                         </tr>
                     </tfoot>

@@ -16,6 +16,7 @@ class CreateStockTable extends Migration
         Schema::create('stock', function (Blueprint $table) {
             $table->bigIncrements('stockID');
             $table->unsignedBigInteger('purchaseOrderID')->nullable();
+            $table->unsignedBigInteger('productionBOMID')->nullable();
 			$table->unsignedBigInteger('createdByUserID');
             $table->timestamp('dateCreated')->useCurrent();
             $table->foreign('purchaseOrderID')->references('purchaseOrderID')->on('purchaseOrder');

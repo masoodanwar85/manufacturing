@@ -40,6 +40,11 @@ class ProductionController extends Controller
                 $crudRoutePart = 'production';
                 $primaryKey = 'productionBOMID';
                 $startButton = '<a onclick="return confirm(\'Are you sure you want to move it to next stage?\');" class="btn btn-warning btn-xs" href="' . route('production.nextStage', $row->productionBOMID) . '">Next Stage</a>';
+                if ($row->productionStageID == 2) {
+                    $startButton = '';
+                    $editGate = '';
+                    $deleteGate = '';
+                }
                 return view('partials.datatablesActions', compact(
                     'startButton',
                     'viewGate',
@@ -151,35 +156,85 @@ class ProductionController extends Controller
         abort_if(Gate::denies('production_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 		DB::beginTransaction();
 		try {
-            $production->update($request->all());
-
-			$production->expenses()->delete();
-			$production->items()->delete();
-
-            foreach ($request->productItemID as $idx => $thisProductItemID) {
-                $productionBOMItem = ProductionBOMItem::create([
-                    'productionBOMID' => $production->productionBOMID,
-                    'productID' => $thisProductItemID,
-                    'quantity' => $request->productItemQuantity[$idx],
-                    'unitPrice' => $request->productItemPrice[$idx],
-                    'createdByUserID' => Auth::id()
+            $is_success = false;
+            if ($request->has('stage') && $request->get('stage') == 'finished') {
+                $production->update([
+                    'productionStageID' => \Config::get('constants.production_stages.finished')
                 ]);
+
+                $stockToAdd = [];
+                foreach ($request->productItemID as $idx => $thisProductItemID) {
+                    $thisProduct = $production->items()->where('productID', $thisProductItemID)->first();
+                    $thisProduct->update([
+                        'consumed' => $request->productItemQuantityConsumed[$idx]
+                    ]);
+
+                    // If Quantity is Less, then put back to Factory Stock
+                    if ($request->productItemQuantityConsumed[$idx] < $thisProduct->quantity) {
+                        // Add this product to stock
+                        $stockToAdd[] = ['productID' => $thisProductItemID, 'quantityToAdd' => $thisProduct->quantity - $request->productItemQuantityConsumed[$idx]];
+                    }
+                }
+
+                if (count($stockToAdd) > 0) {
+                    $stock = \App\Models\Stock::create([
+                        'productionBOMID' => $production->productionBOMID,
+                        'createdByUserID' => Auth::id()
+                    ]);
+
+                    foreach ($stockToAdd as $thisStock) {
+                        $stockDetail = $stock->stockDetails()->create([
+                            'productID' => $thisStock['productID'],
+                            'godownID' => \Config::get('constants.production_stages.default_factory_id'),
+                            'quantity' => $thisStock['quantityToAdd'],
+                            'quantityUnits' => $thisStock['quantityToAdd'],
+                            'purchasePrice' => 0
+                        ]);
+
+                        $stockDetail->stockDetailStatuses()->create([
+                            'statusID' => \Config::get('constants.stock_status.quetta_godown'),
+                            'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
+                            'godownID' => \Config::get('constants.production_stages.default_factory_id'),
+                            'quantity' => $thisStock['quantityToAdd'],
+                            'quantityUnits' => $thisStock['quantityToAdd'],
+                            'createdByUserID' => Auth::id()
+                        ]);
+                    }
+                }
+                $is_success = true;
+            } else {
+                $production->update($request->all());
+    			$production->expenses()->delete();
+    			$production->items()->delete();
+
+                foreach ($request->productItemID as $idx => $thisProductItemID) {
+                    $productionBOMItem = ProductionBOMItem::create([
+                        'productionBOMID' => $production->productionBOMID,
+                        'productID' => $thisProductItemID,
+                        'quantity' => $request->productItemQuantity[$idx],
+                        'unitPrice' => $request->productItemPrice[$idx],
+                        'createdByUserID' => Auth::id()
+                    ]);
+                }
+
+                foreach ($request->expenseHeadID as $idx => $thisExpenseHeadID) {
+                    $productionBOMExpense = ProductionBOMExpense::create([
+                        'productionBOMID' => $production->productionBOMID,
+                        'expenseHeadID' => $thisExpenseHeadID,
+                        'amount' => $request->expenseAmount[$idx],
+                        'createdByUserID' => Auth::id()
+                    ]);
+                }
+
+                $is_success = true;
+                if ($production->productionStageID == 1) {
+                    \App\Models\StockDetailStatus::where('productionBOMID', $production->productionBOMID)->delete();
+                    $retStatus = $this->addStockDetailStatus($production->productionBOMID);
+                    $is_success = $retStatus['success'];
+                    $errorMsg = $retStatus['message'];
+                }
             }
 
-            foreach ($request->expenseHeadID as $idx => $thisExpenseHeadID) {
-                $productionBOMExpense = ProductionBOMExpense::create([
-                    'productionBOMID' => $production->productionBOMID,
-                    'expenseHeadID' => $thisExpenseHeadID,
-                    'amount' => $request->expenseAmount[$idx],
-                    'createdByUserID' => Auth::id()
-                ]);
-            }
-
-            $is_success = true;
-            if ($production->productionStageID == 1) {
-                \App\Models\StockDetailStatus::where('productionBOMID', $production->productionBOMID)->delete();
-                $is_success = $this->addStockDetailStatus($production->productionBOMID);
-            }
 
             if ($is_success) {
                 DB::commit();
@@ -229,9 +284,12 @@ class ProductionController extends Controller
 		DB::beginTransaction();
 		try {
             if ($production->productionStageID == \Config::get('constants.production_stages.draft')) {
-                $this->addStockDetailStatus($production->productionBOMID);
+                $retStatus = $this->addStockDetailStatus($production->productionBOMID);
+                $is_success = $retStatus['success'];
+                $errorMsg = $retStatus['message'];
             } elseif ($production->productionStageID == \Config::get('constants.production_stages.in_process')) {
-                dd('In Process');
+                $production->productionStageID = \Config::get('constants.production_stages.finished');
+                return $this->edit($production);
             } else {
                 dd('Please Contact Admin!');
             }
@@ -252,8 +310,9 @@ class ProductionController extends Controller
         return redirect()->route('production.index');
     }
 
-    public function addStockDetailStatus(int $productionBOMID): bool {
+    public function addStockDetailStatus(int $productionBOMID) {
         $is_success = true;
+        $errorMsg = '';
         $production = ProductionBOM::with('items')->where('productionBOMID',$productionBOMID)->first();
         foreach ($production->items as $productionBOMItem) {
             // Check for stock for this product
@@ -313,6 +372,6 @@ class ProductionController extends Controller
                 $errorMsg = 'Required quantity for ' . $productionBOMItem->product->productName . ' is ' . $productionBOMItem->quantity * $production->quantity  . ' and stock has ' . $productStockQty;                        break;
             }
         }
-        return $is_success;
+        return ['success' => $is_success, 'message' => $errorMsg];
     }
 }
