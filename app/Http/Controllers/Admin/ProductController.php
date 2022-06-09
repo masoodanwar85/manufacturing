@@ -245,10 +245,10 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
-            if ($product->BOMs->items) {
+            if ($product->BOMs) {
                 $product->BOMs->items()->delete();
                 $product->BOMs->expenses()->delete();
-                $product->BOMs->delete();    
+                $product->BOMs->delete();
             }
             $product->delete();
             DB::commit();
