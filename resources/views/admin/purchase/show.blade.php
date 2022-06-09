@@ -190,8 +190,11 @@
 					?>
 					@foreach($purchase->transactions as $purchaseOrderTransactions)
 						@if ($purchaseOrderTransactions->pivot->isExpense == 1)
+                            $rowTotalInPKR = 0;
 							<?php
-								$rowTotalInPKR = $purchaseOrderTransactions->transactionDetails[0]->amount / $purchaseOrderTransactions->exchangeRate;
+                                if ($purchaseOrderTransactions->transactionDetails[0]->amount > 0) {
+                                    $rowTotalInPKR = $purchaseOrderTransactions->transactionDetails[0]->amount / $purchaseOrderTransactions->exchangeRate;
+                                }
 								$totalInPKR+= $rowTotalInPKR;
 							?>
 							<tr>
