@@ -20,6 +20,16 @@ class Staff extends Model
         return $this->belongsTo('App\Models\StaffType','staffTypeID','staffTypeID');
     }
 
+    public function scopeSalesAgents($query)
+    {
+        return $query->where('staffTypeID',4);
+    }
+
+    public function salesOrders()
+	{
+		return $this->hasMany('App\Models\SalesOrder','salesAgentID','staffID');
+	}
+
     public function attendance()
     {
         return $this->hasMany('App\Models\Attendance','staffID','staffID');

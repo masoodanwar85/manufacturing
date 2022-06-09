@@ -97,8 +97,17 @@
 					</div>
                 </div>
 				<div class="form-group row">
-                    <label for="description" class="col-sm-2 col-form-label">Description: </label>
-					<div class="col-sm-10">
+                    <label for="description" class="col-sm-2 col-form-label">Sales Agent: </label>
+					<div class="col-sm-3">
+                        <select name="salesAgentID" class="form-control select2">
+                            <option value="">Please Select Sales Agent</option>
+                            @foreach($saleAgents as $saleAgent)
+                                <option value="{{ $saleAgent->staffID }}" {{ old('salesAgentID') == $saleAgent->staffID ? 'selected' : '' }}>{{ $saleAgent->staffName }}</option>
+                            @endforeach
+                        </select>
+					</div>
+                    <label for="description" class="offset-sm-2 col-sm-2 col-form-label">Description: </label>
+					<div class="col-sm-3">
                     	<textarea name="description" class="form-control">{{ old('description') }}</textarea>
 					</div>
                 </div>

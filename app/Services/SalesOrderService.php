@@ -16,8 +16,8 @@ class SalesOrderService {
 			// salesOrder
 			$request->merge(['orderDate' => date('Y-m-d', strtotime($request->orderDate))]);
 			$request->merge(['paymentDueDate' => date('Y-m-d', strtotime($request->paymentDueDate))]);
-			$request->request->add(['createdByUserID' => Auth::id()]);
-			$request->request->add(['invoiceNumber' => SalesOrder::select(DB::raw('IFNULL(max(CAST(invoiceNumber AS UNSIGNED)),0)+1 AS nextInvoiceNumber'))->first()->nextInvoiceNumber]);
+			$request->merge(['createdByUserID' => Auth::id()]);
+			$request->merge(['invoiceNumber' => SalesOrder::select(DB::raw('IFNULL(max(CAST(invoiceNumber AS UNSIGNED)),0)+1 AS nextInvoiceNumber'))->first()->nextInvoiceNumber]);
 			$salesOrder = SalesOrder::create($request->all());
 
 			if ($this->insertSalesOrderDetails($request,$salesOrder) == true) {

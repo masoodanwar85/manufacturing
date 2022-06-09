@@ -27,10 +27,10 @@ class ProductFactory extends Factory
 			'minimumUnitID' => $this->faker->numberBetween(1,2),
 			'maximumUnitID' => $this->faker->numberBetween(1,2),
 			'productName' => $this->faker->word,
-			'unitsInProduct' => $this->faker->numberBetween(1,20),
+			'unitsInProduct' => 1,
 			'thresholdUnit' => $this->faker->numberBetween(10,200),
-			'isSoldPackOrLoose' => $this->faker->numberBetween(1,2),
-			'isUnitsInProductFixed' => $this->faker->numberBetween(0,1),
+			'isSoldPackOrLoose' => 1,
+			'isUnitsInProductFixed' => 1,
 			'unitPurchasePrice' => '0.00',
 			'unitSalePrice' => '0.00',
             'createdByUserID' => 1

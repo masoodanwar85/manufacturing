@@ -95,7 +95,8 @@ class SalesOrderController extends Controller
 		$godownProducts = \App\Models\Stock::getGodownProducts();
 		$now = date('Y-m-d');
 		$customers = \App\Models\Customer::all()->sortBy('customerName');
-		return view('admin.sales.create',compact('products','customers','now','godownProducts'));
+        $saleAgents = \App\Models\Staff::salesAgents()->orderBy('staffName')->get(['staffID','staffName','headID']);
+        return view('admin.sales.create',compact('products','customers','now','godownProducts','saleAgents'));
     }
 
     /**
@@ -167,7 +168,8 @@ class SalesOrderController extends Controller
 		$cashHeadID = \Config::get('constants.account_heads.cash');
 		$totalPayable = \App\Models\Customer::getBalance($sale->customerID)[0]->totalPayable;
 		$salesOrder = SalesOrder::with(['transactions.transactionDetails','stockDetailStatuses.stockDetail.product','stockDetailStatuses.godown'])->find($sale->salesOrderID);
-        return view('admin.sales.edit', compact('salesOrder','products','customers','cashHeadID','totalPayable','godownProducts','flattenedStockProducts'));
+        $saleAgents = \App\Models\Staff::salesAgents()->orderBy('staffName')->get(['staffID','staffName','headID']);
+        return view('admin.sales.edit', compact('salesOrder','products','customers','cashHeadID','totalPayable','godownProducts','flattenedStockProducts','saleAgents'));
     }
 
     /**

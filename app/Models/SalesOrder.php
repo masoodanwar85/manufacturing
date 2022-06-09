@@ -13,11 +13,16 @@ class SalesOrder extends Model
     protected $primaryKey = 'salesOrderID';
 	protected $with = ['customer','salesOrderDetails'];
     public $timestamps = false;
-    protected $fillable = ['salesOrderID','customerID','invoiceNumber','bookSerial','orderDate','discount','shippingCharges','paymentDueDate','description','createdByUserID'];
+    protected $fillable = ['salesOrderID','customerID','salesAgentID','invoiceNumber','bookSerial','orderDate','discount','shippingCharges','paymentDueDate','description','createdByUserID'];
 
 	public function customer()
 	{
 		return $this->belongsTo('App\Models\Customer','customerID','customerID');
+	}
+
+    public function salesAgent()
+	{
+		return $this->belongsTo('App\Models\Staff','salesAgentID','staffID');
 	}
 
 	public function salesOrderDetails()

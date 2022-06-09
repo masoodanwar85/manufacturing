@@ -16,6 +16,7 @@ class CreateSalesOrderTable extends Migration
         Schema::create('salesOrder', function (Blueprint $table) {
 			$table->bigIncrements('salesOrderID');
 			$table->unsignedBigInteger('customerID');
+            $table->foreignId('salesAgentID')->nullable()->constrained('staff','staffID');
 			$table->string('invoiceNumber');
             $table->string('bookSerial')->nullable();
 			$table->date('orderDate');

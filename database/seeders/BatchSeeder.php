@@ -14,11 +14,9 @@ class BatchSeeder extends Seeder
     public function run()
     {
         $aryBatches = [
-            ['batchName' => 'Batch 1', 'startDate' => '2017-01-01', 'endDate' => '2018-01-01','description' => 'The best batch 1'],
-            ['batchName' => 'Batch 2', 'startDate' => '2018-01-02', 'endDate' => '2019-01-01','description' => 'The best batch 2'],
-            ['batchName' => 'Batch 3', 'startDate' => '2019-01-02', 'endDate' => '2020-01-01','description' => 'The best batch 3'],
-            ['batchName' => 'Batch 4', 'startDate' => '2020-01-02', 'endDate' => '2021-01-01','description' => 'The current batch 4'],
-			['batchName' => 'Batch 5', 'startDate' => '2021-01-02', 'endDate' => '2022-01-01','description' => 'The next batch 5']
+            ['batchName' => 'Batch 1', 'startDate' => '2021-01-01', 'endDate' => '2022-01-01','description' => 'The best batch 1'],
+            ['batchName' => 'Batch 2', 'startDate' => '2022-01-02', 'endDate' => '2023-01-01','description' => 'The best batch 2'],
+            ['batchName' => 'Batch 3', 'startDate' => '2023-01-02', 'endDate' => '2024-01-01','description' => 'The best batch 3']
         ];
         foreach ($aryBatches as $batch) {
             \Illuminate\Support\Facades\DB::table('batch')->insert([
