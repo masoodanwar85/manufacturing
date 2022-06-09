@@ -194,7 +194,7 @@ class ProductController extends Controller
 			if ($product->BOM != NULL) {
 				$product->BOM->items()->delete();
 				$product->BOM->expenses()->delete();
-				$product->BOM->delete();	
+				$product->BOM->delete();
 			}
 
 
@@ -245,9 +245,11 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
-            $product->BOMs->items()->delete();
-            $product->BOMs->expenses()->delete();
-            $product->BOMs->delete();
+            if ($product->BOMs->items) {
+                $product->BOMs->items()->delete();
+                $product->BOMs->expenses()->delete();
+                $product->BOMs->delete();    
+            }
             $product->delete();
             DB::commit();
             $request->session()->flash('message', 'Product deleted successfully!');
