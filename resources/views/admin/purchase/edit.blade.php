@@ -300,10 +300,13 @@
 										@foreach($purchase->transactions as $purchaseOrderTransactions)
 											@if ($purchaseOrderTransactions->pivot->isExpense == 1)
 												<?php
-													$rowTotalInPKR = $purchaseOrderTransactions->transactionDetails[0]->amount / $purchaseOrderTransactions->exchangeRate;
-													if ($globalSettings['client_settings.operatorToConvertToPKR'] == '*') {
-														$rowTotalInPKR = $purchaseOrderTransactions->transactionDetails[0]->amount * $purchaseOrderTransactions->exchangeRate;
-													}
+                                                    $rowTotalInPKR = 0;
+                                                    if ($purchaseOrderTransactions->transactionDetails[0]->amount > 0) {
+                                                        $rowTotalInPKR = $purchaseOrderTransactions->transactionDetails[0]->amount / $purchaseOrderTransactions->exchangeRate;
+                                                        if ($globalSettings['client_settings.operatorToConvertToPKR'] == '*') {
+                                                            $rowTotalInPKR = $purchaseOrderTransactions->transactionDetails[0]->amount * $purchaseOrderTransactions->exchangeRate;
+                                                        }
+                                                    }
 
 													$expenseGTotalInPKR+=$rowTotalInPKR;
 													$subHeadID = $purchaseOrderTransactions->transactionDetails[0]->subHead->headID;
