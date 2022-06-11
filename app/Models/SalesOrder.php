@@ -45,8 +45,12 @@ class SalesOrder extends Model
 		return $this->belongsToMany('App\Models\StockDetailStatus','salesOrderDetail','salesOrderID','stockDetailStatusID');
 	}
 
-	public static function getSaleOrders() {
+	public static function getSaleOrders($salesOrderID = 0) {
 	    DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+        $strWhere = "";
+        if ($salesOrderID > 0) {
+            $strWhere .= " AND temp.salesOrderID = " . $salesOrderID;
+        }
 		$rawSQL = "
 			SELECT temp.salesOrderID,temp.invoiceNumber,temp.bookSerial,temp.orderDate,temp.discount,temp.shippingCharges,temp.paymentDueDate,SUM(totalAmount) AS totalAmount,SUM(totalPaid) AS totalPaid,(SUM(totalAmount) - SUM(totalPaid)) AS remaining,customer.customerName, customer.shopName
 			FROM (
@@ -85,6 +89,7 @@ class SalesOrder extends Model
 				GROUP BY salesOrder.salesOrderID
 			) AS temp
 			INNER JOIN customer ON customer.customerID = temp.customerID
+            WHERE 1=1 " . $strWhere . "
 			GROUP BY temp.salesOrderID,temp.invoiceNumber,temp.bookSerial,temp.orderDate,temp.discount,temp.shippingCharges,temp.paymentDueDate,customer.customerName,customer.shopName
 			ORDER BY temp.salesOrderID DESC";
 
