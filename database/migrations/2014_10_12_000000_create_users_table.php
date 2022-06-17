@@ -28,7 +28,7 @@ class CreateUsersTable extends Migration
             $table->string('rememberToken')->nullable();
             $table->timestamp('dateCreated')->useCurrent();
             $table->foreign('userTypeID')->references('userTypeID')->on('userType');
-			$table->foreign('clientID')->references('clientID')->on('client');
+            $table->foreign('clientID')->references('clientID')->on('client');
         });
     }
 

@@ -32,6 +32,10 @@
 					<div class="font-weight-bold">Shop Name:</div>
 					{{ $customer->shopName }}
 				</div>
+                <div class="col">
+					<div class="font-weight-bold">Sales Agent:</div>
+					{{ $customer->salesAgent ? $customer->salesAgent->staffName : '' }}
+				</div>
 				<div class="col">
 					<div class="font-weight-bold">Phone #:</div>
 					{{ $customer->phone }}

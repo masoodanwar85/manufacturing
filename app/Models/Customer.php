@@ -14,11 +14,16 @@ class Customer extends Model
     protected $primaryKey = 'customerID';
 	protected $with = ['head'];
     public $timestamps = false;
-    protected $fillable = ['customerID','customerName','headID','shopName','phone','address','description','createdByUserID'];
+    protected $fillable = ['customerID','customerName','headID','salesAgentID','shopName','phone','address','description','createdByUserID'];
 
 	public function head()
     {
         return $this->hasOne('App\Models\AccountHead','headID','headID');
+    }
+
+    public function salesAgent()
+    {
+        return $this->hasOne('App\Models\Staff','staffID','salesAgentID');
     }
 
 	public function purchaseOrders()

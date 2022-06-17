@@ -16,7 +16,7 @@ class CreateCustomerTable extends Migration
         Schema::create('customer', function (Blueprint $table) {
 			$table->bigIncrements('customerID');
 			$table->unsignedBigInteger('headID');
-			$table->string('customerName');
+            $table->string('customerName');
 			$table->string('shopName')->nullable();
 			$table->string('phone')->nullable();
 			$table->string('address')->nullable();
@@ -24,7 +24,7 @@ class CreateCustomerTable extends Migration
 			$table->unsignedBigInteger('createdByUserID');
             $table->timestamp('dateCreated')->useCurrent();
 			$table->foreign('headID')->references('headID')->on('accountHead');
-			$table->foreign('createdByUserID')->references('userID')->on('users');
+            $table->foreign('createdByUserID')->references('userID')->on('users');
         });
     }
 

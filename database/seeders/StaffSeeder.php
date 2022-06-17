@@ -18,6 +18,7 @@ class StaffSeeder extends Seeder
             ['staffName' => 'Tayyab Hussain','staffTypeID' => 2, 'dateJoined' => '2020-12-20'],
 			['staffName' => 'Javaid Khan','staffTypeID' => 3, 'dateJoined' => '2020-12-20'],
 			['staffName' => 'Ahmed Khan','staffTypeID' => 4, 'dateJoined' => '2020-12-20'],
+            ['staffName' => 'Sales Agent','staffTypeID' => 4, 'dateJoined' => '2020-10-20'],
 			['staffName' => 'Akbar Khan','staffTypeID' => 5, 'dateJoined' => '2020-12-20']
         ];
         foreach ($aryStaff as $staff) {

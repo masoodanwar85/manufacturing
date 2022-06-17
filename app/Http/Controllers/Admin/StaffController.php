@@ -99,8 +99,8 @@ class StaffController extends Controller
     {
 		DB::beginTransaction();
 		try {
-			$request->request->add(['createdByUserID' => Auth::id()]);
-			$request->request->add(['headID' => \App\Models\AccountHead::addAccountHead($request->staffName . ' (Staff)',Auth::id(),\Config::get('constants.account_heads.staff'))]);
+			$request->merge(['createdByUserID' => Auth::id()]);
+			$request->merge(['headID' => \App\Models\AccountHead::addAccountHead($request->staffName . ' (Staff)',Auth::id(),\Config::get('constants.account_heads.staff'))]);
 	        $staff = Staff::create($request->all());
 			DB::commit();
 			$request->session()->flash('message', 'Staff added successfully!');

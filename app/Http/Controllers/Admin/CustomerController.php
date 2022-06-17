@@ -80,7 +80,8 @@ class CustomerController extends Controller
     public function create()
     {
 		abort_if(Gate::denies('customer_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('admin.customer.create');
+        $saleAgents = \App\Models\Staff::salesAgents()->get();
+        return view('admin.customer.create',compact('saleAgents'));
     }
 
     /**
@@ -93,15 +94,14 @@ class CustomerController extends Controller
     {
 		DB::beginTransaction();
 		try {
-			$request->request->add(['createdByUserID' => Auth::id()]);
-
-			$request->request->add(['headID' => \App\Models\AccountHead::addAccountHead($request->customerName . ' (' . $request->shopName . ')' . ' (Customer)',Auth::id(),\Config::get('constants.account_heads.customer'),1,0,0,0,0,0)]);
+			$request->merge(['createdByUserID' => Auth::id()]);
+			$request->merge(['headID' => \App\Models\AccountHead::addAccountHead($request->customerName . ' (' . $request->shopName . ')' . ' (Customer)',Auth::id(),\Config::get('constants.account_heads.customer'),1,0,0,0,0,0)]);
 			$customer = Customer::create($request->all());
 			DB::commit();
 			$request->session()->flash('message', 'Customer created successfully!');
 		} catch (\Exception $e) {
 			DB::rollback();
-			$request->session()->flash('error', 'An error occurred while creating customer!');
+            $request->session()->flash('error', 'An error occurred while creating customer!');
 		}
 		return redirect()->route('customer.index');
     }
@@ -115,7 +115,8 @@ class CustomerController extends Controller
     public function show(Customer $customer)
     {
 		abort_if(Gate::denies('customer_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		$totalPayable = Customer::getBalance($customer->customerID)[0]->totalPayable;
+        $customer->load('salesAgent');
+        $totalPayable = Customer::getBalance($customer->customerID)[0]->totalPayable;
 		$customerTransactions = \App\Services\TransactionService::getSubHeadTransactions(Customer::find($customer->customerID)->headID,'salesOrders');
         return view('admin.customer.show', compact('customer','totalPayable','customerTransactions'));
     }
@@ -129,7 +130,8 @@ class CustomerController extends Controller
     public function edit(Customer $customer)
     {
 		abort_if(Gate::denies('customer_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		return view('admin.customer.edit', compact('customer'));
+        $saleAgents = \App\Models\Staff::salesAgents()->get();
+		return view('admin.customer.edit', compact('customer','saleAgents'));
     }
 
     /**

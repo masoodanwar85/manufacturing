@@ -40,6 +40,18 @@
 					</div>
 				</div>
 
+                <div class="form-group row">
+					<label for="saleAgent" class="col-sm-2 col-form-label">Sales Agent: </label>
+					<div class="col-sm-10">
+						<select name="salesAgentID" class="form-control">
+                            <option value="">Select Sales Agent</option>
+                            @foreach ($saleAgents as $saleAgent)
+                                <option value="{{ $saleAgent->staffID }}" {!! old('salesAgentID', $customer->salesAgentID) == $saleAgent->staffID ? 'selected' : '' !!}>{{ $saleAgent->staffName }}</option>
+                            @endforeach
+                        </select>
+					</div>
+				</div>
+
 				<div class="form-group row">
 					<label for="phone" class="col-sm-2 col-form-label">Phone: </label>
 					<div class="col-sm-10">

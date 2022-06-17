@@ -80,6 +80,13 @@
 			'finished' => 2,
             'default_factory_id' => 2
 		],
+        'staff_types' => [
+			'employee' => 1,
+			'manager' => 2,
+			'accountant' => 3,
+            'sales_agent' => 4,
+            'purchase_agent' => 5
+		],
         'bank_instrument' => [
             'type' => [
                 'cheque' => 1

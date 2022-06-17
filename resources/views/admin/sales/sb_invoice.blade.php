@@ -110,7 +110,7 @@
                             Total Quantity: {{ $totalQty }}<br />
                         </h5>
                         <h5>
-                            Salesman: {{ $salesOrder->salesAgent->staffName }}
+                            Salesman: {{ $salesOrder->salesAgent ? $salesOrder->salesAgent->staffName : '' }}
                         </h5>
 					</div>
 					<!-- /.col -->
