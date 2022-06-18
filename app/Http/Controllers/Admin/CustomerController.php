@@ -23,7 +23,13 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = Customer::all();
+            $customer = Customer::query();
+            $salesAgentID = $this->salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
+            if ($salesAgentID != null) {
+                $customer->where('salesAgentID', $salesAgentID);
+            }
+
+            $query = $customer->get();
             $table = Datatables::of($query);
 
             $table->addColumn('placeholder', '&nbsp;');
@@ -116,6 +122,10 @@ class CustomerController extends Controller
     {
 		abort_if(Gate::denies('customer_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $customer->load('salesAgent');
+        $salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
+        if ($salesAgentID != null && ($customer->salesAgent == null || $customer->salesAgent->staffID != $salesAgentID)) {
+            return response()->json(['message' => '403 Forbidden'], 403);
+        }
         $totalPayable = Customer::getBalance($customer->customerID)[0]->totalPayable;
 		$customerTransactions = \App\Services\TransactionService::getSubHeadTransactions(Customer::find($customer->customerID)->headID,'salesOrders');
         return view('admin.customer.show', compact('customer','totalPayable','customerTransactions'));

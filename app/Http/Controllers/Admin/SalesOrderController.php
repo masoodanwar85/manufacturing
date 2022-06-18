@@ -94,7 +94,13 @@ class SalesOrderController extends Controller
 		$products = \App\Models\Stock::getProducts();
 		$godownProducts = \App\Models\Stock::getGodownProducts();
 		$now = date('Y-m-d');
-		$customers = \App\Models\Customer::with('salesAgent')->get()->sortBy('customerName');
+
+        $customer = \App\Models\Customer::query();
+        $salesAgentID = $this->salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
+        if ($salesAgentID != null) {
+            $customer->where('salesAgentID', $salesAgentID);
+        }
+        $customers = $customer->with('salesAgent')->get()->sortBy('customerName');
         $saleAgents = \App\Models\Staff::salesAgents()->orderBy('staffName')->get(['staffID','staffName','headID']);
         return view('admin.sales.create',compact('products','customers','now','godownProducts','saleAgents'));
     }
@@ -164,7 +170,12 @@ class SalesOrderController extends Controller
 			$flattenedStockProducts["product_" . $stockProduct->productID] = $stockProduct;
 		}
 		$godownProducts = \App\Models\Stock::getGodownProducts();
-        $customers = \App\Models\Customer::with('salesAgent')->get()->sortBy('customerName');
+        $customer = \App\Models\Customer::query();
+        $salesAgentID = $this->salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
+        if ($salesAgentID != null) {
+            $customer->where('salesAgentID', $salesAgentID);
+        }
+        $customers = $customer->with('salesAgent')->get()->sortBy('customerName');
 		$cashHeadID = \Config::get('constants.account_heads.cash');
 		$totalPayable = \App\Models\Customer::getBalance($sale->customerID)[0]->totalPayable;
 		$salesOrder = SalesOrder::with(['transactions.transactionDetails','stockDetailStatuses.stockDetail.product','stockDetailStatuses.godown'])->find($sale->salesOrderID);

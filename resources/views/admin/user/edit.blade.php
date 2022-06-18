@@ -75,6 +75,17 @@
 	                    @endif
 					</div>
                 </div>
+                <div class="form-group row">
+					<label for="staffID" class="col-sm-2 col-form-label">Staff: </label>
+					<div class="col-sm-10">
+						<select name="staffID" class="form-control">
+                            <option value="">Select Staff</option>
+                            @foreach ($staffs as $staff)
+                                <option value="{{ $staff->staffID }}" {!! old('staffID', $user->staffID) == $staff->staffID ? 'selected' : '' !!}>{{ $staff->staffName }} ({{ $staff->staffType->staffType }})</option>
+                            @endforeach
+                        </select>
+					</div>
+				</div>
                 <div>
                     <input class="btn btn-primary" type="submit" value="Update">
                 </div>

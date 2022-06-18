@@ -25,6 +25,11 @@ class Staff extends Model
         return $this->belongsTo('App\Models\Customer','salesAgentID','staffID');
     }
 
+    public function user()
+    {
+        return $this->belongsTo('App\Models\User','staffID','staffID');
+    }
+
     public function scopeSalesAgents($query)
     {
         return $query->where('staffTypeID',4);

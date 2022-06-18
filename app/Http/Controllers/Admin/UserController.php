@@ -87,7 +87,8 @@ class UserController extends Controller
     {
 		abort_if(Gate::denies('user_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 		$roles = \App\Models\Roles::all()->sortBy('roleName');
-        return view('admin.user.create',compact('roles'));
+        $staffs = \App\Models\Staff::all()->sortBy('staffName');
+        return view('admin.user.create',compact('roles','staffs'));
     }
 
     /**
@@ -100,11 +101,9 @@ class UserController extends Controller
     {
 		DB::beginTransaction();
 		try {
-			$request->request->add(['userTypeID' => 2]);
-			$request->request->add(['clientID' => 1]);
-			$request->merge([
-				'password' => Hash::make($request->password)
-			]);
+			$request->merge(['userTypeID' => 2]);
+			$request->merge(['clientID' => 1]);
+			$request->merge(['password' => Hash::make($request->password)]);
 	        $user = User::create($request->all());
 			$user->roles()->attach($request->roleID);
 			DB::commit();
@@ -142,7 +141,8 @@ class UserController extends Controller
 		$userRoles = $user->roles->map(function ($item, $key) {
 			return $item->roleID;
 		})->toArray();
-        return view('admin.user.edit',compact('user','roles','userRoles'));
+        $staffs = \App\Models\Staff::all()->sortBy('staffName');
+        return view('admin.user.edit',compact('user','roles','userRoles','staffs'));
     }
 
     /**
@@ -160,9 +160,7 @@ class UserController extends Controller
 			if (strlen(trim($request->password))) {
 				$newPassword = Hash::make($request->password);
 			}
-			$request->merge([
-				'password' => $newPassword
-			]);
+			$request->merge(['password' => $newPassword]);
 			$user->update($request->all());
 			$user->roles()->sync($request->roleID);
 			DB::commit();

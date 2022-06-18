@@ -13,7 +13,7 @@ class User extends Authenticatable
 
     protected $primaryKey = 'userID';
     public $timestamps = false;
-	protected $with = ['userType'];
+	protected $with = ['userType','staff'];
 
     /**
      * The attributes that are mass assignable.
@@ -23,10 +23,11 @@ class User extends Authenticatable
     protected $fillable = [
 		'statusID',
 		'clientID',
+        'staffID',
 		'userTypeID',
         'name',
         'email',
-        'password',
+        'password'
     ];
 
     /**
@@ -87,6 +88,10 @@ class User extends Authenticatable
 
     public function userType() {
         return $this->belongsTo('App\Models\UserType','userTypeID','userTypeID');
+    }
+
+    public function staff() {
+        return $this->hasOne('App\Models\Staff','staffID','staffID');
     }
 
 	public function client() {

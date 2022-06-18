@@ -373,10 +373,19 @@
 		$('#balanceInUrdu').html('&nbsp;&nbsp;&nbsp;&nbsp;' + translate(balance));
     }
 
+    function getCustomerData(customerID) {
+        if ($('select[name="salesAgentID"]').length) {
+            var salesAgentID = $('select[name="customerID"] option:selected').attr('salesagentid');
+            // $('select[name="salesAgentID"]').val(salesAgentID);
+            $('select[name="salesAgentID"]').select2().select2('val',salesAgentID);
+        }
+
+        getCustomerBalance(customerID);
+	}
+
 	function getCustomerBalance(customerID) {
 		$('#customerBalance').text('');
 		if (!isNaN(parseInt(customerID))) {
-			//{{ route("customer.balance",1) }}
 			$.ajax({
 				url: `/admin/customer/${customerID}/balance`,
 				success: function(returnedBalance) {

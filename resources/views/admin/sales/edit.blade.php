@@ -20,10 +20,10 @@
 				<div class="form-group row {{ $errors->has('customerID') ? 'has-error' : '' }}">
 					<label for="customerID" class="col-sm-2 col-form-label">Customer: *</label>
 					<div class="col-sm-5">
-						<select name="customerID" class="form-control select2 @if($errors->has('customerID')) is-invalid @endif" onChange="getCustomerBalance(this.value);" required>
+						<select name="customerID" class="form-control select2 @if($errors->has('customerID')) is-invalid @endif" onChange="getCustomerData(this.value);" required>
 							<option value="">Please Select Customer</option>
 							@foreach($customers as $customer)
-								<option value="{{ $customer->customerID }}" salesAgentID="{{ $customer->salesAgent ? $customer->salesAgent->staffID : 0 }}" {{ old('customerID', $salesOrder->customerID) == $customer->customerID ? 'selected' : '' }}>{{ $customer->customerName }} ({{ $customer->shopName }}) ({{ $customer->address }})</option>
+								<option value="{{ $customer->customerID }}" salesAgentID="{{ $customer->salesAgent ? $customer->salesAgent->staffID : '' }}" {{ old('customerID', $salesOrder->customerID) == $customer->customerID ? 'selected' : '' }}>{{ $customer->customerName }} ({{ $customer->shopName }}) ({{ $customer->address }})</option>
 							@endforeach
 						</select>
 						@if($errors->has('customerID'))
@@ -82,12 +82,17 @@
                 <div class="form-group row">
                     <label for="description" class="col-sm-2 col-form-label">Sales Agent: </label>
 					<div class="col-sm-3">
-                        <select name="salesAgentID" class="form-control select2">
-                            <option value="">Please Select Sales Agent</option>
-                            @foreach($saleAgents as $saleAgent)
-                                <option value="{{ $saleAgent->staffID }}" {{ old('salesAgentID', $salesOrder->salesAgentID) == $saleAgent->staffID ? 'selected' : '' }}>{{ $saleAgent->staffName }}</option>
-                            @endforeach
-                        </select>
+                        @if (auth()->user()->staffID == null)
+                            <select name="salesAgentID" class="form-control select2">
+                                <option value="">Please Select Sales Agent</option>
+                                @foreach($saleAgents as $saleAgent)
+                                    <option value="{{ $saleAgent->staffID }}" {{ old('salesAgentID', $salesOrder->salesAgentID) == $saleAgent->staffID ? 'selected' : '' }}>{{ $saleAgent->staffName }}</option>
+                                @endforeach
+                            </select>
+                        @else
+                            {!! auth()->user()->staff ? auth()->user()->staff->staffName: '' !!}
+                            <input type="hidden" name="salesAgentID" value="{{ auth()->user()->staff->staffID }}" />
+                        @endif
 					</div>
                     <label for="description" class="offset-sm-2 col-sm-2 col-form-label">Description: </label>
 					<div class="col-sm-3">
