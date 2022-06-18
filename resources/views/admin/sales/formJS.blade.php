@@ -20,7 +20,7 @@
 		@else
 			calculateGrandTotal();
 		@endif
-        // $('select.select2').select2();
+        $('select.select2').select2();
         bindRemoveClick();
         bindQuantityChanged();
 		@if ($globalSettings['client_settings.is_units_in_product_fixed'] == 0)

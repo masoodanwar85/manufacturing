@@ -23,7 +23,7 @@
 						<select name="customerID" class="form-control select2 @if($errors->has('customerID')) is-invalid @endif" onChange="getCustomerBalance(this.value);" required>
 							<option value="">Please Select Customer</option>
 							@foreach($customers as $customer)
-								<option value="{{ $customer->customerID }}" {{ old('customerID', $salesOrder->customerID) == $customer->customerID ? 'selected' : '' }}>{{ $customer->customerName }} ({{ $customer->address }})</option>
+								<option value="{{ $customer->customerID }}" salesAgentID="{{ $customer->salesAgent ? $customer->salesAgent->staffID : 0 }}" {{ old('customerID', $salesOrder->customerID) == $customer->customerID ? 'selected' : '' }}>{{ $customer->customerName }} ({{ $customer->shopName }}) ({{ $customer->address }})</option>
 							@endforeach
 						</select>
 						@if($errors->has('customerID'))
