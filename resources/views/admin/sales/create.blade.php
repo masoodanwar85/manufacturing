@@ -22,7 +22,7 @@
 						<select name="customerID" class="form-control select2 @if($errors->has('customerID')) is-invalid @endif" onChange="getCustomerData(this.value);" required>
 							<option value="">Please Select Customer</option>
 							@foreach($customers as $customer)
-								<option value="{{ $customer->customerID }}" salesAgentID="{{ $customer->salesAgent ? $customer->salesAgent->staffID : '' }}" {{ old('customerID') == $customer->customerID ? 'selected' : '' }}>{{ $customer->customerName }} ({{ $customer->shopName }}) ({{ $customer->address }})</option>
+								<option value="{{ $customer->customerID }}" salesAgentID="{{ $customer->salesAgent ? $customer->salesAgent->staffID : null }}" {{ old('customerID') == $customer->customerID ? 'selected' : '' }}>{{ $customer->customerName }} ({{ $customer->shopName }}) ({{ $customer->address }})</option>
 							@endforeach
 						</select>
 						@if($errors->has('customerID'))

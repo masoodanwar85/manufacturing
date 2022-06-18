@@ -26,7 +26,8 @@ class SalesOrderController extends Controller
     {
 		abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if ($request->ajax()) {
-            $table = Datatables::of(SalesOrder::getSaleOrders());
+            $salesAgentID = $this->salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
+            $table = Datatables::of(SalesOrder::getSaleOrders(0,$salesAgentID));
 
             $table->addColumn('placeholder', '&nbsp;');
             $table->addColumn('actions', '&nbsp;');

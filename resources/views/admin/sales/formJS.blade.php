@@ -376,7 +376,7 @@
     function getCustomerData(customerID) {
         if ($('select[name="salesAgentID"]').length) {
             var salesAgentID = $('select[name="customerID"] option:selected').attr('salesagentid');
-            // $('select[name="salesAgentID"]').val(salesAgentID);
+            $('select[name="salesAgentID"]').val(salesAgentID);
             $('select[name="salesAgentID"]').select2().select2('val',salesAgentID);
         }
 

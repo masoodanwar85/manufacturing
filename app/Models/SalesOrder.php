@@ -45,11 +45,14 @@ class SalesOrder extends Model
 		return $this->belongsToMany('App\Models\StockDetailStatus','salesOrderDetail','salesOrderID','stockDetailStatusID');
 	}
 
-	public static function getSaleOrders($salesOrderID = 0) {
+	public static function getSaleOrders($salesOrderID = 0,$salesAgentID = 0) {
 	    DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
         $strWhere = "";
         if ($salesOrderID > 0) {
             $strWhere .= " AND temp.salesOrderID = " . $salesOrderID;
+        }
+        if ($salesAgentID > 0) {
+            $strWhere .= " AND temp.salesAgentID = " . $salesAgentID;
         }
 		$rawSQL = "
 			SELECT temp.salesOrderID,temp.invoiceNumber,temp.bookSerial,temp.orderDate,temp.discount,temp.shippingCharges,temp.paymentDueDate,SUM(totalAmount) AS totalAmount,SUM(totalPaid) AS totalPaid,(SUM(totalAmount) - SUM(totalPaid)) AS remaining,customer.customerName, customer.shopName
@@ -57,6 +60,7 @@ class SalesOrder extends Model
 				SELECT
 					salesOrder.salesOrderID,
 					salesOrder.customerID,
+                    salesOrder.salesAgentID,
 					salesOrder.invoiceNumber,
                     salesOrder.bookSerial,
 					salesOrder.orderDate,
@@ -74,6 +78,7 @@ class SalesOrder extends Model
 				SELECT
 					salesOrder.salesOrderID,
 					salesOrder.customerID,
+                    salesOrder.salesAgentID,
 					salesOrder.invoiceNumber,
                     salesOrder.bookSerial,
 					salesOrder.orderDate,
