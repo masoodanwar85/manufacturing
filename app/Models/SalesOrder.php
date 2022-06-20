@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use \Carbon\Carbon;
 
 class SalesOrder extends Model
 {
@@ -45,17 +46,23 @@ class SalesOrder extends Model
 		return $this->belongsToMany('App\Models\StockDetailStatus','salesOrderDetail','salesOrderID','stockDetailStatusID');
 	}
 
-	public static function getSaleOrders($salesOrderID = 0,$salesAgentID = 0) {
+	public static function getSaleOrders($salesOrderID = 0,$filters = []) {
 	    DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
         $strWhere = "";
         if ($salesOrderID > 0) {
             $strWhere .= " AND temp.salesOrderID = " . $salesOrderID;
         }
-        if ($salesAgentID > 0) {
-            $strWhere .= " AND temp.salesAgentID = " . $salesAgentID;
+        if (isset($filters['salesAgentID']) && $filters['salesAgentID'] > 0) {
+            $strWhere .= " AND temp.salesAgentID = " . $filters['salesAgentID'];
         }
-		$rawSQL = "
-			SELECT temp.salesOrderID,temp.invoiceNumber,temp.bookSerial,temp.orderDate,temp.discount,temp.shippingCharges,temp.paymentDueDate,SUM(totalAmount) AS totalAmount,SUM(totalPaid) AS totalPaid,(SUM(totalAmount) - SUM(totalPaid)) AS remaining,customer.customerName, customer.shopName
+        if (isset($filters['fromDate']) && isset($filters['toDate']) && Carbon::createFromFormat('Y-m-d',$filters['fromDate']) !== false && Carbon::createFromFormat('Y-m-d',$filters['toDate']) !== false) {
+            $strWhere .= " AND (temp.orderDate BETWEEN '" . $filters['fromDate'] . "' AND '" . $filters['toDate'] . "')";
+        }
+        if (isset($filters['customerID']) && $filters['customerID'] > 0) {
+            $strWhere .= " AND temp.customerID = " . $filters['customerID'];
+        }
+        $rawSQL = "
+			SELECT temp.salesOrderID,temp.invoiceNumber,temp.bookSerial,temp.orderDate,temp.discount,temp.shippingCharges,temp.paymentDueDate,SUM(totalAmount) AS totalAmount,SUM(totalPaid) AS totalPaid,(SUM(totalAmount) - SUM(totalPaid)) AS remaining,customer.customerID,customer.customerName,customer.shopName
 			FROM (
 				SELECT
 					salesOrder.salesOrderID,
@@ -95,7 +102,7 @@ class SalesOrder extends Model
 			) AS temp
 			INNER JOIN customer ON customer.customerID = temp.customerID
             WHERE 1=1 " . $strWhere . "
-			GROUP BY temp.salesOrderID,temp.invoiceNumber,temp.bookSerial,temp.orderDate,temp.discount,temp.shippingCharges,temp.paymentDueDate,customer.customerName,customer.shopName
+			GROUP BY temp.salesOrderID,temp.invoiceNumber,temp.bookSerial,temp.orderDate,temp.discount,temp.shippingCharges,temp.paymentDueDate,customer.customerID,customer.customerName,customer.shopName
 			ORDER BY temp.salesOrderID DESC";
 
 		return DB::select($rawSQL);

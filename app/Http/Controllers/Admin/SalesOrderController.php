@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\Facades\DataTables;
+use \Carbon\Carbon;
 use Dompdf\Dompdf;
 
 class SalesOrderController extends Controller
@@ -25,9 +26,24 @@ class SalesOrderController extends Controller
     public function index(Request $request)
     {
 		abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $filters = array();
+        $filters['customerID'] = $request->customerID;
+        $filters['fromDate'] = date('Y-m-d');
+        $filters['toDate'] = date('Y-m-d');
+        if (!empty($request->fromDate) && Carbon::createFromFormat('Y-m-d',$request->fromDate)) {
+            $filters['fromDate'] = Carbon::createFromFormat('Y-m-d',$request->fromDate)->toDateString();
+        }
+        if (!empty($request->toDate) && Carbon::createFromFormat('Y-m-d',$request->toDate)) {
+            $filters['toDate'] = Carbon::createFromFormat('Y-m-d',$request->toDate)->toDateString();
+        }
+
+        $salesAgentID = $this->salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
+
+        $filters['salesAgentID'] = $salesAgentID;
+        
         if ($request->ajax()) {
-            $salesAgentID = $this->salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
-            $table = Datatables::of(SalesOrder::getSaleOrders(0,$salesAgentID));
+            $table = Datatables::of(SalesOrder::getSaleOrders(0,$filters));
 
             $table->addColumn('placeholder', '&nbsp;');
             $table->addColumn('actions', '&nbsp;');
@@ -79,9 +95,17 @@ class SalesOrderController extends Controller
             $table->rawColumns(['actions', 'placeholder']);
 
             return $table->make(true);
+        } else {
+            $customers = \App\Models\Customer::query();
+
+            if ($salesAgentID != null) {
+                $customers->where('salesAgentID', $salesAgentID);
+            }
+
+            $customers = $customers->get();
         }
 
-        return view('admin.sales.index');
+        return view('admin.sales.index', compact('customers','filters'));
     }
 
     /**

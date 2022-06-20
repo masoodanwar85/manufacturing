@@ -18,6 +18,30 @@
 			@endcan
 		</div>
 		<div class="card-body">
+            <form id="frmSearch">
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label for="inputFromDate">From Date</label>
+                        <input type="date" class="form-control" name="fromDate" value="{{ $filters['fromDate'] }}" />
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="inputToDate">To Date</label>
+                        <input type="date" class="form-control" name="toDate" value="{{ date('Y-m-d',strtotime($filters['toDate'])) }}" />
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="customerID">Customer</label>
+                        <select name="customerID" class="form-control">
+                            <option value=""></option>
+                            @foreach ($customers as $customer)
+                                <option value="{{ $customer->customerID }}" {!! $filters['customerID'] == $customer->customerID ? 'selected' : '' !!} >{{ $customer->customerName }} ({{ $customer->shopName }}) ({{ $customer->address }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group col-md-1">
+                        <button style="margin-top:30px;" type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
 			<table class=" table table-bordered table-striped table-hover ajaxTable datatable datatable-salesOrder">
 				<thead>
 					<tr>
@@ -49,7 +73,7 @@
                 serverSide: true,
                 retrieve: true,
                 aaSorting: [],
-                ajax: "{{ route('sales.index') }}",
+                ajax: "{{ route('sales.index') }}?" + $('#frmSearch').serialize(),
                 columns: [
 					{ data: 'customerName', name: 'customerName' },
                     { data: 'orderDate', name: 'orderDate' },
