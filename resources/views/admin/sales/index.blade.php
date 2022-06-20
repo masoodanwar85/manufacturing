@@ -37,6 +37,17 @@
                             @endforeach
                         </select>
                     </div>
+                    @if (!empty($salesAgents))
+                        <div class="form-group col-md-2">
+                            <label for="customerID">Sales Agent</label>
+                            <select name="salesAgentID" class="form-control">
+                                <option value=""></option>
+                                @foreach ($salesAgents as $saleAgent)
+                                    <option value="{{ $saleAgent->staffID }}" {!! $filters['salesAgentID'] == $saleAgent->staffID ? 'selected' : '' !!} >{{ $saleAgent->staffName }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
                     <div class="form-group col-md-1">
                         <button style="margin-top:30px;" type="submit" class="btn btn-primary">Submit</button>
                     </div>

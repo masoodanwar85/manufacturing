@@ -28,6 +28,7 @@ class SalesOrderController extends Controller
 		abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $filters = array();
+        $filters['salesAgentID'] = $request->salesAgentID;
         $filters['customerID'] = $request->customerID;
         $filters['fromDate'] = date('Y-m-d');
         $filters['toDate'] = date('Y-m-d');
@@ -39,8 +40,9 @@ class SalesOrderController extends Controller
         }
 
         $salesAgentID = $this->salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
-
-        $filters['salesAgentID'] = $salesAgentID;
+        if ($salesAgentID != null) {
+            $filters['salesAgentID'] = $salesAgentID;
+        }
 
         if ($request->ajax()) {
             $table = Datatables::of(SalesOrder::getSaleOrders(0,$filters));
@@ -96,16 +98,20 @@ class SalesOrderController extends Controller
 
             return $table->make(true);
         } else {
+
             $customers = \App\Models\Customer::query();
 
             if ($salesAgentID != null) {
                 $customers->where('salesAgentID', $salesAgentID);
+                $salesAgents = [];
+            } else {
+                $salesAgents = \App\Models\Staff::salesAgents()->get()->sortBy('staffName');
             }
 
             $customers = $customers->get()->sortBy('customerName');
         }
 
-        return view('admin.sales.index', compact('customers','filters'));
+        return view('admin.sales.index', compact('customers','filters','salesAgents'));
     }
 
     /**
