@@ -41,7 +41,7 @@ class SalesOrderController extends Controller
         $salesAgentID = $this->salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
 
         $filters['salesAgentID'] = $salesAgentID;
-        
+
         if ($request->ajax()) {
             $table = Datatables::of(SalesOrder::getSaleOrders(0,$filters));
 
@@ -102,7 +102,7 @@ class SalesOrderController extends Controller
                 $customers->where('salesAgentID', $salesAgentID);
             }
 
-            $customers = $customers->get();
+            $customers = $customers->get()->sortBy('customerName');
         }
 
         return view('admin.sales.index', compact('customers','filters'));
