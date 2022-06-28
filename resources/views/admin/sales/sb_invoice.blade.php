@@ -123,6 +123,10 @@
 										<td class="text-right" style="border-top:0px;">@money('$grandTotal')</td>
 									</tr>
                                     <tr>
+                                        <th class="text-right" style="border-top:0px;width:50%">Discount:</th>
+										<td class="text-right">@money('$salesOrder->discount')</td>
+									</tr>
+									<tr>
                                         <th class="text-right" style="border-top:0px;width:50%">Paid Amount:</th>
 										<td class="text-right">@money('$paid')</td>
 									</tr>
