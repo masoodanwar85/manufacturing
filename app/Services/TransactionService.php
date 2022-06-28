@@ -115,11 +115,11 @@ class TransactionService {
 	}
 
 	public static function getSubHeadTransactions($subHeadID,$withRelationship = null,$sortBy = "transactionDate",$sortOrder = "DESC") {
+		$transactions = \App\Models\Transaction::whereIn('transactionID',\App\Models\TransactionDetail::groupBy('transactionID')->where('subHeadID',$subHeadID)->pluck('transactionID')->toArray())->orderBy($sortBy,$sortOrder)->get();
 		if ($withRelationship == null) {
-			return \App\Models\Transaction::whereIn('transactionID',\App\Models\TransactionDetail::groupBy('transactionID')->where('subHeadID',$subHeadID)->pluck('transactionID')->toArray())->orderBy($sortBy,$sortOrder)->get();
-		} else {
-			return \App\Models\Transaction::with($withRelationship)->whereIn('transactionID',\App\Models\TransactionDetail::groupBy('transactionID')->where('subHeadID',$subHeadID)->pluck('transactionID')->toArray())->orderBy($sortBy,$sortOrder)->get();
+			$transactions->load($withRelationship);
 		}
+		return $transactions;
 	}
 
 	// public static function getAccountsReceivables($accountHeadID) {
