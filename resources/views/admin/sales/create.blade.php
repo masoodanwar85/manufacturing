@@ -48,7 +48,7 @@
                             </div>
                             <div class="col-sm-2">
                                 @can('invoice_books_create')
-                                    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#exampleModal" style="color:white;" title="Stock Transfer">
+                                    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#exampleModal" style="color:white;" title="Void Bill">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 @endcan

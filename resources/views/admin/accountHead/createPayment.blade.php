@@ -80,7 +80,21 @@
 						<span style="color:red;font-weight:bold;" id="customerBalance"></span>
 					</div>
                     <div class="col-sm-3">
-                        <input type="text" name="transactionTypeNumber" class="form-control" value="" placeholder="Bill Number">
+                        <div class="input-group">
+                            <input type="text" name="transactionTypeNumber" id="bookSerial" class="form-control" value="" placeholder="Bill Number" readonly>
+                            @can('invoice_books_create')
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-sm btn-danger" style="color:white;" title="Click here if you have No Receipt Book Number" onclick="$('#bookSerial').val('');">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#exampleModal" style="color:white;" title="Click here to Void Bill Number and Get Next Number.">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            @endcan
+                        </div>
                     </div>
 				</div>
 				@if ($isPayment == true)
@@ -275,6 +289,42 @@
             </form>
         </div>
     </div>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form name="frm" id="frmVoidSerial" action="" method="post">
+					@csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Void Serial</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label for="prevGodown" class="col-sm-4 col-form-label">Invoice Book #:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="invoiceBookNum" readonly disabled value="" />
+								<input type="hidden" id="invoiceBookNumber" name="invoiceBookNumber" value="" />
+                            </div>
+                        </div>
+						<div class="form-group row">
+							<label for="reason" class="col-sm-4 col-form-label">Reason:</label>
+							<div class="col-sm-8">
+								<textarea class="form-control" id="reason" name="reason" required></textarea>
+							</div>
+						</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" onclick="voidThisSerial();" data-dismiss="modal" class="btn btn-primary">Void</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 	@include('admin.accountHead.dynamicFields')
 @endsection
 
