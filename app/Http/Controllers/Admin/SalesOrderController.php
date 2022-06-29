@@ -168,7 +168,7 @@ class SalesOrderController extends Controller
 		$salesOrder = SalesOrder::with(['transactions.transactionDetails','stockDetailStatuses.stockDetail.product'])->find($salesOrderID);
 		$cashHeadID = \Config::get('constants.account_heads.cash');
 		$client = \App\Models\Client::find(\App\Models\User::find(Auth::id())->clientID);
-		return view('admin.sales.sb_invoice', compact('salesOrder','cashHeadID','client'));
+		return view('admin.sales.invoice', compact('salesOrder','cashHeadID','client'));
     }
 
 	public function invoicePDF(int $salesOrderID)
