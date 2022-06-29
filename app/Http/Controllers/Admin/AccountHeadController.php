@@ -574,7 +574,7 @@ class AccountHeadController extends Controller
 
 	public function openingBalance(Request $request) {
 		abort_if(Gate::denies('transaction_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		$openingBalanceHeads = \App\Models\AccountHead::with('childrenAccountHeads')->whereRaw('isShowForOpeningBalance',1)->get();
+		$openingBalanceHeads = \App\Models\AccountHead::with('childrenAccountHeads')->where('isShowForOpeningBalance',1)->get();
 		$openingBalances = \App\Models\OpeningBalance::all();
         return view('admin.accountHead.formOpeningBalance', compact('openingBalances','openingBalanceHeads'));
 	}
