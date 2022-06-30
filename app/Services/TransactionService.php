@@ -116,7 +116,7 @@ class TransactionService {
 
 	public static function getSubHeadTransactions($subHeadID,$withRelationship = null,$sortBy = "transactionDate",$sortOrder = "DESC") {
 		$transactions = \App\Models\Transaction::whereIn('transactionID',\App\Models\TransactionDetail::groupBy('transactionID')->where('subHeadID',$subHeadID)->pluck('transactionID')->toArray())->orderBy($sortBy,$sortOrder)->get();
-		if ($withRelationship == null) {
+		if ($withRelationship != null) {
 			$transactions->load($withRelationship);
 		}
 		return $transactions;
