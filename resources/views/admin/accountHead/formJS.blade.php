@@ -65,9 +65,11 @@
 					if (returned == '') {
 						$('#invoiceBookNum').val();
 						$('#invoiceBookNumber').val();
+						$('#bookSerial').removeAttr('readonly');
 					} else {
 						$('#invoiceBookNum').val(returned);
 						$('#invoiceBookNumber').val(returned);
+						$('#bookSerial').attr('readonly',true);
 					}
 				}
 			});
