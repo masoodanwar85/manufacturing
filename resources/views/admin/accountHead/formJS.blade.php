@@ -2,7 +2,9 @@
 
 <script type="text/javascript">
 	$(function(){
-		getNextSerial('RB');
+		@if($isPayment == false)
+			getNextSerial('RB');
+		@endif
 
 		$('select.select2').select2();
 
@@ -53,41 +55,43 @@
 		});
 	});
 
-	function getNextSerial(bookType) {
-		$.ajax({
-			url: `/admin/invoiceBooks/${bookType}/nextSerial`,
-			success: function(returned) {
-				$('#reason').text('');
-				$('#bookSerial').val(returned);
-				if (returned == '') {
-					$('#invoiceBookNum').val();
-					$('#invoiceBookNumber').val();
-				} else {
-					$('#invoiceBookNum').val(returned);
-					$('#invoiceBookNumber').val(returned);
-				}
-			}
-		});
-	}
-
-    function voidThisSerial() {
-        var bookSerialNumber = $('#invoiceBookNumber').val();
-		var reason = $('#reason').val();
-		if (bookSerialNumber.length && reason.length) {
-			var bookType = bookSerialNumber.substring(0,2);
+	@if($isPayment == false)
+		function getNextSerial(bookType) {
 			$.ajax({
-				url: '{{ route('invoiceBooks.voidSerial') }}',
-				type: 'POST',
-				data: $('#frmVoidSerial').serialize(),
+				url: `/admin/invoiceBooks/${bookType}/nextSerial`,
 				success: function(returned) {
-					console.log(returned);
-					getNextSerial('RB');
+					$('#reason').text('');
+					$('#bookSerial').val(returned);
+					if (returned == '') {
+						$('#invoiceBookNum').val();
+						$('#invoiceBookNumber').val();
+					} else {
+						$('#invoiceBookNum').val(returned);
+						$('#invoiceBookNumber').val(returned);
+					}
 				}
 			});
-		} else {
-			alert('Invalid Book Serial to Void or Reason required');
 		}
-    }
+
+	    function voidThisSerial() {
+	        var bookSerialNumber = $('#invoiceBookNumber').val();
+			var reason = $('#reason').val();
+			if (bookSerialNumber.length && reason.length) {
+				var bookType = bookSerialNumber.substring(0,2);
+				$.ajax({
+					url: '{{ route('invoiceBooks.voidSerial') }}',
+					type: 'POST',
+					data: $('#frmVoidSerial').serialize(),
+					success: function(returned) {
+						console.log(returned);
+						getNextSerial('RB');
+					}
+				});
+			} else {
+				alert('Invalid Book Serial to Void or Reason required');
+			}
+	    }
+	@endif
 
 
 	function changePaymentForField(value) {
