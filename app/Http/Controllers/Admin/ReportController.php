@@ -146,4 +146,49 @@ class ReportController extends Controller
         }
         return view('admin.reports.missings', compact('missings_grouped'));
     }
+
+    public function daySummary(Request $request) {
+        $orderDate = date('Y-m-d');
+        $salesAgentID = null;
+
+        if (!empty($request->orderDate) && strlen($request->orderDate)) {
+            $orderDate = $request->orderDate;
+        }
+        if (!empty($request->salesAgentID) && strlen($request->salesAgentID)) {
+            $salesAgentID = $request->salesAgentID;
+        }
+
+        $salesAgents = \App\Models\Staff::salesAgents()->get()->sortBy('staffName');
+
+        $salesAgentName = "";
+
+        $finalOrders = [];
+        $aryProducts = [];
+
+        $products = \App\Models\Product::without('category')->get(['productID','productName'])->sortBy('productName')->toArray();
+        $orders = \App\Models\SalesOrder::without(['customer','salesOrderDetails'])->where('salesAgentID',$salesAgentID)->where('orderDate',$orderDate)->get('salesOrderID')->sortBy('salesOrderID');
+
+        if (!$orders->isEmpty()) {
+
+            $salesAgentName = \App\Models\Staff::find($salesAgentID)->staffName;
+
+            foreach ($products as $product) {
+                $aryProducts[$product['productID']]['productName'] = $product['productName'];
+                $aryProducts[$product['productID']]['productID'] = $product['productID'];
+                $aryProducts[$product['productID']]['quantity'] = 0;
+                $aryProducts[$product['productID']]['sum'] = 0;
+            }
+            foreach ($orders as $order) {
+                $finalOrders[$order->salesOrderID]['products'] = $aryProducts;
+            }
+            $summary = \App\Models\Product::getSalesAgentSummary($salesAgentID, $orderDate);
+            foreach ($summary as $thisSummary) {
+                $finalOrders[$thisSummary->salesOrderID]['customerName'] = $thisSummary->customerName;
+                $finalOrders[$thisSummary->salesOrderID]['totalAmount'] = $thisSummary->total;
+                $finalOrders[$thisSummary->salesOrderID]['products'][$thisSummary->productID]['quantity'] = $thisSummary->quantity;
+            }
+        }
+
+        return view('admin.reports.daySummary', compact('salesAgents','salesAgentID','orderDate','finalOrders','aryProducts','salesAgentName'));
+    }
 }

@@ -25,7 +25,7 @@ class SalesOrderController extends Controller
      */
     public function index(Request $request)
     {
-		abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $filters = array();
         $filters['salesAgentID'] = $request->salesAgentID;
