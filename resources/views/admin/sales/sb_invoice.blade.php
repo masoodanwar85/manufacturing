@@ -9,42 +9,43 @@
 @section('content')
 	<div class="row">
 		<div class="col-12">
-			<div class="invoice p-3 mb-3">
+			<div class="invoice mb-3">
 				<div class="row" style="border-bottom:5px solid grey;">
-					<div class="col-2">
-						<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Pepsi_logo_2014.svg/1200px-Pepsi_logo_2014.svg.png" width="70" />
+					<div class="col-3">
+                        <h3><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Pepsi_logo_2014.svg/1200px-Pepsi_logo_2014.svg.png" width="65" /> &nbsp;&nbsp;&nbsp; SB &amp; Co.</h3>
                     </div>
-                    <div class="col-2">
-                        <h3>SB &amp; Co.</h3>
-                    </div>
-                    <div class="col-5">
-                        <h3>SADA BAHAR TRADERS</h3>
+                    <div class="col-6">
+                        <h4>SADA BAHAR TRADERS</h4>
                         <h5>
                             0848-413803, 03328083801<br />
-                            Near Veternary Civil Hospital, Karachi Road<br />
+                            Near Veternary Civil Hospital, Karachi Road,
                             Khuzdar
                         </h5>
 					</div>
                     <div class="col-3">
-                        <h3 class="text-right">SALE INVOICE</h3>
+                        <h4 class="text-right">SALE INVOICE</h4>
                         <h5 class="text-right">
                             INV-{{ $salesOrder->invoiceNumber }}<br />
-                            {{ date('d-M-Y') }}
+                            Bill Date: {{ $salesOrder->orderDate }}
                         </h5>
                     </div>
 				</div>
 				<!-- info row -->
 				<div class="row invoice-info">
-					<div class="col-sm-6 invoice-col">
-						<h4>Customer ID: {{ $salesOrder->customer->customerID }}</h4>
+					<div class="col-sm-3 invoice-col">
+						<h5>Customer ID: {{ $salesOrder->customer->customerID }}</h5>
                         <address>
 							<strong>{{ $salesOrder->customer->customerName }}</strong><br>
-							{{ $salesOrder->customer->shopName }}<br>
-							{{ $salesOrder->customer->address }}<br>
 							Phone: {{ $salesOrder->customer->phone }}
 						</address>
 					</div>
-					<div class="col-sm-4 invoice-col">
+                    <div class="col-sm-4 invoice-col">
+						<address>
+							{{ $salesOrder->customer->shopName }}<br>
+							{{ $salesOrder->customer->address }}
+						</address>
+					</div>
+					<div class="col-sm-5 invoice-col">
 
 					</div>
 					<!-- /.col -->
@@ -55,13 +56,13 @@
 				<div class="row">
 					<div class="col-12 table-responsive">
 						<table class="table table-striped table-sm">
-							<thead>
+							<thead class="thead-light">
 								<tr>
-									<th>#</th>
-                                    <th>Product</th>
-                                    <th>Unit Price</th>
-									<th>Quantity</th>
-									<th class="text-right">Sub Total</th>
+									<th style="background-color:#e9ecef">#</th>
+                                    <th style="background-color:#e9ecef">Product</th>
+                                    <th style="background-color:#e9ecef">Unit Price</th>
+									<th style="background-color:#e9ecef">Quantity</th>
+									<th style="background-color:#e9ecef" class="text-right">Sub Total</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -97,58 +98,43 @@
 							<?php
 								$grandTotal = $total + $salesOrder->shippingCharges - $salesOrder->discount;
 							?>
+                            <tfoot>
+                                <tr>
+                                    <td rowspan="2" colspan="3">
+                                        <h5>
+                                            Salesman: {{ $salesOrder->salesAgent ? $salesOrder->salesAgent->staffName : '' }}
+                                        </h5>
+                                        <span style="float:right;">Total Qty: {{ $totalQty }}</span>
+                                        Printed On: {{ date('d-M-Y H:i:s') }}
+                                    </td>
+                                    <th class="text-right" style="width:15%;">Total Amount:</th>
+                                    <td class="text-right">@money('$grandTotal')/-</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right" style="border-top:0px;">Discount:</th>
+                                    <td class="text-right">@money('$salesOrder->discount')/-</td>
+                                </tr>
+                                <tr>
+                                    <td rowspan="2" colspan="3" style="border-top:0px;">
+                                        <p class="font-urdu">
+                                        نوٹ: برائے مہربانی مال وصول کرتے وقت پراڈکٹ کی ایکسپائری اور لیکیج ضرور چیک کر لیں۔ بعد میں کمپنی کی کسی
+                                        قسم کی کوئی ذمہ داری نہیں ہوگی
+                                        </p>
+                                    </td>
+                                    <th class="text-right" style="border-top:0px;">Paid Amount:</th>
+                                    <td class="text-right">@money('$paid')/-</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right" style="border-top:0px;">Balance:</th>
+                                    <td class="text-right">@money('$grandTotal - $paid')/-</td>
+                                </tr>
+                            </tfoot>
 						</table>
 					</div>
 					<!-- /.col -->
-				</div><hr />
-				<!-- /.row -->
-
-				<div class="row">
-					<!-- accepted payments column -->
-					<div class="col-8">
-						<h5 class="text-right">
-                            Total Quantity: {{ $totalQty }}<br />
-                        </h5>
-                        <h5>
-                            Salesman: {{ $salesOrder->salesAgent ? $salesOrder->salesAgent->staffName : '' }}
-                        </h5>
-					</div>
-					<!-- /.col -->
-					<div class="col-4">
-						<div class="table-responsive">
-							<table class="table table-striped table-sm">
-								<tbody>
-									<tr>
-										<th class="text-right" style="border-top:0px;">Total Amount:</th>
-										<td class="text-right" style="border-top:0px;">@money('$grandTotal')</td>
-									</tr>
-                                    <tr>
-                                        <th class="text-right" style="border-top:0px;width:50%">Discount:</th>
-										<td class="text-right">@money('$salesOrder->discount')</td>
-									</tr>
-									<tr>
-                                        <th class="text-right" style="border-top:0px;width:50%">Paid Amount:</th>
-										<td class="text-right">@money('$paid')</td>
-									</tr>
-									<tr>
-										<th class="text-right" style="border-top:0px;">Balance:</th>
-										<td class="text-right">@money('$grandTotal - $paid')</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-                    <div class="col-12">
-                        <p>
-                        نوٹ: برائے مہربانی مال وصول کرتے وقت پراڈکٹ کی ایکسپائری اور لیکیج ضرور چیک کر لیں۔ بعد میں کمپنی کی کسی
-                        قسم کی کوئی ذمہ داری نہیں ہوگی
-                        </p>
-                    </div>
 				</div>
-
 				<!-- /.row -->
-
-				<!-- this row will not appear when printing -->
+                <!-- this row will not appear when printing -->
 				<div class="row no-print">
 					<div class="col-12">
 						<a href="javascript:void(0);" onclick="javascript:window.print();" rel="noopener" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
@@ -159,4 +145,19 @@
 			<!-- /.invoice -->
 		</div><!-- /.col -->
 	</div><!-- /.row -->
+@stop
+@section('css')
+    <style>
+        @font-face {
+            font-family: '_pdms_jauhar_regular';
+            src: url('/fonts/_pdms_jauhar_regular.ttf');
+            font-weight: bold;
+        }
+
+        .font-urdu {
+            font-family: _pdms_jauhar_regular;
+            font-size: 20px;
+            text-align:right;
+        }
+    </style>
 @stop
