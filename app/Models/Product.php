@@ -122,9 +122,9 @@ class Product extends Model
                 SUM(stockDetailStatus.quantity) as quantity,
                 (SUM((stockDetailStatus.quantity * stockDetailStatus.saleprice)) - salesOrder.discount) as total
             from salesOrder
-            inner join customer on customer.customerID = salesorder.customerID
-            inner join salesorderdetail on salesorder.salesOrderID = salesorderdetail.salesOrderID
-            inner join stockdetailstatus on stockDetailStatus.stockDetailStatusID = salesorderdetail.stockDetailStatusID
+            inner join customer on customer.customerID = salesOrder.customerID
+            inner join salesOrderDetail on salesOrder.salesOrderID = salesOrderDetail.salesOrderID
+            inner join stockDetailStatus on stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
             inner join stockDetail on stockDetail.stockDetailID = stockDetailStatus.stockDetailID
             inner join product on product.productID = stockDetail.productID
             where salesOrder.salesAgentID = " . $salesAgentID . " and salesOrder.orderDate = '" . $orderDate . "'
