@@ -44,22 +44,30 @@
                         @foreach ($aryProducts as $product)
                             <td>{{ $product['productName'] }}</td>
                         @endforeach
+                        <th>Total Cotton</th>
                         <th>Total Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                         $grandTotal = 0;
+                        $grandTotalCotton = 0;
                     ?>
                     @foreach ($finalOrders as $order)
+                        <?php
+                            $customerTotal = 0;
+                        ?>
                         <tr>
                             <th>{{ $order['customerName'] }}</th>
                             @foreach ($order['products'] as $key => $orderProduct)
                                 <td>{{ $orderProduct['quantity'] }}</td>
                                 <?php
                                     $aryProducts[$key]['sum'] += $orderProduct['quantity'];
+                                    $customerTotal += $orderProduct['quantity'];
+                                    $grandTotalCotton += $orderProduct['quantity'];
                                 ?>
                             @endforeach
+                            <th>{{ $customerTotal }}</th>
                             <th>{{ number_format($order['totalAmount']) }}</th>
                             <?php
                                 $grandTotal += $order['totalAmount'];
@@ -73,6 +81,7 @@
                         @foreach ($aryProducts as $product)
                             <th>{{ $product['sum'] }}</th>
                         @endforeach
+                        <th>{{ $grandTotalCotton }}</th>
                         <th>{{ $grandTotal }}</th>
                     </tr>
                 </tfoot>
