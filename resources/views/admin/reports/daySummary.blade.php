@@ -40,7 +40,7 @@
             <table class="table table-bordered table-hover table-sm">
                 <thead>
                     <tr>
-                        <th>Customers</th>
+                        <th>Shop</th>
                         @foreach ($aryProducts as $product)
                             <td>{{ $product['productName'] }}</td>
                         @endforeach
@@ -58,7 +58,7 @@
                             $customerTotal = 0;
                         ?>
                         <tr>
-                            <th>{{ $order['customerName'] }}</th>
+                            <th>{{ $order['shopName'] }}</th>
                             @foreach ($order['products'] as $key => $orderProduct)
                                 <td>{{ $orderProduct['quantity'] }}</td>
                                 <?php

@@ -186,7 +186,7 @@ class ReportController extends Controller
                 if (!isset($finalOrders[$thisSummary->salesOrderID]['totalAmount'])) {
                     $finalOrders[$thisSummary->salesOrderID]['totalAmount'] = 0;
                 }
-                $finalOrders[$thisSummary->salesOrderID]['customerName'] = $thisSummary->customerName;
+                $finalOrders[$thisSummary->salesOrderID]['shopName'] = $thisSummary->shopName;
                 $finalOrders[$thisSummary->salesOrderID]['totalAmount'] += $thisSummary->total;
                 $finalOrders[$thisSummary->salesOrderID]['products'][$thisSummary->productID]['quantity'] = $thisSummary->quantity;
             }

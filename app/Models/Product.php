@@ -115,7 +115,7 @@ class Product extends Model
             select
                 salesOrder.salesOrderID,
                 salesOrder.customerID,
-                customer.customerName,
+                customer.shopName,
                 salesOrder.orderDate,
                 stockDetail.productID,
                 product.productName,
