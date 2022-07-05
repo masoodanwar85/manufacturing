@@ -1,24 +1,28 @@
 @extends('adminlte::page')
 
-@section('title', 'Day Summary Report')
+@section('title', 'Range Summary Report')
 
 @section('content_header')
-    <h1>Day Summary</h1>
+    <h1>Range Summary</h1>
 @stop
 
 @section('content')
     <div class="card card-default color-palette-box">
         <div class="card-header">
             <h3 class="card-title">
-                <i class="fas fa-clipboard-list"></i> Day Summary
+                <i class="fas fa-clipboard-list"></i> Range Summary
             </h3>
         </div>
         <div class="card-body">
             <form>
                 <div class="form-row">
                     <div class="form-group col-md-2">
-                        <label for="inputFromDate">Date:</label>
-                        <input type="date" class="form-control" name="orderDate" value="{{ $orderDate }}" />
+                        <label for="inputFromDate">From Date:</label>
+                        <input type="date" class="form-control" name="startDate" value="{{ $startDate ? $startDate->toDateString() : '' }}" />
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="inputFromDate">To Date:</label>
+                        <input type="date" class="form-control" name="endDate" value="{{ $endDate ? $endDate->toDateString() : '' }}" />
                     </div>
                     <div class="form-group col-md-2">
                         <label for="inputFromDate">Sales Agent:</label>
@@ -36,11 +40,11 @@
             </form>
 
             <h4>Sales Agent: {{ $salesAgentName }}</h4>
-            <h4>Date: {{ $orderDate }}</h4>
+            <h4>Date Range: {{ $startDate ? $startDate->toDateString() : '' }} to {{ $endDate ? $endDate->toDateString() : '' }}</h4>
             <table class="table table-bordered table-hover table-sm">
                 <thead>
                     <tr>
-                        <th>Shop</th>
+                        <th>Date</th>
                         @foreach ($aryProducts as $product)
                             <td>{{ $product['productName'] }}</td>
                         @endforeach
@@ -53,21 +57,21 @@
                         $grandTotal = 0;
                         $grandTotalCotton = 0;
                     ?>
-                    @foreach ($finalOrders as $order)
+                    @foreach ($finalOrders as $idx => $order)
                         <?php
-                            $customerTotal = 0;
+                            $dateTotal = 0;
                         ?>
                         <tr>
-                            <th>{{ $order['shopName'] }}</th>
+                            <th>{{ $idx }}</th>
                             @foreach ($order['products'] as $key => $orderProduct)
                                 <td>{{ $orderProduct['quantity'] }}</td>
                                 <?php
                                     $aryProducts[$key]['sum'] += $orderProduct['quantity'];
-                                    $customerTotal += $orderProduct['quantity'];
+                                    $dateTotal += $orderProduct['quantity'];
                                     $grandTotalCotton += $orderProduct['quantity'];
                                 ?>
                             @endforeach
-                            <th>{{ $customerTotal }}</th>
+                            <th>{{ $dateTotal }}</th>
                             <th>{{ number_format($order['totalAmount']) }}</th>
                             <?php
                                 $grandTotal += $order['totalAmount'];
