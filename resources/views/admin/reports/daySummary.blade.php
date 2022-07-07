@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('adminlte::print')
 
 @section('title', 'Day Summary Report')
 
