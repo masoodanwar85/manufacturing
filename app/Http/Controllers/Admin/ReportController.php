@@ -218,11 +218,10 @@ class ReportController extends Controller
 
         $products = \App\Models\Product::without('category')->get(['productID','productName'])->sortBy('productName')->toArray();
         // $orders = \App\Models\SalesOrder::without(['customer','salesOrderDetails'])->where('salesAgentID',$salesAgentID)->whereBetween('orderDate',[$startDate,$endDate])->get('salesOrderID')->sortBy('salesOrderID');
+        $startDate = Carbon::parse($startDate);
+        $endDate = Carbon::parse($endDate);
 
         if (strlen($startDate) && strlen($endDate) && is_numeric($salesAgentID)) {
-
-            $startDate = Carbon::parse($startDate);
-            $endDate = Carbon::parse($endDate);
 
             $periods = $startDate->range($endDate, 1, 'day')->toArray();
 
