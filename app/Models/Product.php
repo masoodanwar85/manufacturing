@@ -109,7 +109,7 @@ class Product extends Model
 		return DB::select($rawSQL);
 	}
 
-    public static function getSalesAgentDaySummary($salesAgentID, $startDate) {
+    public static function getSalesAgentDaySummary($salesAgentID, $orderDate) {
         DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
         $rawSQL = "
             select
