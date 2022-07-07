@@ -182,7 +182,7 @@ class ReportController extends Controller
             foreach ($orders as $order) {
                 $finalOrders[$order->salesOrderID]['products'] = $aryProducts;
             }
-            $summary = \App\Models\Product::getSalesAgentSummary($salesAgentID, $orderDate, $orderDate);
+            $summary = \App\Models\Product::getSalesAgentDaySummary($salesAgentID, $orderDate);
             foreach ($summary as $thisSummary) {
                 if (!isset($finalOrders[$thisSummary->salesOrderID]['totalAmount'])) {
                     $finalOrders[$thisSummary->salesOrderID]['totalAmount'] = 0;

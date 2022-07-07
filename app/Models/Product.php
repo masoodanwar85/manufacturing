@@ -109,6 +109,37 @@ class Product extends Model
 		return DB::select($rawSQL);
 	}
 
+    public static function getSalesAgentDaySummary($salesAgentID, $startDate) {
+        DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+        $rawSQL = "
+            select
+                salesOrder.salesOrderID,
+                salesOrder.customerID,
+                customer.shopName,
+                salesOrder.orderDate,
+                stockDetail.productID,
+                product.productName,
+                SUM(stockDetailStatus.quantity) as quantity,
+                (SUM((stockDetailStatus.quantity * stockDetailStatus.saleprice)) - salesOrder.discount) as total
+            from salesOrder
+            inner join customer on customer.customerID = salesOrder.customerID
+            inner join salesOrderDetail on salesOrder.salesOrderID = salesOrderDetail.salesOrderID
+            inner join stockDetailStatus on stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
+            inner join stockDetail on stockDetail.stockDetailID = stockDetailStatus.stockDetailID
+            inner join product on product.productID = stockDetail.productID
+            where salesOrder.salesAgentID = " . $salesAgentID . " and salesOrder.orderDate = '" . $orderDate . "'
+            group by
+                salesOrder.salesOrderID,
+                salesOrder.customerID,
+                salesOrder.orderDate,
+                stockDetail.productID
+            order by
+                salesOrder.salesOrderID,
+                stockDetail.productID
+        ";
+        return DB::select($rawSQL);
+    }
+
     public static function getSalesAgentSummary($salesAgentID, $startDate,$endDate) {
         DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
         $rawSQL = "
