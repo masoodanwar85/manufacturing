@@ -11,7 +11,7 @@ class StockDetailStatus extends Model
     protected $table = 'stockDetailStatus';
     protected $primaryKey = 'stockDetailStatusID';
     public $timestamps = false;
-    protected $fillable = ['stockDetailStatusID','stockDetailID','statusID','batchID','godownID','quantity','quantityUnits','salePrice','createdByUserID'];
+    protected $fillable = ['stockDetailStatusID','stockDetailID','statusID','batchID','godownID','discount','quantity','quantityUnits','salePrice','createdByUserID'];
 
 	public function stockStatus()
     {

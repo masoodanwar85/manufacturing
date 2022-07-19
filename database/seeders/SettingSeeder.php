@@ -21,6 +21,7 @@ class SettingSeeder extends Seeder
 			['settingTypeCode' => 'client', 'fieldTypeCode' => 'text','settingName' => 'Conversion Operator From PKR','settingCode' => 'operatorToConvertFromPKR','label' => 'Operator to convert from PKR','tab' => 'Settings','group' => 'Client','sortOrder' => 1, 'defaultValue' => '*'],
 			['settingTypeCode' => 'user', 'fieldTypeCode' => 'number','settingName' => 'Records Per Page','settingCode' => 'records_per_page','label' => 'Records Per Page','tab' => 'Page','group' => 'Listings','sortOrder' => 1, 'defaultValue' => '50'],
             ['settingTypeCode' => 'client', 'fieldTypeCode' => 'radio','settingName' => 'Show Exchange Rate','settingCode' => 'is_show_exchange_rate','label' => 'Show Exchange Rate','tab' => 'Settings','group' => 'Client','sortOrder' => 1, 'defaultValue' => '1'],
+            ['settingTypeCode' => 'client', 'fieldTypeCode' => 'radio','settingName' => 'Show Discount Per Product','settingCode' => 'is_show_discount_per_product','label' => 'Show Discount Per Product','tab' => 'Settings','group' => 'Client','sortOrder' => 1, 'defaultValue' => '1'],
         ];
 
         foreach ($arySettings as $setting) {

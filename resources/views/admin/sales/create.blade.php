@@ -124,6 +124,7 @@
 								<h3>Products</h3>
 								<div class="clearfix"></div>
 							</div>
+                            <?php $colspanValue = 7; ?>
 							<div class="x_content">
 								<table class="table" id="myTable">
 									<thead>
@@ -133,8 +134,11 @@
 											<th style="text-align:center;width:15%;">Godown</th>
 											<th style="text-align:center;width:10%;">Per Unit Price</th>
 											<th style="text-align:center;width:8%;">Quantity</th>
-											<th style="text-align:center;width:10%;">Units</th>
 											<th style="text-align:center;width:10%;">Sale Price</th>
+                                            @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
+                                                <th style="text-align:center;width:10%;">Discount</th>
+                                                <?php $colspanValue++; ?>
+                                            @endif
 											<th style="text-align:center;width:15%;">Sub Total</th>
 											<th style="text-align:center;width:5%;">Action</th>
 										</tr>
@@ -144,7 +148,7 @@
 									</tbody>
 									<tfoot>
 										<tr id="actionRow">
-											<td colspan="8"></td>
+											<td colspan="{{ $colspanValue }}"></td>
 											<td>
 												<button class="btn btn-primary btn-sm pull-right " onclick="addSORow()" type="button" title="Add New Sale Item">
 													<i class="nav-icon fas fa-fw fa-plus"></i>
@@ -152,29 +156,29 @@
 											</td>
 										</tr>
 										<tr>
-											<td colspan="7" class="font-weight-bold text-right">Sub Total:</td>
+											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Sub Total:</td>
 											<td colspan="2" id="gSubTotal" class="font-weight-bold">0</td>
 										</tr>
 										<tr>
-											<td colspan="7" class="font-weight-bold text-right">Shipping:</td>
+											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Shipping:</td>
 											<td colspan="2" id="shippingChargesTotal" class="font-weight-bold">0</td>
 										</tr>
 										<tr>
-											<td colspan="7" class="font-weight-bold text-right">Discount:</td>
+											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Discount:</td>
 											<td colspan="2" id="discountTotal" class="font-weight-bold">0</td>
 										</tr>
 										<tr>
-											<td colspan="7" class="font-weight-bold text-right">Total:</td>
+											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Total:</td>
 											<td colspan="2" id="gTotal" class="font-weight-bold">0</td>
 										</tr>
 										<tr>
-											<td colspan="7" class="font-weight-bold text-right">Paid:</td>
+											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Paid:</td>
 											<td colspan="2">
 												<input type="text" onKeyUp="calculateBalance();" name="amountPaid" id="amountPaid" value="0" class="form-control" />
 											</td>
 										</tr>
 										<tr>
-											<td colspan="6" class="font-weight-bold text-right font-urdu" id="balanceInUrdu"></td>
+											<td colspan="{{ $colspanValue-2 }}" class="font-weight-bold text-right font-urdu" id="balanceInUrdu"></td>
 											<td class="font-weight-bold text-right">Balance:</td>
 											<td colspan="2" id="balance" class="font-weight-bold">0</td>
 										</tr>
