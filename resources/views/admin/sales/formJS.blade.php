@@ -169,7 +169,7 @@
 			purchasePrice = parseFloat(trElem.find('input[name="purchasePrice[]"]').val().replace(',',''));
             salePrice = parseFloat(trElem.find('input[name="salePrice[]"]').val().replace(',',''));
             @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
-                discount = parseFloat(trElem.find('input[name="discount[]"]').val().replace(',',''));
+                discount = parseFloat(trElem.find('input[name="product_discount[]"]').val().replace(',',''));
             @endif
             total = (salePrice * quantity) - (discount * quantity);
         } else {

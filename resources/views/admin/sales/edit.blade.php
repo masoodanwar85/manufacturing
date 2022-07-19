@@ -208,10 +208,12 @@
                                                     <td>
     													<div class="form-group">
     														<div class="col-sm-12">
-    											            	<input type="text" readonly onkeyUp="calculateProductRowTotal(this);" name="discount[]" value="@money('$stockDetailStatus->discount','')" class="form-control" min="0" placeholder="Discount" required>
+    											            	<input type="text" readonly onkeyUp="calculateProductRowTotal(this);" name="product_discount[]" value="@money('$stockDetailStatus->discount','')" class="form-control" min="0" placeholder="Discount" required>
     											        	</div>
     													</div>
     												</td>
+                                                @else
+                                                    <input type="hidden" name="product_discount[]" value="0" />
                                                 @endif
 												<td>
 													<div class="form-group">

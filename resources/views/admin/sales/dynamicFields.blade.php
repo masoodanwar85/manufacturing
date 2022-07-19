@@ -46,9 +46,11 @@
         <span class="separator"></span>
         <div class="form-group">
             <div class="col-sm-12">
-                <input type="text" onkeyUp="calculateProductRowTotal(this);" name="discount[]" value="0" class="form-control" min="0" placeholder="Discount" required>
+                <input type="text" onkeyUp="calculateProductRowTotal(this);" name="product_discount[]" value="0" class="form-control" min="0" placeholder="Discount" required>
             </div>
         </div>
+    @else
+        <input type="hidden" name="product_discount[]" value="0" />
     @endif
     <span class="separator"></span>
     <div class="form-group">
