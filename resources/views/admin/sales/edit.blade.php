@@ -7,7 +7,7 @@
 @stop
 
 @section('content')
-	<div class="card card-default color-palette-box">
+    <div class="card card-default color-palette-box">
 		<div class="card-header">
 			<h3 class="card-title">
 				<i class="fas fa-share"></i> Edit Sales Order
@@ -129,6 +129,7 @@
 									<tbody>
 										<?php
 											$total = 0;
+                                            $discount = 0;
 											$paid = 0;
 										?>
 										@foreach($salesOrder->stockDetailStatuses as $stockDetailStatus)
@@ -136,7 +137,7 @@
 												$aryProduct = \App\Models\Stock::getProducts($stockDetailStatus->stockDetail->productID);
 												$unitsAvailability = 0;
 												if (count($aryProduct)) {
-													$unitsAvailability = $aryProduct[0]->unitsAvailable;
+													$unitsAvailability = $aryProduct[0]->quantityAvailable;
 												}
 											?>
 											<tr>
@@ -156,7 +157,7 @@
 												            	<?php
 																	$unitsAvailable = 0;
 																	if (count($flattenedStockProducts) && !empty($flattenedStockProducts['product_' . $stockDetailStatus->stockDetail->productID])) {
-																		$unitsAvailable = $flattenedStockProducts['product_' . $stockDetailStatus->stockDetail->productID]->unitsAvailable;
+																		$unitsAvailable = $flattenedStockProducts['product_' . $stockDetailStatus->stockDetail->productID]->quantityAvailable;
 																	}
 																	//$unitsAvailable+=$stockDetailStatus->quantity;
                                                                     $totalUnitsAvailableText = "0";
@@ -218,7 +219,7 @@
 												<td>
 													<div class="form-group">
 												        <div class="col-sm-12">
-												            <input type="text" disabled name="total[]" value="@money('$stockDetailStatus->quantityUnits * $stockDetailStatus->salePrice','')" class="form-control" />
+												            <input type="text" disabled name="total[]" value="@money('($stockDetailStatus->quantityUnits * $stockDetailStatus->salePrice)-($stockDetailStatus->quantityUnits * $stockDetailStatus->discount)','')" class="form-control" />
 												        </div>
 												    </div>
 												</td>
@@ -229,7 +230,7 @@
 												</td>
 											</tr>
 											<?php
-												$total+= $stockDetailStatus->quantityUnits * $stockDetailStatus->salePrice;
+												$total+= ($stockDetailStatus->quantity * $stockDetailStatus->salePrice)-($stockDetailStatus->quantity * $stockDetailStatus->discount);
 											?>
 										@endforeach
 									</tbody>

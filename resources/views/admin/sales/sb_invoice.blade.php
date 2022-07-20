@@ -53,6 +53,7 @@
 				<!-- /.row -->
 
 				<!-- Table row -->
+                <?php $colspanValue = 3; ?>
 				<div class="row">
 					<div class="col-12 table-responsive">
 						<table class="table table-striped table-sm">
@@ -62,6 +63,10 @@
                                     <th style="background-color:#e9ecef">Product</th>
                                     <th style="background-color:#e9ecef">Unit Price</th>
 									<th style="background-color:#e9ecef">Quantity</th>
+                                    @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
+                                        <th style="background-color:#e9ecef">Discount</th>
+                                        <?php $colspanValue++; ?>
+                                    @endif
 									<th style="background-color:#e9ecef" class="text-right">Sub Total</th>
 								</tr>
 							</thead>
@@ -70,6 +75,7 @@
                                     $totalQty = 0;
 									$total = 0;
 									$paid = 0;
+                                    $totalDiscount = 0;
 									$grandTotal = 0;
 								?>
 								@foreach($salesOrder->stockDetailStatuses as $stockDetailStatus)
@@ -78,11 +84,15 @@
 										<td>{{$stockDetailStatus->stockDetail->product->productName}} ({{$stockDetailStatus->stockDetail->product->category->categoryName}})</td>
 										<td>@money('$stockDetailStatus->salePrice')</td>
                                         <td>{{$stockDetailStatus->quantity}}</td>
-										<td class="text-right">@money('$stockDetailStatus->quantity * $stockDetailStatus->salePrice')</td>
+                                        @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
+                                            <td>@money('$stockDetailStatus->discount')</td>
+                                        @endif
+										<td class="text-right">@money('($stockDetailStatus->quantity * $stockDetailStatus->salePrice)-($stockDetailStatus->quantity * $stockDetailStatus->discount)')</td>
 									</tr>
 									<?php
-										$total+= $stockDetailStatus->quantity * $stockDetailStatus->salePrice;
+										$total+= ($stockDetailStatus->quantity * $stockDetailStatus->salePrice)-($stockDetailStatus->quantity * $stockDetailStatus->discount);
                                         $totalQty+=$stockDetailStatus->quantity;
+                                        $totalDiscount += $stockDetailStatus->discount;
 									?>
 								@endforeach
 							</tbody>
@@ -100,22 +110,34 @@
 							?>
                             <tfoot>
                                 <tr>
-                                    <td rowspan="2" colspan="3">
-                                        <h5>
+                                    <td colspan="3">
+                                        <h5 style="margin-bottom:0px;">
                                             Salesman: {{ $salesOrder->salesAgent ? $salesOrder->salesAgent->staffName : '' }}
                                         </h5>
-                                        <span style="float:right;">Total Qty: {{ $totalQty }}</span>
-                                        Printed On: {{ date('d-M-Y H:i:s') }}
                                     </td>
-                                    <th class="text-right" style="width:15%;">Total Amount:</th>
+                                    <th @if ($globalSettings['client_settings.is_show_discount_per_product'] == 0) style="width:20%;" @endif>
+                                        <span style="float:left;">{{ $totalQty }}</span>
+                                        @if ($globalSettings['client_settings.is_show_discount_per_product'] == 0)
+                                            <span style="float:right;">Total Amount:</span>
+                                        @endif
+                                    </th>
+                                    @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
+                                        <th class="text-right" style="width:20%;">
+                                            <span style="float:left;">@money('$totalDiscount')</span>
+                                            Total Amount:
+                                        </th>
+                                    @endif
                                     <td class="text-right">@money('$grandTotal')/-</td>
                                 </tr>
                                 <tr>
+                                    <td colspan="{{ $colspanValue }}" style="border-top:0px;">
+                                        <span style="float:left;">Printed On: {{ date('d-M-Y H:i:s') }}</span>
+                                    </td>
                                     <th class="text-right" style="border-top:0px;">Discount:</th>
                                     <td class="text-right">@money('$salesOrder->discount')/-</td>
                                 </tr>
                                 <tr>
-                                    <td rowspan="2" colspan="3" style="border-top:0px;">
+                                    <td rowspan="2" colspan="{{ $colspanValue }}" style="border-top:0px;">
                                         <p class="font-urdu">
                                         نوٹ: برائے مہربانی مال وصول کرتے وقت پراڈکٹ کی ایکسپائری اور لیکیج ضرور چیک کر لیں۔ بعد میں کمپنی کی کسی
                                         قسم کی کوئی ذمہ داری نہیں ہوگی

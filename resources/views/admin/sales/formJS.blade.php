@@ -166,10 +166,10 @@
         if (areAllValuesFilled === true) {
             unitsInProduct = parseInt(trElem.find('input[name="unitsInProduct[]"]').val());
 			quantity = parseInt(trElem.find('input[name="quantity[]"]').val());
-			purchasePrice = parseFloat(trElem.find('input[name="purchasePrice[]"]').val().replace(',',''));
-            salePrice = parseFloat(trElem.find('input[name="salePrice[]"]').val().replace(',',''));
+			purchasePrice = parseFloat(trElem.find('input[name="purchasePrice[]"]').val().replaceAll(',',''));
+            salePrice = parseFloat(trElem.find('input[name="salePrice[]"]').val().replaceAll(',',''));
             @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
-                discount = parseFloat(trElem.find('input[name="product_discount[]"]').val().replace(',',''));
+                discount = parseFloat(trElem.find('input[name="product_discount[]"]').val().replaceAll(',',''));
             @endif
             total = (salePrice * quantity) - (discount * quantity);
         } else {
@@ -193,8 +193,8 @@
         var total = 0;
 		var subTotal = 0;
         $(totalFields).each(function(x,y) {
-            if (!isNaN(parseFloat($(y).val().replace(',','')))) {
-                subTotal+=parseFloat($(y).val().replace(',',''));
+            if (!isNaN(parseFloat($(y).val().replaceAll(',','')))) {
+                subTotal+=parseFloat($(y).val().replaceAll(',',''));
             }
         });
 
@@ -298,6 +298,7 @@
             alert('You have ' + maxQty + ' available units.');
             jQElem.val(maxQty);
         }
+        calculateProductRowTotal(quantityField);
     }
 
     function calculateBalance() {

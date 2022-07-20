@@ -189,8 +189,10 @@
                         <td class="text-right">Total:</td>
                         <td>@money('$totalPurchases')</td>
                         <td>@money('$totalSales')</td>
-                        <td>@money('$totalDiscount')</td>
-                        <td>@money('$totalNetSales')</td>
+                        @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
+                            <td>@money('$totalDiscount')</td>
+                            <td>@money('$totalNetSales')</td>
+                        @endif
                         <td>@money('$totalSales - $totalDiscount - $totalPurchases')</td>
                     </tr>
                 </tfoot>
