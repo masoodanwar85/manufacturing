@@ -486,6 +486,10 @@ class AccountHeadController extends Controller
                 return redirect()->route('accountHead.receipt');
             }
 
+            if ($request->paymentTo != 'customer') {
+                $transactionTypeNumber = null;
+            }
+
             $transactionID = \App\Services\TransactionService::addTransaction(2,1,null,$transactionTypeNumber,1,$request->transactionDate);
 
             foreach ($aryTransactionDetails['debit'] as $debitTransactions) {
