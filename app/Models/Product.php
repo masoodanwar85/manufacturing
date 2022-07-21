@@ -108,4 +108,60 @@ class Product extends Model
 		";
 		return DB::select($rawSQL);
 	}
+
+    public static function getSalesAgentDaySummary($salesAgentID, $orderDate) {
+        DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+        $rawSQL = "
+            select
+                salesOrder.salesOrderID,
+                salesOrder.customerID,
+                customer.shopName,
+                salesOrder.orderDate,
+                stockDetail.productID,
+                product.productName,
+                SUM(stockDetailStatus.quantity) as quantity,
+                (SUM((stockDetailStatus.quantity * stockDetailStatus.saleprice)) - salesOrder.discount) as total
+            from salesOrder
+            inner join customer on customer.customerID = salesOrder.customerID
+            inner join salesOrderDetail on salesOrder.salesOrderID = salesOrderDetail.salesOrderID
+            inner join stockDetailStatus on stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
+            inner join stockDetail on stockDetail.stockDetailID = stockDetailStatus.stockDetailID
+            inner join product on product.productID = stockDetail.productID
+            where salesOrder.salesAgentID = " . $salesAgentID . " and salesOrder.orderDate = '" . $orderDate . "'
+            group by
+                salesOrder.salesOrderID,
+                salesOrder.customerID,
+                salesOrder.orderDate,
+                stockDetail.productID
+            order by
+                salesOrder.salesOrderID,
+                stockDetail.productID
+        ";
+        return DB::select($rawSQL);
+    }
+
+    public static function getSalesAgentSummary($salesAgentID, $startDate,$endDate) {
+        DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+        $rawSQL = "
+            SELECT
+                salesOrder.orderDate,
+                stockDetail.productID,
+                product.productName,
+                SUM(stockDetailStatus.quantity) as quantity,
+                (SUM((stockDetailStatus.quantity * stockDetailStatus.saleprice)) - SUM(salesOrder.discount)) AS total
+            FROM salesOrder
+            INNER JOIN salesOrderDetail on salesOrder.salesOrderID = salesOrderDetail.salesOrderID
+            INNER JOIN stockDetailStatus on stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
+            INNER JOIN stockDetail on stockDetail.stockDetailID = stockDetailStatus.stockDetailID
+            INNER JOIN product on product.productID = stockDetail.productID
+            WHERE salesOrder.salesAgentID = " . $salesAgentID . " AND salesOrder.orderDate BETWEEN '" . $startDate . "' AND '" . $endDate . "'
+            GROUP BY
+                salesOrder.orderDate,
+                stockDetail.productID
+            ORDER BY
+                salesOrder.orderDate,
+                stockDetail.productID
+        ";
+        return DB::select($rawSQL);
+    }
 }

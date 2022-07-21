@@ -389,15 +389,15 @@ class Stock extends Model
 			$whereClause = " AND product.productID = " . (int) $productID;
 		}
 		$rawSQL = "
-			SELECT Temp.productID,Temp.unitsInProduct,Temp.productName,Temp.purchasePrice,SUM(Temp.totalQty) AS quantityAvailable,SUM(Temp.totalUnits) AS unitsAvailable,category.categoryName FROM (
-				SELECT product.categoryID,product.unitsInProduct,product.productID,product.productName,product.unitPurchasePrice AS purchasePrice,SUM(stockDetailStatus.quantity) AS totalQty, SUM(stockDetailStatus.quantityUnits) AS totalUnits
+			SELECT Temp.productID,Temp.unitsInProduct,Temp.productName,Temp.purchasePrice,SUM(Temp.totalQty) AS quantityAvailable,category.categoryName FROM (
+				SELECT product.categoryID,product.unitsInProduct,product.productID,product.productName,product.unitPurchasePrice AS purchasePrice,SUM(stockDetailStatus.quantity) AS totalQty
 				FROM product
 				INNER JOIN stockDetail ON stockDetail.productID = product.productID
 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 				WHERE stockDetailStatus.statusID IN (" . \Config::get('constants.stock_status.isAvailableForSale') . ")" . $whereClause . "
 				GROUP BY product.productID
 				UNION
-				SELECT product.categoryID,product.unitsInProduct,product.productID,product.productName,product.unitPurchasePrice,(SUM(stockDetailStatus.quantity) * -1) AS totalQty, (SUM(stockDetailStatus.quantityUnits) * -1) AS totalUnits
+				SELECT product.categoryID,product.unitsInProduct,product.productID,product.productName,product.unitPurchasePrice,(SUM(stockDetailStatus.quantity) * -1) AS totalQty
 				FROM product
 				INNER JOIN stockDetail ON stockDetail.productID = product.productID
 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
@@ -406,7 +406,7 @@ class Stock extends Model
 			) AS Temp
 			INNER JOIN category ON category.categoryID = Temp.categoryID
 			GROUP BY Temp.productID,Temp.unitsInProduct,Temp.productName,Temp.purchasePrice,category.categoryName
-			HAVING unitsAvailable > 0
+			HAVING quantityAvailable > 0
 			ORDER BY Temp.productName";
 
 		return DB::select($rawSQL);

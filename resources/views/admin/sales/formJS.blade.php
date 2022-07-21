@@ -23,9 +23,6 @@
         $('select.select2').select2();
         bindRemoveClick();
         bindQuantityChanged();
-		@if ($globalSettings['client_settings.is_units_in_product_fixed'] == 0)
-		bindQuantityUnitChanged();
-		@endif
     });
 
 	function getNextSerial(bookType) {
@@ -72,7 +69,6 @@
             "productName" : "{{$product->productName}}",
             "purchasePrice" : "@money('$product->purchasePrice','')",
             "quantityAvailable" : "{{$product->quantityAvailable}}",
-			"unitsAvailable" : "{{$product->unitsAvailable}}",
 			"unitsInProduct" : "{{$product->unitsInProduct}}"
         },
         @endforeach
@@ -87,7 +83,6 @@
 				{
 					"purchasePrice" : "@money('$godownProduct->purchasePrice','')",
 		            "quantityAvailable" : "{{$godownProduct->quantityAvailable}}",
-					"unitsAvailable" : "{{$godownProduct->unitsAvailable}}",
 					"godownID" : "{{$godownProduct->godownID}}",
 					"godownName" : "{{$godownProduct->godownName}}"
 				},
@@ -108,7 +103,6 @@
 					"godowns" : [{
 						"purchasePrice" : "@money('$godownProduct->purchasePrice','')",
 						"quantityAvailable" : "{{$godownProduct->quantityAvailable}}",
-						"unitsAvailable" : "{{$godownProduct->unitsAvailable}}",
 						"godownID" : "{{$godownProduct->godownID}}",
 						"godownName" : "{{$godownProduct->godownName}}"
 					},
@@ -132,24 +126,13 @@
         });
     }
 
-	@if ($globalSettings['client_settings.is_units_in_product_fixed'] == 0)
-	function bindQuantityUnitChanged() {
-        $('input[name="quantityUnits[]"]').bind('keydown mouseup keypress blur keyup change', function(e) {
-			quantityUnitChanged(e.target);
-        });
-    }
-	@endif
-
-    function addSORow() {
+	function addSORow() {
         var strPORowHTML = $('#so-row').html();
         //strPORowHTML = strPORowHTML.replace(/_ctr/g,'_'+poDetailCounter);
         strPORowHTML = strPORowHTML.replace(/<span class="separator"><\/span>/g,'</td><td>');
         $('table#myTable tbody').append('<tr><td>' + strPORowHTML + '</td></tr>');
         bindRemoveClick();
         bindQuantityChanged();
-		@if ($globalSettings['client_settings.is_units_in_product_fixed'] == 0)
-		bindQuantityUnitChanged();
-		@endif
 
         // var isSelect2Implemented = false;
         // $('select[name="productID[]"]').map(function(){
@@ -164,15 +147,13 @@
         var jQElem = $(elem);
         var trElem = jQElem.parent().parent().parent().parent();
         var areAllValuesFilled = true;
-        var quantity,quantityUnits,purchasePrice,total,salePrice,unitsInProduct;
+        var quantity,purchasePrice,total,salePrice,unitsInProduct;
+        var discount = 0;
 
         if (isNaN(parseInt(trElem.find('input[name="unitsInProduct[]"]').val()))) {
             areAllValuesFilled = false;
         }
 		if (isNaN(parseInt(trElem.find('input[name="quantity[]"]').val()))) {
-            areAllValuesFilled = false;
-        }
-		if (isNaN(parseInt(trElem.find('input[name="quantityUnits[]"]').val()))) {
             areAllValuesFilled = false;
         }
         if (isNaN(parseFloat(trElem.find('input[name="salePrice[]"]').val()))) {
@@ -185,10 +166,12 @@
         if (areAllValuesFilled === true) {
             unitsInProduct = parseInt(trElem.find('input[name="unitsInProduct[]"]').val());
 			quantity = parseInt(trElem.find('input[name="quantity[]"]').val());
-			quantityUnits = parseInt(trElem.find('input[name="quantityUnits[]"]').val());
-            purchasePrice = parseFloat(trElem.find('input[name="purchasePrice[]"]').val().replace(',',''));
-            salePrice = parseFloat(trElem.find('input[name="salePrice[]"]').val().replace(',',''));
-            total = salePrice * quantityUnits;
+			purchasePrice = parseFloat(trElem.find('input[name="purchasePrice[]"]').val().replaceAll(',',''));
+            salePrice = parseFloat(trElem.find('input[name="salePrice[]"]').val().replaceAll(',',''));
+            @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
+                discount = parseFloat(trElem.find('input[name="product_discount[]"]').val().replaceAll(',',''));
+            @endif
+            total = (salePrice * quantity) - (discount * quantity);
         } else {
             total = 0;
         }
@@ -210,8 +193,8 @@
         var total = 0;
 		var subTotal = 0;
         $(totalFields).each(function(x,y) {
-            if (!isNaN(parseFloat($(y).val().replace(',','')))) {
-                subTotal+=parseFloat($(y).val().replace(',',''));
+            if (!isNaN(parseFloat($(y).val().replaceAll(',','')))) {
+                subTotal+=parseFloat($(y).val().replaceAll(',',''));
             }
         });
 
@@ -252,9 +235,8 @@
         var jQElem = $(selectProduct);
         var productID = jQElem.find(':selected').val();
 		var trElem = jQElem.parent().parent().parent().parent();
-		var unitsAvailable, quantityAvailable, purchasePrice,godownHTML,totalUnitsAvailableText,unitsInProduct;
+		var quantityAvailable, purchasePrice,godownHTML,totalUnitsAvailableText,unitsInProduct;
 		if (productID == '') {
-			unitsAvailable = '';
 			quantityAvailable = '';
 			purchasePrice = '';
 			godownHTML = '';
@@ -263,18 +245,15 @@
 		} else {
 			purchasePrice = productsInfo[productID].purchasePrice;
 			quantityAvailable = productsInfo[productID].quantityAvailable;
-			unitsAvailable = productsInfo[productID].unitsAvailable;
 			godownHTML = makeProductGodownsDD(productID);
 			totalUnitsAvailableText = productUnitText(productID);
 			unitsInProduct = productsInfo[productID].unitsInProduct;
 		}
 		trElem.find('.godown').html(godownHTML);
         trElem.find('select[name="godownID[]"]').prop('selectedIndex',1);
-		trElem.find('input[name="unitsAvailable[]"]').val(unitsAvailable);
 		trElem.find('input[name="unitsInProduct[]"]').val(unitsInProduct);
 		trElem.find('.totalUnitsAvailable').text(totalUnitsAvailableText);
 		trElem.find('input[name="quantity[]"]').attr('max',quantityAvailable);
-		trElem.find('input[name="quantityUnits[]"]').attr('max',unitsAvailable);
 		trElem.find('input[name="purchasePrice[]"]').val(purchasePrice);
 		trElem.find('input[name="salePrice[]"]').val(purchasePrice);
 		updateQtyUnits(selectProduct);
@@ -285,21 +264,11 @@
         // }
     }
 
-	function productUnitText(productID,unitsAvailable = 0,quantityAvailable = 0) {
-		if (unitsAvailable == 0) {
+	function productUnitText(productID,quantityAvailable = 0) {
+		if (quantityAvailable == 0) {
 			quantityAvailable = productsInfo[productID].quantityAvailable;
-			unitsAvailable = productsInfo[productID].unitsAvailable;
 		}
 		var totalUnitsAvailableText = quantityAvailable;
-		var totalUnitsAvailable = unitsAvailable;
-		if (godownProductsInfo[productID].unitsInProduct > 1) {
-			totalUnitsAvailableText += " Qty -- " + totalUnitsAvailable;
-			if (godownProductsInfo[productID].unit == 'Qty') {
-				totalUnitsAvailableText += " Items";
-			} else {
-				totalUnitsAvailableText += " " + godownProductsInfo[productID].unit;
-			}
-		}
 		return totalUnitsAvailableText;
 	}
 
@@ -315,7 +284,7 @@
 		var optionsHTML = "";
 		var godownsArray = godownProductsInfo[productID].godowns;
 		godownsArray.forEach(function(godownObj) {
-			optionsHTML += '<option value="'+godownObj.godownID+'">' + godownObj.godownName + ' (' + productUnitText(productID,godownObj.unitsAvailable,godownObj.quantityAvailable) + ')' + '</option>';
+			optionsHTML += '<option value="'+godownObj.godownID+'">' + godownObj.godownName + ' (' + productUnitText(productID,godownObj.quantityAvailable) + ')' + '</option>';
 		});
 		return '<select name="godownID[]" class="form-control"><option value=""></option>' + optionsHTML + '</select>';
 	}
@@ -329,31 +298,8 @@
             alert('You have ' + maxQty + ' available units.');
             jQElem.val(maxQty);
         }
-		updateQtyUnits(quantityField);
-    }
-
-	function updateQtyUnits(field) {
-		var jQElem = $(field);
-		var trElem = jQElem.parent().parent().parent().parent();
-		var productID = trElem.find('select[name="productID[]"]').val();
-		var quantity = trElem.find('input[name="quantity[]"]').val();
-		var prevQty = trElem.find('input[name="prevQty[]"]').val();
-		if (quantity != prevQty) {
-			trElem.find('input[name="prevQty[]"]').val(quantity);
-			var quantityUnits = 0;
-			if (productID != '') {
-				quantityUnits = parseInt(productsInfo[productID].unitsInProduct) * parseInt(quantity);
-			}
-			trElem.find('input[name="quantityUnits[]"]').val(quantityUnits);
-			calculateProductRowTotal(field);
-		}
-	}
-
-	@if ($globalSettings['client_settings.is_units_in_product_fixed'] == 0)
-	function quantityUnitChanged(quantityField) {
         calculateProductRowTotal(quantityField);
     }
-	@endif
 
     function calculateBalance() {
         var amountPaid = $('#amountPaid').val();

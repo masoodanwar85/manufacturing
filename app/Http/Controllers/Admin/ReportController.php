@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Gate;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -145,5 +146,107 @@ class ReportController extends Controller
             $missings_grouped[$item->bookType . '-' . $item->bookNumber][] = $item;
         }
         return view('admin.reports.missings', compact('missings_grouped'));
+    }
+
+    public function daySummary(Request $request) {
+        $orderDate = date('Y-m-d');
+        $salesAgentID = null;
+
+        if (!empty($request->orderDate) && strlen($request->orderDate)) {
+            $orderDate = $request->orderDate;
+        }
+        if (!empty($request->salesAgentID) && strlen($request->salesAgentID)) {
+            $salesAgentID = $request->salesAgentID;
+        }
+
+        $salesAgents = \App\Models\Staff::salesAgents()->get()->sortBy('staffName');
+
+        $salesAgentName = "";
+
+        $finalOrders = [];
+        $aryProducts = [];
+
+        $products = \App\Models\Product::without('category')->get(['productID','productName'])->sortBy('productName')->toArray();
+        $orders = \App\Models\SalesOrder::without(['customer','salesOrderDetails'])->where('salesAgentID',$salesAgentID)->where('orderDate',$orderDate)->get('salesOrderID')->sortBy('salesOrderID');
+
+        if (!$orders->isEmpty()) {
+
+            $salesAgentName = \App\Models\Staff::find($salesAgentID)->staffName;
+
+            foreach ($products as $product) {
+                $aryProducts[$product['productID']]['productName'] = $product['productName'];
+                $aryProducts[$product['productID']]['productID'] = $product['productID'];
+                $aryProducts[$product['productID']]['quantity'] = 0;
+                $aryProducts[$product['productID']]['sum'] = 0;
+            }
+            foreach ($orders as $order) {
+                $finalOrders[$order->salesOrderID]['products'] = $aryProducts;
+            }
+            $summary = \App\Models\Product::getSalesAgentDaySummary($salesAgentID, $orderDate);
+            foreach ($summary as $thisSummary) {
+                if (!isset($finalOrders[$thisSummary->salesOrderID]['totalAmount'])) {
+                    $finalOrders[$thisSummary->salesOrderID]['totalAmount'] = 0;
+                }
+                $finalOrders[$thisSummary->salesOrderID]['shopName'] = $thisSummary->shopName;
+                $finalOrders[$thisSummary->salesOrderID]['totalAmount'] += $thisSummary->total;
+                $finalOrders[$thisSummary->salesOrderID]['products'][$thisSummary->productID]['quantity'] = $thisSummary->quantity;
+            }
+        }
+
+        return view('admin.reports.daySummary', compact('salesAgents','salesAgentID','orderDate','finalOrders','aryProducts','salesAgentName'));
+    }
+
+    public function rangeSummary(Request $request) {
+        $startDate = date('Y-m-d');
+        $endDate = date('Y-m-d');
+        $salesAgentID = "";
+
+        if (!empty($request->startDate) && strlen($request->startDate) && !empty($request->endDate) && strlen($request->endDate)) {
+            $startDate = $request->startDate;
+            $endDate = $request->endDate;
+        }
+        if (!empty($request->salesAgentID) && strlen($request->salesAgentID)) {
+            $salesAgentID = $request->salesAgentID;
+        }
+
+        $salesAgents = \App\Models\Staff::salesAgents()->get()->sortBy('staffName');
+
+        $salesAgentName = "";
+
+        $finalOrders = [];
+        $aryProducts = [];
+
+        $products = \App\Models\Product::without('category')->get(['productID','productName'])->sortBy('productName')->toArray();
+        // $orders = \App\Models\SalesOrder::without(['customer','salesOrderDetails'])->where('salesAgentID',$salesAgentID)->whereBetween('orderDate',[$startDate,$endDate])->get('salesOrderID')->sortBy('salesOrderID');
+        $startDate = Carbon::parse($startDate);
+        $endDate = Carbon::parse($endDate);
+
+        if (strlen($startDate) && strlen($endDate) && is_numeric($salesAgentID)) {
+
+            $periods = $startDate->range($endDate, 1, 'day')->toArray();
+
+            foreach ($products as $product) {
+                $aryProducts[$product['productID']]['productName'] = $product['productName'];
+                $aryProducts[$product['productID']]['productID'] = $product['productID'];
+                $aryProducts[$product['productID']]['quantity'] = 0;
+                $aryProducts[$product['productID']]['sum'] = 0;
+            }
+
+            foreach ($periods as $period) {
+                $finalOrders[$period->toDateString()]['products'] = $aryProducts;
+                $finalOrders[$period->toDateString()]['totalAmount'] = 0;
+            }
+
+            $summary = \App\Models\Product::getSalesAgentSummary($salesAgentID, $startDate, $endDate);
+
+            foreach ($summary as $thisSummary) {
+                $finalOrders[$thisSummary->orderDate]['totalAmount'] += $thisSummary->total;
+                $finalOrders[$thisSummary->orderDate]['products'][$thisSummary->productID]['quantity'] += $thisSummary->quantity;
+            }
+
+            $salesAgentName = \App\Models\Staff::find($salesAgentID)->staffName;
+        }
+
+        return view('admin.reports.rangeSummary', compact('salesAgents','salesAgentID','startDate','endDate','finalOrders','aryProducts','salesAgentName'));
     }
 }

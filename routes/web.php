@@ -82,4 +82,6 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
 	Route::get('report/sales', [App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('report.sales');
     Route::get('report/duplicates', [App\Http\Controllers\Admin\ReportController::class, 'duplicates'])->name('report.duplicates');
     Route::get('report/missing', [App\Http\Controllers\Admin\ReportController::class, 'missings'])->name('report.missings');
+	Route::get('report/daySummary', [App\Http\Controllers\Admin\ReportController::class, 'daySummary'])->name('report.daySummary');
+	Route::get('report/rangeSummary', [App\Http\Controllers\Admin\ReportController::class, 'rangeSummary'])->name('report.rangeSummary');
 });

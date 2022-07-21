@@ -46,6 +46,8 @@ return [
 	'profit_loss'					=> 'Profit/Loss',
 	'ledgers'						=> 'Ledgers',
     'cashInOut'						=> 'Cash In/Out',
+    'day_summary'   				=> 'Day Summary',
+    'detail_summary'				=> 'Detail Summary',
     'accounts'						=> 'Accounts',
 	'sales'							=> 'Sales',
 	'duplicates'					=> 'Duplicate Bills',

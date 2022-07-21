@@ -91,10 +91,9 @@ class SalesOrderService {
 		for ($i=0; $i < $count; $i++) {
 			// Get Product Stock Availability
 			$product = \App\Models\Stock::getProducts($request->productID[$i]);
-			$updatedQuantityUnits = $request->quantity[$i];
 			$updatedQuantity = $request->quantity[$i];
 
-			if (!empty($product) && $product[0]->unitsAvailable >= $updatedQuantityUnits) {
+			if (!empty($product) && $product[0]->quantityAvailable >= $updatedQuantity) {
 
 				// Get Stock Details of this product
 				// $stockDetails = \App\Models\Stock::getProductStockDetails($request->productID[$i]);
@@ -116,9 +115,8 @@ class SalesOrderService {
 				}
 
 				$quantityRemaining = $updatedQuantity;
-				$quantityUnitsRemaining = $updatedQuantityUnits;
 				foreach ($stockDetails as $stockDetailInfo) {
-					if ($quantityUnitsRemaining == 0) {
+					if ($quantityRemaining == 0) {
 						break;
 					} else {
 						$stockDetailStatus = new \App\Models\StockDetailStatus();
@@ -127,11 +125,12 @@ class SalesOrderService {
 						$stockDetailStatus->batchID = \App\Services\BatchService::getCurrentBatch()->batchID;
 						$stockDetailStatus->godownID = $stockDetailInfo->godownID;
 						$stockDetailStatus->salePrice = str_replace(',','',$request->salePrice[$i]);
+						$stockDetailStatus->discount = str_replace(',','',$request->product_discount[$i]);
 						$stockDetailStatus->createdByUserID = Auth::id();
 					}
-					if ($stockDetailInfo->unitsAvailable >= $quantityUnitsRemaining) {
+					if ($stockDetailInfo->quantityAvailable >= $quantityRemaining) {
 						$stockDetailStatus->quantity = $quantityRemaining;
-						$stockDetailStatus->quantityUnits = $quantityUnitsRemaining;
+						$stockDetailStatus->quantityUnits = $quantityRemaining;
 						$stockDetailStatus->save();
 
 						// Insert stockDetailStatusID in salesOrderDetail
@@ -154,11 +153,11 @@ class SalesOrderService {
 						$stockDetailStatus->save();
 						// Insert stockDetailStatusID in salesOrderDetail
 						$salesOrder->stockDetailStatuses()->attach($stockDetailStatus->stockDetailStatusID);
-						$quantityUnitsRemaining-=$stockDetailInfo->unitsAvailable;
+						$quantityUnitsRemaining-=$stockDetailInfo->quantityAvailable;
 					}
 				}
 
-				$total+= $updatedQuantityUnits * floatval(str_replace(',','',$request->salePrice[$i]));
+				$total+= ($updatedQuantity * floatval(str_replace(',','',$request->salePrice[$i]))) - ($updatedQuantity * floatval(str_replace(',','',$request->product_discount[$i])));
 			} else {
 				$missedProducts+=1;
 				DB::rollback();

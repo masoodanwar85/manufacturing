@@ -21,6 +21,7 @@ class CreateStockDetailStatusTable extends Migration
 			$table->unsignedBigInteger('batchID');
             $table->unsignedBigInteger('godownID');
 			$table->bigInteger('quantity');
+            $table->bigInteger('discount')->default(0);
 			$table->integer('quantityUnits');
 			$table->decimal('salePrice',18,4)->nullable();
 			$table->unsignedBigInteger('createdByUserID');

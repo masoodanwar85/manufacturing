@@ -25,7 +25,7 @@ class SalesOrderController extends Controller
      */
     public function index(Request $request)
     {
-		abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $filters = array();
         $filters['salesAgentID'] = $request->salesAgentID;
@@ -168,7 +168,7 @@ class SalesOrderController extends Controller
 		$salesOrder = SalesOrder::with(['transactions.transactionDetails','stockDetailStatuses.stockDetail.product'])->find($salesOrderID);
 		$cashHeadID = \Config::get('constants.account_heads.cash');
 		$client = \App\Models\Client::find(\App\Models\User::find(Auth::id())->clientID);
-		return view('admin.sales.invoice', compact('salesOrder','cashHeadID','client'));
+		return view('admin.sales.sb_invoice', compact('salesOrder','cashHeadID','client'));
     }
 
 	public function invoicePDF(int $salesOrderID)

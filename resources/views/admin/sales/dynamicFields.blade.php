@@ -36,18 +36,22 @@
 			<input type="hidden" name="prevQty[]" value="" />
         </div>
     </div>
-	<span class="separator"></span>
-    <div class="form-group">
-        <div class="col-sm-12">
-            <input type="number" name="quantityUnits[]" value="1" class="form-control" min="1" required>
-        </div>
-    </div>
     <span class="separator"></span>
     <div class="form-group">
         <div class="col-sm-12">
             <input type="text" onkeyUp="calculateProductRowTotal(this);" name="salePrice[]" value="" class="form-control" min="1" placeholder="Sale Price" required>
         </div>
     </div>
+    @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
+        <span class="separator"></span>
+        <div class="form-group">
+            <div class="col-sm-12">
+                <input type="text" onkeyUp="calculateProductRowTotal(this);" name="product_discount[]" value="0" class="form-control" min="0" placeholder="Discount" required>
+            </div>
+        </div>
+    @else
+        <input type="hidden" name="product_discount[]" value="0" />
+    @endif
     <span class="separator"></span>
     <div class="form-group">
         <div class="col-sm-12">

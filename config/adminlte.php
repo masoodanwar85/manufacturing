@@ -435,6 +435,20 @@ return [
                     'can'  => ['report_read'],
 					'active' => ['admin/report/sales']
                 ],
+                [
+                    'text' => 'day_summary',
+                    'url'  => 'admin/report/daySummary',
+                    'icon' => 'fas fa-fw fa-hand-holding-usd',
+                    'can'  => ['report_read'],
+					'active' => ['admin/report/daySummary']
+                ],
+                [
+                    'text' => 'detail_summary',
+                    'url'  => 'admin/report/rangeSummary',
+                    'icon' => 'fas fa-fw fa-hand-holding-usd',
+                    'can'  => ['report_read'],
+					'active' => ['admin/report/rangeSummary']
+                ],
 				[
                     'text' => 'duplicates',
                     'url'  => 'admin/report/duplicates',
