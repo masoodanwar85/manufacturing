@@ -134,13 +134,13 @@
         bindRemoveClick();
         bindQuantityChanged();
 
-        // var isSelect2Implemented = false;
-        // $('select[name="productID[]"]').map(function(){
-        //     if(!$(this).hasClass('select2-hidden-accessible') && !isSelect2Implemented) {
-        //         $(this).select2();
-        //         isSelect2Implemented = true;
-        //     }
-        // });
+        var isSelect2Implemented = false;
+        $('select[name="productID[]"]').map(function(){
+            if(!$(this).hasClass('select2-hidden-accessible') && !isSelect2Implemented) {
+                $(this).select2();
+                isSelect2Implemented = true;
+            }
+        });
     }
 
     function calculateProductRowTotal(elem) {
