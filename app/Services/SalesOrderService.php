@@ -153,7 +153,7 @@ class SalesOrderService {
 						$stockDetailStatus->save();
 						// Insert stockDetailStatusID in salesOrderDetail
 						$salesOrder->stockDetailStatuses()->attach($stockDetailStatus->stockDetailStatusID);
-						$quantityUnitsRemaining-=$stockDetailInfo->quantityAvailable;
+						$quantityRemaining-=$stockDetailInfo->quantityAvailable;
 					}
 				}
 
