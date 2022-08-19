@@ -171,7 +171,8 @@
             @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
                 discount = parseFloat(trElem.find('input[name="product_discount[]"]').val().replaceAll(',',''));
             @endif
-            total = (salePrice * quantity) - (discount * quantity);
+
+            total = (salePrice * quantity);
         } else {
             total = 0;
         }
@@ -181,15 +182,24 @@
         calculateGrandTotal();
     }
 
-    function calculateGrandTotal() {
+    function calculateGrandTotal(elem) {
+        var discountParent = $(elem);
+        var discountParentFind = discountParent.parent().parent().parent().parent();
+        var perProductQuantity = parseInt(discountParentFind.find('input[name="quantity[]"]').val());
+        var perProductDiscount = parseInt(discountParentFind.find('input[name="product_discount[]"]').val());
+        var totalQuantityDiscount = parseInt(perProductQuantity) * parseFloat(perProductDiscount);
+        // console.log(totalQuantityDiscount);
         var totalFields = $('input[name="total[]"]');
 		var shippingCharges = $('input[name="shippingCharges"]').val();
         if (isNaN(parseInt(shippingCharges))) {
             shippingCharges = 0;
         }
-		var discount = $('input[name="discount"]').val();
+		// var discount = $('input[name="discount"]').val();
+
+        var totalDiscount = parseFloat(totalQuantityDiscount) + parseFloat(perProductDiscount);
+        console.log(totalDiscount);
 		$('#shippingChargesTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + shippingCharges);
-		$('#discountTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + discount);
+		$('#discountTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + totalDiscount);
         var total = 0;
 		var subTotal = 0;
         $(totalFields).each(function(x,y) {
@@ -198,7 +208,7 @@
             }
         });
 
-		total = parseFloat(subTotal) + parseInt(shippingCharges) - parseInt(discount);
+		total = parseFloat(subTotal) + parseInt(shippingCharges) - parseInt(totalDiscount);
 		$('#gSubTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + subTotal.toFixed(2));
 		$('#gTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + total.toFixed(2));
 		@if ($isNew == 1)
