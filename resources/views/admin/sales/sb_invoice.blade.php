@@ -76,6 +76,7 @@
 									$total = 0;
 									$paid = 0;
                                     $totalDiscount = 0;
+                                    $totalAmount = 0;
 									$grandTotal = 0;
 								?>
 								@foreach($salesOrder->stockDetailStatuses as $stockDetailStatus)
@@ -87,12 +88,12 @@
                                         @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
                                             <td>@money('$stockDetailStatus->discount')</td>
                                         @endif
-										<td class="text-right">@money('($stockDetailStatus->quantity * $stockDetailStatus->salePrice)-($stockDetailStatus->quantity * $stockDetailStatus->discount)')</td>
+										<td class="text-right">@money('($stockDetailStatus->quantity * $stockDetailStatus->salePrice)')</td>
 									</tr>
 									<?php
-										$total+= ($stockDetailStatus->quantity * $stockDetailStatus->salePrice)-($stockDetailStatus->quantity * $stockDetailStatus->discount);
+										$total+= ($stockDetailStatus->quantity * $stockDetailStatus->salePrice) + ($salesOrder->shippingCharges);
                                         $totalQty+=$stockDetailStatus->quantity;
-                                        $totalDiscount += $stockDetailStatus->discount;
+                                        $totalDiscount += ($salesOrder->discount) + ($stockDetailStatus->quantity * $stockDetailStatus->discount);
 									?>
 								@endforeach
 							</tbody>
@@ -106,7 +107,8 @@
 								@endforeach
 							@endforeach
 							<?php
-								$grandTotal = $total + $salesOrder->shippingCharges - $salesOrder->discount;
+                                $totalAmount = $total;
+								$grandTotal = $total - $totalDiscount ;
 							?>
                             <tfoot>
                                 <tr>
@@ -127,14 +129,14 @@
                                             Total Amount:
                                         </th>
                                     @endif
-                                    <td class="text-right">@money('$grandTotal')/-</td>
+                                    <td class="text-right">@money('$totalAmount')/-</td>
                                 </tr>
                                 <tr>
                                     <td colspan="{{ $colspanValue }}" style="border-top:0px;">
                                         <span style="float:left;">Printed On: {{ date('d-M-Y H:i:s') }}</span>
                                     </td>
                                     <th class="text-right" style="border-top:0px;">Discount:</th>
-                                    <td class="text-right">@money('$salesOrder->discount')/-</td>
+                                    <td class="text-right">@money('($salesOrder->discount) + ($stockDetailStatus->quantity * $stockDetailStatus->discount)')/-</td>
                                 </tr>
                                 <tr>
                                     <td rowspan="2" colspan="{{ $colspanValue }}" style="border-top:0px;">

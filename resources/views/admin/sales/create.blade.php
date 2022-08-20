@@ -88,7 +88,7 @@
 					</div>
 					<label for="shippingCharges" class="offset-sm-2 col-sm-2 col-form-label">Shipping Charges: *</label>
 					<div class="col-sm-3">
-	                    <input type="number" onkeyup="calculateGrandTotal();" name="shippingCharges" class="form-control @if($errors->has('shippingCharges')) is-invalid @endif" value="{{ old('shippingCharges',0) }}" required>
+	                    <input type="number" name="shippingCharges" class="form-control @if($errors->has('shippingCharges')) is-invalid @endif" value="{{ old('shippingCharges',0) }}" required>
 	                    @if($errors->has('shippingCharges'))
 	                        <em class="invalid-feedback">
 	                            {{ $errors->first('shippingCharges') }}

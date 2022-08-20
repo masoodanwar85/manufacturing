@@ -23,6 +23,8 @@
         $('select.select2').select2();
         bindRemoveClick();
         bindQuantityChanged();
+        bindShippingChanged();
+        bindBillDiscountChanged();
     });
 
 	function getNextSerial(bookType) {
@@ -120,6 +122,24 @@
         });
     }
 
+    function bindShippingChanged() {
+        $('input[name="shippingCharges"]').bind('keydown mouseup keypress blur keyup change', function(e) {
+            var firstProductDD = $('#myTable tbody tr td:first-child').find('select[name="productID[]"]');
+            if (firstProductDD.val() != '') {
+                quantityChanged(firstProductDD);
+            }
+        });
+    }
+
+    function bindBillDiscountChanged() {
+        $('input[name="discount"]').bind('keydown mouseup keypress blur keyup change', function(e) {
+            var firstProductDD = $('#myTable tbody tr td:first-child').find('select[name="productID[]"]');
+            if (firstProductDD.val() != '') {
+                quantityChanged(firstProductDD);
+            }
+        });
+    }
+
     function bindQuantityChanged() {
         $('input[name="quantity[]"]').bind('keydown mouseup keypress blur keyup change', function(e) {
             quantityChanged(e.target);
@@ -179,25 +199,24 @@
 
         trElem.find('input[name="total[]"]').val(total);
 
-        calculateGrandTotal();
+        calculateGrandTotal(trElem);
     }
 
-    function calculateGrandTotal(elem) {
-        var discountParent = $(elem);
-        var discountParentFind = discountParent.parent().parent().parent().parent();
-        var perProductQuantity = parseInt(discountParentFind.find('input[name="quantity[]"]').val());
-        var perProductDiscount = parseInt(discountParentFind.find('input[name="product_discount[]"]').val());
+    function calculateGrandTotal(parentElement) {
+        if ($('#myTable tbody tr td:first-child').find('select[name="productID[]"]').val() == '') {
+            return;
+        }
+        var perProductQuantity = parseInt(parentElement.find('input[name="quantity[]"]').val());
+        var perProductDiscount = parseFloat(parentElement.find('input[name="product_discount[]"]').val());
         var totalQuantityDiscount = parseInt(perProductQuantity) * parseFloat(perProductDiscount);
-        // console.log(totalQuantityDiscount);
         var totalFields = $('input[name="total[]"]');
 		var shippingCharges = $('input[name="shippingCharges"]').val();
         if (isNaN(parseInt(shippingCharges))) {
             shippingCharges = 0;
         }
-		// var discount = $('input[name="discount"]').val();
 
-        var totalDiscount = parseFloat(totalQuantityDiscount) + parseFloat(perProductDiscount);
-        console.log(totalDiscount);
+		var discount = parseInt($('input[name="discount"]').val());
+        var totalDiscount = totalQuantityDiscount + discount;
 		$('#shippingChargesTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + shippingCharges);
 		$('#discountTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + totalDiscount);
         var total = 0;
@@ -208,7 +227,7 @@
             }
         });
 
-		total = parseFloat(subTotal) + parseInt(shippingCharges) - parseInt(totalDiscount);
+		total = parseFloat(subTotal) + parseInt(shippingCharges) - parseFloat(totalDiscount);
 		$('#gSubTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + subTotal.toFixed(2));
 		$('#gTotal').html('&nbsp;&nbsp;&nbsp;&nbsp;' + total.toFixed(2));
 		@if ($isNew == 1)
@@ -266,7 +285,7 @@
 		trElem.find('input[name="quantity[]"]').attr('max',quantityAvailable);
 		trElem.find('input[name="purchasePrice[]"]').val(purchasePrice);
 		trElem.find('input[name="salePrice[]"]').val(purchasePrice);
-		updateQtyUnits(selectProduct);
+		// updateQtyUnits(selectProduct);
 		// calculateProductRowTotal(selectProduct);
 
         // if (checkProductSelected(productID)) {

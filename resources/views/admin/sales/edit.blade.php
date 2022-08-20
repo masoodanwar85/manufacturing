@@ -71,7 +71,7 @@
 					</div>
 					<label for="shippingCharges" class="offset-sm-2 col-sm-2 col-form-label">Shipping Charges: *</label>
 					<div class="col-sm-3">
-	                    <input type="number"  onkeyup="calculateGrandTotal();" name="shippingCharges" class="form-control @if($errors->has('shippingCharges')) is-invalid @endif" value="{{ old('shippingCharges',$salesOrder->shippingCharges) }}" required>
+	                    <input type="number" name="shippingCharges" class="form-control @if($errors->has('shippingCharges')) is-invalid @endif" value="{{ old('shippingCharges',$salesOrder->shippingCharges) }}" required>
 	                    @if($errors->has('shippingCharges'))
 	                        <em class="invalid-feedback">
 	                            {{ $errors->first('shippingCharges') }}
@@ -219,7 +219,7 @@
 												<td>
 													<div class="form-group">
 												        <div class="col-sm-12">
-												            <input type="text" disabled name="total[]" value="@money('($stockDetailStatus->quantityUnits * $stockDetailStatus->salePrice)-($stockDetailStatus->quantityUnits * $stockDetailStatus->discount)','')" class="form-control" />
+												            <input type="text" disabled name="total[]" value="@money('($stockDetailStatus->quantityUnits * $stockDetailStatus->salePrice)','')" class="form-control" />
 												        </div>
 												    </div>
 												</td>
@@ -230,7 +230,7 @@
 												</td>
 											</tr>
 											<?php
-												$total+= ($stockDetailStatus->quantity * $stockDetailStatus->salePrice)-($stockDetailStatus->quantity * $stockDetailStatus->discount);
+												$total+= ($stockDetailStatus->quantity * $stockDetailStatus->salePrice);
 											?>
 										@endforeach
 									</tbody>
@@ -254,11 +254,11 @@
 										</tr>
 										<tr>
 											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Sub Total:</td>
-											<td colspan="2" id="gSubTotal" class="font-weight-bold"> &nbsp;&nbsp;&nbsp;&nbsp;{{ $total }} </td>
+											<td colspan="2" id="gSubTotal" class="font-weight-bold"> &nbsp;&nbsp;&nbsp;&nbsp;{{ $total }}.00</td>
 										</tr>
 										<tr>
 											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Discount:</td>
-											<td colspan="2" id="discountTotal" class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;{{$salesOrder->discount}}</td>
+											<td colspan="2" id="discountTotal" class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;{{($salesOrder->discount) + ($stockDetailStatus->quantity * $stockDetailStatus->discount)}}</td>
 										</tr>
 										<tr>
 											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Shipping:</td>
@@ -266,7 +266,7 @@
 										</tr>
 										<tr>
 											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Grand Total:</td>
-											<td colspan="2" id="gTotal" class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;{{ $total - $salesOrder->discount + $salesOrder->shippingCharges }}</td>
+											<td colspan="2" id="gTotal" class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;{{ $total - $salesOrder->discount + $salesOrder->shippingCharges - (($salesOrder->discount) + ($stockDetailStatus->quantity * $stockDetailStatus->discount))}}.00</td>
 										</tr>
 										<tr>
 											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Paid:</td>
@@ -277,7 +277,7 @@
 										<tr>
 											<td colspan="{{ $colspanValue-2 }}" class="font-weight-bold text-right font-urdu" id="balanceInUrdu"></td>
 											<td class="font-weight-bold text-right">Balance:</td>
-											<td colspan="2" id="balance" class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;{{ $total - $salesOrder->discount + $salesOrder->shippingCharges - $paid}}</td>
+											<td colspan="2" id="balance" class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;{{ $total - $salesOrder->discount + $salesOrder->shippingCharges - (($salesOrder->discount) + ($stockDetailStatus->quantity * $stockDetailStatus->discount)) - $paid}}.00</td>
 										</tr>
 
 									</tfoot>

@@ -136,7 +136,7 @@
 									</tr>
 									<tr>
 										<th>Discount</th>
-										<td>{{ $salesOrder->discount }}</td>
+										<td>{{ $salesOrder->discount  }}</td>
 									</tr>
 									<tr>
 										<th>Shipping:</th>
