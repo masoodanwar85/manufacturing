@@ -91,7 +91,7 @@
 										<td class="text-right">@money('($stockDetailStatus->quantity * $stockDetailStatus->salePrice)')</td>
 									</tr>
 									<?php
-										$total+= ($stockDetailStatus->quantity * $stockDetailStatus->salePrice) + ($salesOrder->shippingCharges);
+										$total+= ($stockDetailStatus->quantity * $stockDetailStatus->salePrice);
                                         $totalQty+=$stockDetailStatus->quantity;
                                         $totalDiscount += ($salesOrder->discount) + ($stockDetailStatus->quantity * $stockDetailStatus->discount);
 									?>
@@ -108,7 +108,7 @@
 							@endforeach
 							<?php
                                 $totalAmount = $total;
-								$grandTotal = $total - $totalDiscount ;
+								$grandTotal = $total + $salesOrder->shippingCharges - $totalDiscount ;
 							?>
                             <tfoot>
                                 <tr>
@@ -137,6 +137,10 @@
                                     </td>
                                     <th class="text-right" style="border-top:0px;">Discount:</th>
                                     <td class="text-right">@money('($salesOrder->discount) + ($stockDetailStatus->quantity * $stockDetailStatus->discount)')/-</td>
+                                </tr>
+                                <tr>
+                                    <th colspan="5" class="text-right" style="border-top:0px;">Shipping Charges:</th>
+                                    <td class="text-right">Rs.{{($salesOrder->shippingCharges)}}/-</td>
                                 </tr>
                                 <tr>
                                     <td rowspan="2" colspan="{{ $colspanValue }}" style="border-top:0px;">

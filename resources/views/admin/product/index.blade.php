@@ -25,6 +25,7 @@
 						<th>Name</th>
 						<th>Category</th>
 						<th>Unit</th>
+						<th>Sale Price</th>
 						<th>Purchase Price</th>
 						<th>Alert Quantity</th>
 						<th>Date Created</th>
@@ -53,6 +54,7 @@
                     { data: 'productName', name: 'productName' },
                     { data: 'categoryName', name: 'categoryName' },
                     { data: 'maximumUnitSymbol', name: 'maximumUnitSymbol' },
+                    { data: 'unitSalePrice', name: 'unitSalePrice' },
 					{ data: 'unitPurchasePrice', name: 'unitPurchasePrice' },
 					{ data: 'thresholdUnit', name: 'thresholdUnit' },
                     { data: 'dateCreated', name: 'dateCreated' },

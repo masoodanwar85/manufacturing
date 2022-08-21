@@ -80,9 +80,18 @@
 						@endif
 					</div>
 				</div>
-				<div class="form-group row {{ $errors->has('unitPurchasePrice') ? 'has-error' : '' }}">
+				<div class="form-group row {{ $errors->has('unitSalePrice') ? 'has-error' : '' }}">
+					<label for="unitPurchasePrice" class="col-sm-2 col-form-label">Sale Price: *</label>
+					<div class="col-sm-4">
+						<input type="number" name="unitSalePrice" class="form-control @if($errors->has('unitSalePrice')) is-invalid @endif" value="{{ old('unitSalePrice') }}" required>
+						@if($errors->has('unitSalePrice'))
+							<em class="invalid-feedback">
+								{{ $errors->first('unitSalePrice') }}
+							</em>
+						@endif
+					</div>
 					<label for="unitPurchasePrice" class="col-sm-2 col-form-label">Purchase Price: *</label>
-					<div class="col-sm-10">
+					<div class="col-sm-4 {{ $errors->has('unitPurchasePrice') ? 'has-error' : '' }}">
 						<input type="number" name="unitPurchasePrice" class="form-control @if($errors->has('unitPurchasePrice')) is-invalid @endif" value="{{ old('unitPurchasePrice') }}" required>
 						@if($errors->has('unitPurchasePrice'))
 							<em class="invalid-feedback">

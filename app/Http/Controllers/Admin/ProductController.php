@@ -54,6 +54,9 @@ class ProductController extends Controller
             $table->editColumn('productName', function ($row) {
                 return $row->productName ? $row->productName : "";
             });
+            $table->editColumn('unitSalePrice', function ($row) {
+                return $row->unitSalePrice ? $row->unitSalePrice : "0";
+            });
 			$table->editColumn('unitPurchasePrice', function ($row) {
                 return $row->unitPurchasePrice ? $row->unitPurchasePrice : "0";
             });
@@ -107,7 +110,7 @@ class ProductController extends Controller
         try {
             $request->request->add(['createdByUserID' => Auth::id()]);
             $request->request->add(['minimumUnitID' => $request->maximumUnitID]);
-            $request->request->add(['unitSalePrice' => 0]);
+//            $request->request->add(['unitSalePrice' => 0]);
             $product = Product::create($request->all());
 
             if ($request->get('isBOM') == 1) {

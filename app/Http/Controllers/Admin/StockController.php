@@ -105,6 +105,7 @@ class StockController extends Controller
      */
     public function store(Request $request)
     {
+//        dd($request->all());
 		DB::beginTransaction();
 		try {
 			$request->request->add(['createdByUserID' => Auth::id()]);
@@ -121,19 +122,20 @@ class StockController extends Controller
 					'quantity' => $updatedQty,
 					'quantityUnits' => $updatedUnits,
 					'godownID' => $request->godownID[$idx],
-					'purchasePrice' => $request->perUnitPrice[$idx]
+					'purchasePrice' => $request->salePrice[$idx]
 				]);
 				$stockDetail->stockDetailStatuses()->create([
 					'statusID' => \Config::get('constants.stock_status.quetta_godown'),
 					'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
 					'quantity' => $updatedQty,
                     'godownID' => $request->godownID[$idx],
+					'salePrice' => $request->salePrice[$idx],
 					'quantityUnits' => $updatedUnits,
 					'createdByUserID' => Auth::id()
 				]);
 
 				if ($request->isUpdateProductPrice[$idx] == 1) {
-					\App\Models\Product::find($productID)->update(['unitPurchasePrice' => $request->perUnitPrice[$idx]]);
+					\App\Models\Product::find($productID)->update(['unitPurchasePrice' => $request->salePrice[$idx]]);
 				}
 			}
 			DB::commit();

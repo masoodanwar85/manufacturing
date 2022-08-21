@@ -101,7 +101,7 @@
 		<span class="separator"></span>
         <div class="form-group">
             <div class="col-sm-12">
-        		<input type="text" name="perUnitPrice[]" value="" class="form-control" min="1" placeholder="Unit Price" required>
+        		<input type="text" name="salePrice[]" value="" class="form-control" min="1" placeholder="Unit Price" required>
         	</div>
         </div>
 		<span class="separator"></span>

@@ -69,13 +69,13 @@
         @foreach ($products as $product)
         "{{$product->productID}}" : {
             "productName" : "{{$product->productName}}",
-            "purchasePrice" : "@money('$product->purchasePrice','')",
+            "salePrice" : "@money('$product->salePrice','')",
+            "purchasePrice": "@money('$product->purchasePrice','')",
             "quantityAvailable" : "{{$product->quantityAvailable}}",
 			"unitsInProduct" : "{{$product->unitsInProduct}}"
         },
         @endforeach
     };
-
 	var godownProductsInfo = {
 		<?php
 			$selectedProductID = 0;
@@ -196,7 +196,6 @@
         } else {
             total = 0;
         }
-
         trElem.find('input[name="total[]"]').val(total);
 
         calculateGrandTotal(trElem);
@@ -264,27 +263,30 @@
         var jQElem = $(selectProduct);
         var productID = jQElem.find(':selected').val();
 		var trElem = jQElem.parent().parent().parent().parent();
-		var quantityAvailable, purchasePrice,godownHTML,totalUnitsAvailableText,unitsInProduct;
+		var quantityAvailable,purchasePrice, salePrice,godownHTML,totalUnitsAvailableText,unitsInProduct;
 		if (productID == '') {
 			quantityAvailable = '';
-			purchasePrice = '';
+            purchasePrice = '';
+            salePrice = '';
 			godownHTML = '';
 			totalUnitsAvailableText = '';
 			unitsInProduct = 0;
 		} else {
-			purchasePrice = productsInfo[productID].purchasePrice;
+            purchasePrice = productsInfo[productID].purchasePrice;
+            salePrice = productsInfo[productID].salePrice;
 			quantityAvailable = productsInfo[productID].quantityAvailable;
 			godownHTML = makeProductGodownsDD(productID);
 			totalUnitsAvailableText = productUnitText(productID);
 			unitsInProduct = productsInfo[productID].unitsInProduct;
 		}
+        console.log(productsInfo[productID]);
 		trElem.find('.godown').html(godownHTML);
         trElem.find('select[name="godownID[]"]').prop('selectedIndex',1);
 		trElem.find('input[name="unitsInProduct[]"]').val(unitsInProduct);
 		trElem.find('.totalUnitsAvailable').text(totalUnitsAvailableText);
 		trElem.find('input[name="quantity[]"]').attr('max',quantityAvailable);
-		trElem.find('input[name="purchasePrice[]"]').val(purchasePrice);
-		trElem.find('input[name="salePrice[]"]').val(purchasePrice);
+		// trElem.find('input[name="purchasePrice[]"]').val(purchasePrice);
+		trElem.find('input[name="salePrice[]"]').val(salePrice);
 		// updateQtyUnits(selectProduct);
 		// calculateProductRowTotal(selectProduct);
 
