@@ -63,7 +63,8 @@ class Stock extends Model
 				(totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity - totalManufacturingQuantity) AS inStockQuantity,
 				(totalPurchasedUnits + totalGoodSalesReturnUnits - totalSoldUnits - totalDamagedUnits - totalBadSalesReturnUnits - totalManufacturingQuantity) AS inStockUnits,
 				lastPurchasePrice,
-                ((totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity - totalManufacturingQuantity) * lastPurchasePrice) AS inStockTotalPrice
+				salePrice,
+                ((totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity - totalManufacturingQuantity) * salePrice) AS inStockTotalPrice
 			FROM (
 				SELECT
 					measurementUnit.symbol,
@@ -83,7 +84,8 @@ class Stock extends Model
 					SUM(temp.quantityGoodSalesReturn) AS totalGoodSalesReturnQuantity,
 					SUM(temp.unitsGoodSalesReturn) AS totalGoodSalesReturnUnits,
                     SUM(temp.quantityManufacturing) AS totalManufacturingQuantity,
-					product.unitPurchasePrice AS lastPurchasePrice
+					product.unitPurchasePrice AS lastPurchasePrice,
+					product.unitSalePrice AS salePrice
 				FROM (
 					SELECT
 						stockDetail.productID,
@@ -390,14 +392,14 @@ class Stock extends Model
 		}
 		$rawSQL = "
 			SELECT Temp.productID,Temp.unitsInProduct,Temp.productName,Temp.purchasePrice,Temp.salePrice,SUM(Temp.totalQty) AS quantityAvailable,category.categoryName FROM (
-				SELECT product.categoryID,product.unitsInProduct,product.productID,product.productName,product.unitPurchasePrice,product.unitSalePrice AS salePrice,SUM(stockDetailStatus.quantity) AS totalQty
+				SELECT product.categoryID,product.unitsInProduct,product.productID,product.productName,product.unitPurchasePrice AS purchasePrice,product.unitSalePrice AS salePrice,SUM(stockDetailStatus.quantity) AS totalQty
 				FROM product
 				INNER JOIN stockDetail ON stockDetail.productID = product.productID
 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
 				WHERE stockDetailStatus.statusID IN (" . \Config::get('constants.stock_status.isAvailableForSale') . ")" . $whereClause . "
 				GROUP BY product.productID
 				UNION
-				SELECT product.categoryID,product.unitsInProduct,product.productID,product.productName,product.unitPurchasePrice,product.unitSalePrice,(SUM(stockDetailStatus.quantity) * -1) AS totalQty
+				SELECT product.categoryID,product.unitsInProduct,product.productID,product.productName,product.unitPurchasePrice AS purchasePrice,product.unitSalePrice AS salePrice,(SUM(stockDetailStatus.quantity) * -1) AS totalQty
 				FROM product
 				INNER JOIN stockDetail ON stockDetail.productID = product.productID
 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID

@@ -67,8 +67,11 @@ class StockController extends Controller
 				$extra = $row->unitsInProduct > 1 ? " Qty -- " . $row->totalGoodSalesReturnUnits . ($row->symbol == "Qty" ? " Items" : " " . $row->symbol) : "";
 				return $row->totalGoodSalesReturnQuantity > 0 ? $row->totalGoodSalesReturnQuantity . $extra : "0";
             });
-            $table->editColumn('lastPurchasePrice', function ($row) {
-                return \App\Services\CurrencyService::getCurrencyFormatted($row->lastPurchasePrice);
+//            $table->editColumn('lastPurchasePrice', function ($row) {
+//                return \App\Services\CurrencyService::getCurrencyFormatted($row->lastPurchasePrice);
+//            });
+            $table->editColumn('salePrice', function ($row) {
+                return \App\Services\CurrencyService::getCurrencyFormatted($row->salePrice);
             });
             $table->editColumn('totalPriceInStock', function ($row) use ($grandTotal) {
                 $grandTotal+=$row->inStockTotalPrice;

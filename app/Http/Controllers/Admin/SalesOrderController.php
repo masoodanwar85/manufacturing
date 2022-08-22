@@ -123,7 +123,6 @@ class SalesOrderController extends Controller
     {
 		abort_if(Gate::denies('sales_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 		$products = \App\Models\Stock::getProducts();
-		dd($products);
 		$godownProducts = \App\Models\Stock::getGodownProducts();
 		$now = date('Y-m-d');
 

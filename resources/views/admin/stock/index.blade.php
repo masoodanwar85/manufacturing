@@ -25,8 +25,10 @@
 						@endif
 						<th>Good Returns</th>
 						<th>Bad Returns</th>
-						<th>Last Purchase Price</th>
+                        <th>Sale Price</th>
                         <th>Stock Total Price</th>
+{{--						<th>Last Purchase Price</th>--}}
+{{--                        <th>Stock Total Price</th>--}}
 						<th>Action</th>
 					</tr>
 				</thead>
@@ -65,7 +67,8 @@
 					@endif
 					{ data: 'totalGoodSalesReturn', name: 'totalGoodSalesReturn' },
 					{ data: 'totalBadSalesReturn', name: 'totalBadSalesReturn' },
-					{ data: 'lastPurchasePrice', name: 'lastPurchasePrice' },
+					{ data: 'salePrice', name: 'salePrice' },
+					// { data: 'lastPurchasePrice', name: 'lastPurchasePrice' },
                     { data: 'totalPriceInStock', name: 'totalPriceInStock' },
                     { data: 'actions', name: 'Actions' }
                 ],

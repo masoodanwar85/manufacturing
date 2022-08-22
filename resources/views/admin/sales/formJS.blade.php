@@ -285,7 +285,7 @@
 		trElem.find('input[name="unitsInProduct[]"]').val(unitsInProduct);
 		trElem.find('.totalUnitsAvailable').text(totalUnitsAvailableText);
 		trElem.find('input[name="quantity[]"]').attr('max',quantityAvailable);
-		// trElem.find('input[name="purchasePrice[]"]').val(purchasePrice);
+		trElem.find('input[name="purchasePrice[]"]').val(purchasePrice);
 		trElem.find('input[name="salePrice[]"]').val(salePrice);
 		// updateQtyUnits(selectProduct);
 		// calculateProductRowTotal(selectProduct);
