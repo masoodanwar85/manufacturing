@@ -8,6 +8,7 @@ use Gate;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
+use function GuzzleHttp\Promise\all;
 
 class ReportController extends Controller
 {
@@ -248,5 +249,58 @@ class ReportController extends Controller
         }
 
         return view('admin.reports.rangeSummary', compact('salesAgents','salesAgentID','startDate','endDate','finalOrders','aryProducts','salesAgentName'));
+    }
+
+    public function supplierSummary(Request $request) {
+        $startDate = date('Y-m-d');
+        $endDate = date('Y-m-d');
+        $supplierID = "";
+
+        if (!empty($request->startDate) && strlen($request->startDate) && !empty($request->endDate) && strlen($request->endDate)) {
+            $startDate = $request->startDate;
+            $endDate = $request->endDate;
+        }
+        if (!empty($request->supplierID) && strlen($request->supplierID)) {
+            $supplierID = $request->supplierID;
+        }
+
+        $suppliers = \App\Models\Supplier::all();
+
+        $supplierName = "";
+
+        $finalOrders = [];
+        $aryProducts = [];
+
+        $products = \App\Models\Product::without('category')->get(['productID','productName'])->sortBy('productName')->toArray();
+        // $orders = \App\Models\SalesOrder::without(['customer','salesOrderDetails'])->where('salesAgentID',$salesAgentID)->whereBetween('orderDate',[$startDate,$endDate])->get('salesOrderID')->sortBy('salesOrderID');
+        $startDate = Carbon::parse($startDate);
+        $endDate = Carbon::parse($endDate);
+
+        if (strlen($startDate) && strlen($endDate) && is_numeric($supplierID)) {
+
+            $periods = $startDate->range($endDate, 1, 'day')->toArray();
+
+            foreach ($products as $product) {
+                $aryProducts[$product['productID']]['productName'] = $product['productName'];
+                $aryProducts[$product['productID']]['productID'] = $product['productID'];
+                $aryProducts[$product['productID']]['quantity'] = 0;
+                $aryProducts[$product['productID']]['sum'] = 0;
+            }
+
+            foreach ($periods as $period) {
+                $finalOrders[$period->toDateString()]['products'] = $aryProducts;
+                $finalOrders[$period->toDateString()]['totalAmount'] = 0;
+            }
+
+            $summary = \App\Models\Product::getSupplierAgentSummary($supplierID, $startDate, $endDate);
+            foreach ($summary as $thisSummary) {
+                $finalOrders[$thisSummary->purchaseOrderDate]['totalAmount'] += $thisSummary->total;
+                $finalOrders[$thisSummary->purchaseOrderDate]['products'][$thisSummary->productID]['quantity'] += $thisSummary->quantity;
+            }
+
+            $supplierName = \App\Models\Supplier::find($supplierID)->supplierName;
+        }
+
+        return view('admin.reports.supplierSummary', compact('suppliers','supplierID','startDate','endDate','finalOrders','aryProducts','supplierName'));
     }
 }

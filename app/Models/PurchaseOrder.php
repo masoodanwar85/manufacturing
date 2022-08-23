@@ -49,4 +49,6 @@ class PurchaseOrder extends Model
     {
         return $this->hasOne('App\Models\Stock','purchaseOrderID','purchaseOrderID');
     }
+
+
 }

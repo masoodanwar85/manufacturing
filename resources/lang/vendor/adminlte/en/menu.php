@@ -48,6 +48,7 @@ return [
     'cashInOut'						=> 'Cash In/Out',
     'day_summary'   				=> 'Day Summary',
     'detail_summary'				=> 'Detail Summary',
+    'supplier_summary'              => 'Supplier Summary',
     'accounts'						=> 'Accounts',
 	'sales'							=> 'Sales',
 	'duplicates'					=> 'Duplicate Bills',

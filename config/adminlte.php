@@ -449,6 +449,13 @@ return [
                     'can'  => ['report_read'],
 					'active' => ['admin/report/rangeSummary']
                 ],
+                [
+                    'text' => 'supplier_summary',
+                    'url'  => 'admin/report/supplierSummary',
+                    'icon' => 'fas fa-fw fa-hand-holding-usd',
+                    'can'  => ['report_read'],
+					'active' => ['admin/report/supplierSummary']
+                ],
 				[
                     'text' => 'duplicates',
                     'url'  => 'admin/report/duplicates',

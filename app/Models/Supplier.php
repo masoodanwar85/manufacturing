@@ -47,4 +47,5 @@ class Supplier extends Model
 		";
 		return DB::select($rawSQL);
 	}
+
 }
