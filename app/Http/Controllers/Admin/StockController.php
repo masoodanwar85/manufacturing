@@ -125,7 +125,7 @@ class StockController extends Controller
 					'quantity' => $updatedQty,
 					'quantityUnits' => $updatedUnits,
 					'godownID' => $request->godownID[$idx],
-					'purchasePrice' => $request->salePrice[$idx]
+					'purchasePrice' => 0
 				]);
 				$stockDetail->stockDetailStatuses()->create([
 					'statusID' => \Config::get('constants.stock_status.quetta_godown'),
@@ -138,7 +138,7 @@ class StockController extends Controller
 				]);
 
 				if ($request->isUpdateProductPrice[$idx] == 1) {
-					\App\Models\Product::find($productID)->update(['unitPurchasePrice' => $request->salePrice[$idx]]);
+					\App\Models\Product::find($productID)->update(['unitSalePrice' => $request->salePrice[$idx]]);
 				}
 			}
 			DB::commit();
