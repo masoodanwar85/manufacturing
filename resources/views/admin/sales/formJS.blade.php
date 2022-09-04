@@ -279,8 +279,8 @@
 			totalUnitsAvailableText = productUnitText(productID);
 			unitsInProduct = productsInfo[productID].unitsInProduct;
 		}
-        console.log(productsInfo[productID]);
-		trElem.find('.godown').html(godownHTML);
+
+        trElem.find('.godown').html(godownHTML);
         trElem.find('select[name="godownID[]"]').prop('selectedIndex',1);
 		trElem.find('input[name="unitsInProduct[]"]').val(unitsInProduct);
 		trElem.find('.totalUnitsAvailable').text(totalUnitsAvailableText);
@@ -288,7 +288,7 @@
 		trElem.find('input[name="purchasePrice[]"]').val(purchasePrice);
 		trElem.find('input[name="salePrice[]"]').val(salePrice);
 		// updateQtyUnits(selectProduct);
-		// calculateProductRowTotal(selectProduct);
+		calculateProductRowTotal(selectProduct);
 
         // if (checkProductSelected(productID)) {
 		//
