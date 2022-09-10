@@ -93,7 +93,7 @@
 									<?php
 										$total+= ($stockDetailStatus->quantity * $stockDetailStatus->salePrice);
                                         $totalQty+=$stockDetailStatus->quantity;
-                                        $totalDiscount += ($salesOrder->discount) + ($stockDetailStatus->quantity * $stockDetailStatus->discount);
+                                        $totalDiscount += $stockDetailStatus->quantity * $stockDetailStatus->discount;
 									?>
 								@endforeach
 							</tbody>
@@ -108,7 +108,8 @@
 							@endforeach
 							<?php
                                 $totalAmount = $total;
-								$grandTotal = $total + $salesOrder->shippingCharges - $totalDiscount ;
+                                $totalDiscount = $salesOrder->discount + $totalDiscount;
+								$grandTotal = $total + $salesOrder->shippingCharges - $totalDiscount;
 							?>
                             <tfoot>
                                 <tr>
@@ -136,7 +137,7 @@
                                         <span style="float:left;">Printed On: {{ date('d-M-Y H:i:s') }}</span>
                                     </td>
                                     <th class="text-right" style="border-top:0px;">Discount:</th>
-                                    <td class="text-right">@money('($salesOrder->discount) + ($stockDetailStatus->quantity * $stockDetailStatus->discount)')/-</td>
+                                    <td class="text-right">@money('$totalDiscount')/-</td>
                                 </tr>
                                 <tr>
                                     <th colspan="5" class="text-right" style="border-top:0px;">Shipping Charges:</th>

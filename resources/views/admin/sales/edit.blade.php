@@ -129,7 +129,7 @@
 									<tbody>
 										<?php
 											$total = 0;
-                                            $discount = 0;
+                                            $totalDiscount = $salesOrder->discount;
 											$paid = 0;
 										?>
 										@foreach($salesOrder->stockDetailStatuses as $stockDetailStatus)
@@ -139,6 +139,7 @@
 												if (count($aryProduct)) {
 													$unitsAvailability = $aryProduct[0]->quantityAvailable;
 												}
+                                                $totalDiscount += $stockDetailStatus->quantity * $stockDetailStatus->discount;
 											?>
 											<tr>
 												<td>
@@ -258,7 +259,7 @@
 										</tr>
 										<tr>
 											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Discount:</td>
-											<td colspan="2" id="discountTotal" class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;{{($salesOrder->discount) + ($stockDetailStatus->quantity * $stockDetailStatus->discount)}}</td>
+											<td colspan="2" id="discountTotal" class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;{{$totalDiscount}}</td>
 										</tr>
 										<tr>
 											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Shipping:</td>
@@ -266,7 +267,7 @@
 										</tr>
 										<tr>
 											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Grand Total:</td>
-											<td colspan="2" id="gTotal" class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;{{ $total - $salesOrder->discount + $salesOrder->shippingCharges - (($salesOrder->discount) + ($stockDetailStatus->quantity * $stockDetailStatus->discount))}}.00</td>
+											<td colspan="2" id="gTotal" class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;{{ $total - $totalDiscount}}.00</td>
 										</tr>
 										<tr>
 											<td colspan="{{ $colspanValue-1 }}" class="font-weight-bold text-right">Paid:</td>
@@ -277,7 +278,7 @@
 										<tr>
 											<td colspan="{{ $colspanValue-2 }}" class="font-weight-bold text-right font-urdu" id="balanceInUrdu"></td>
 											<td class="font-weight-bold text-right">Balance:</td>
-											<td colspan="2" id="balance" class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;{{ $total - $salesOrder->discount + $salesOrder->shippingCharges - (($salesOrder->discount) + ($stockDetailStatus->quantity * $stockDetailStatus->discount)) - $paid}}.00</td>
+											<td colspan="2" id="balance" class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;{{ $total - $totalDiscount - $paid}}.00</td>
 										</tr>
 
 									</tfoot>
