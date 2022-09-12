@@ -13,11 +13,16 @@ class Product extends Model
     protected $primaryKey = 'productID';
 	protected $with = ['category'];
     public $timestamps = false;
-    protected $fillable = ['productName','categoryID','unitsInProduct','isUnitsInProductFixed','unitPurchasePrice','unitSalePrice','isBOM','maximumUnitID','minimumUnitID','thresholdUnit','isSoldPackOrLoose','image','createdByUserID'];
+    protected $fillable = ['productName','productTypeID','categoryID','unitsInProduct','isUnitsInProductFixed','unitPurchasePrice','unitSalePrice','isBOM','maximumUnitID','minimumUnitID','thresholdUnit','isSoldPackOrLoose','image','createdByUserID'];
 
     public function category()
     {
         return $this->belongsTo('App\Models\Category','categoryID','categoryID');
+    }
+
+    public function type()
+    {
+        return $this->belongsTo('App\Models\ProductType','productTypeID','productTypeID');
     }
 
     public function maximumUnit()

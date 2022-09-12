@@ -23,7 +23,8 @@
 				<thead>
 					<tr>
 						<th>Name</th>
-						<th>Category</th>
+						<th>Type</th>
+                        <th>Category</th>
 						<th>Unit</th>
 						<th>Sale Price</th>
 						<th>Purchase Price</th>
@@ -52,6 +53,7 @@
                 ajax: "{{ route('product.index') }}",
                 columns: [
                     { data: 'productName', name: 'productName' },
+                    { data: 'productType', name: 'productType' },
                     { data: 'categoryName', name: 'categoryName' },
                     { data: 'maximumUnitSymbol', name: 'maximumUnitSymbol' },
                     { data: 'unitSalePrice', name: 'unitSalePrice' },

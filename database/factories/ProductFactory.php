@@ -24,6 +24,7 @@ class ProductFactory extends Factory
     {
         return [
 			'categoryID' => 1,
+            'productTypeID' => 4,
 			'minimumUnitID' => $this->faker->numberBetween(1,2),
 			'maximumUnitID' => $this->faker->numberBetween(1,2),
 			'productName' => $this->faker->word,
