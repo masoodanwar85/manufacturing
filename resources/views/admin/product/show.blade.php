@@ -25,6 +25,10 @@
 					{{ $product->productName }}
 				</div>
 				<div class="col">
+					<div class="font-weight-bold">Type:</div>
+					{{ $product->type->productType }}
+				</div>
+                <div class="col">
 					<div class="font-weight-bold">Category:</div>
 					{{ $product->category->categoryName }}
 				</div>

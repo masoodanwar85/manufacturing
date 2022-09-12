@@ -27,9 +27,23 @@
 						@endif
 					</div>
 				</div>
-				<div class="form-group row {{ $errors->has('categoryID') ? 'has-error' : '' }}">
-					<label for="categoryID" class="col-sm-2 col-form-label">Category: *</label>
-					<div class="col-sm-10">
+				<div class="form-group row {{ $errors->has('productTypeID') ? 'has-error' : '' }}">
+					<label for="categoryID" class="col-sm-2 col-form-label">Product Type: *</label>
+					<div class="col-sm-4">
+						<select name="productTypeID" class="form-control select2 @if($errors->has('productTypeID')) is-invalid @endif" required>
+							<option value="">Please Select Type</option>
+							@foreach($productTypes as $idx => $productType)
+								<option value="{{ $productType->productTypeID }}" {{ old('productTypeID') == $productType->productTypeID ? 'selected' : '' }}>{{ $productType->productType }}</option>
+							@endforeach
+						</select>
+						@if($errors->has('productTypeID'))
+							<em class="invalid-feedback">
+								{{ $errors->first('productTypeID') }}
+							</em>
+						@endif
+					</div>
+                    <label for="categoryID" class="text-right col-sm-2 col-form-label">Category: *</label>
+					<div class="col-sm-4">
 						<select name="categoryID" class="form-control select2 @if($errors->has('categoryID')) is-invalid @endif" required>
 							<option value="">Please Select Category</option>
 							@foreach($categories as $idx => $category)

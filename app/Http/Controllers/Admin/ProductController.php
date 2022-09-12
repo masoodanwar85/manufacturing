@@ -25,9 +25,10 @@ class ProductController extends Controller
 		abort_if(Gate::denies('product_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if ($request->ajax()) {
             $query = DB::table('product')
+                        ->join('productType','product.productTypeID','=','productType.productTypeID')
                         ->join('category','product.categoryID','=','category.categoryID')
 						->join('measurementUnit','product.maximumUnitID','=','measurementUnit.unitID')
-                        ->select('product.*','measurementUnit.symbol as maximumUnitSymbol','category.categoryName')
+                        ->select('product.*','measurementUnit.symbol as maximumUnitSymbol','category.categoryName','productType.productType')
                         ->get();
 
             $table = Datatables::of($query);
@@ -60,6 +61,9 @@ class ProductController extends Controller
             $table->editColumn('categoryName', function ($row) {
                 return $row->categoryName ? $row->categoryName : "";
             });
+            $table->editColumn('productType', function ($row) {
+                return $row->productType;
+            });
 			$table->editColumn('thresholdUnit', function ($row) {
                 return $row->thresholdUnit ? $row->thresholdUnit : "0";
             });
@@ -85,13 +89,14 @@ class ProductController extends Controller
     public function create()
     {
 		abort_if(Gate::denies('product_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $productTypes = \App\Models\ProductType::all()->sortBy('productType');
         $categories = \App\Models\Category::all()->sortBy('categoryName');
 		$measurementUnits = \App\Models\MeasurementUnit::all()->sortBy('unitID');
 
 		$products = \App\Models\Product::with('maximumUnit')->get()->sortBy('productName');
         $BOMExpense = \App\Models\AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.expense') . ' AND isShowForBOMExpense = 1')->get();
 
-		return view('admin.product.create',compact('categories','measurementUnits','products','BOMExpense'));
+		return view('admin.product.create',compact('categories','measurementUnits','products','BOMExpense','productTypes'));
     }
 
     /**
@@ -166,6 +171,7 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
 		abort_if(Gate::denies('product_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $productTypes = \App\Models\ProductType::all()->sortBy('productType');
         $categories = \App\Models\Category::all()->sortBy('categoryName');
 		$measurementUnits = \App\Models\MeasurementUnit::all()->sortBy('unitID');
 		$products = \App\Models\Product::with('maximumUnit')->get()->sortBy('productName');
@@ -173,7 +179,7 @@ class ProductController extends Controller
             $product->load(['BOM.items','BOM.expenses']);
         }
         $BOMExpense = \App\Models\AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.expense') . ' AND isShowForBOMExpense = 1')->get();
-        return view('admin.product.edit', compact('product','categories','measurementUnits','products','BOMExpense'));
+        return view('admin.product.edit', compact('product','categories','measurementUnits','products','BOMExpense','productTypes'));
     }
 
     /**

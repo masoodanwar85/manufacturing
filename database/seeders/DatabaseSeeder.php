@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
 			StockStatusSeeder::class,
 			BankInstrumentTypeSeeder::class,
 			BankInstrumentStatusSeeder::class,
+            ProductTypeSeeder::class,
 			CategorySeeder::class,
 			ProductSeeder::class,
 			BatchSeeder::class,
