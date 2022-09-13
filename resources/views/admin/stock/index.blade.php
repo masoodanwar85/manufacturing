@@ -13,7 +13,22 @@
 			</h3>
 		</div>
 		<div class="card-body">
-			<table class=" table table-bordered table-striped table-hover ajaxTable datatable datatable-stock">
+            <form class="form-horizontal" role="form" method="post" id="stockSearch">
+                <div class="form-group row">
+                    <div class="col-2">
+                        <select name="productTypeID" class="form-control">
+                            <option value="">All ProductTypes</option>
+                            @foreach ($productTypes as $productType)
+                                <option value="{{ $productType->productTypeID }}" {!! $productType->productTypeID == $productTypeID ? 'selected' : '' !!}>{{ $productType->productType }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <button type="button" onclick="applyFilter();" class="btn btn-primary" name="button">Filter</button>
+                    </div>
+                </div>
+            </form>
+			<table class="table table-bordered table-striped table-hover ajaxTable datatable datatable-stock" id="datatable-stock">
 				<thead>
 					<tr>
 						<th>Products</th>
@@ -50,13 +65,27 @@
 @section('plugins.Datatables', true)
 @section('js')
     <script>
+        function applyFilter() {
+            $('#datatable-stock').DataTable().ajax.reload();
+        }
+
         $(function () {
             let dtOverrideGlobals = {
                 processing: true,
                 serverSide: true,
                 retrieve: true,
                 aaSorting: [],
-                ajax: "{{ route('stock.index') }}",
+                ajax: {
+                    url: "{{ route('stock.index') }}",
+                    method: 'GET',
+                    data: function(d) {
+                        Object.assign(d,$('#stockSearch').serializeArray().map(function(x){this[x.name] = x.value; return this;}.bind({}))[0]);
+                        return d;
+                    }
+                },
+                dataSrc: function(json) {
+                    return json.data;
+                },
                 columns: [
 					{ data: 'product', name: 'product' },
                     { data: 'purchased', name: 'purchased' },

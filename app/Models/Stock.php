@@ -30,12 +30,15 @@ class Stock extends Model
         return $this->belongsTo('App\Models\ProductionBOM','productionBOMID','productionBOMID');
     }
 
-	public static function getStock($productID = null,$isThresholdStock = FALSE,$isGroupByGodown = FALSE, $godownID = null) {
+	public static function getStock($productID = null,$isThresholdStock = FALSE,$isGroupByGodown = FALSE, $godownID = null, $productTypeID = null) {
         DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
 		$whereClause = "WHERE 1=1";
 
 		if (is_numeric($productID) && $productID > 0) {
 			$whereClause .= " AND productID = " . (int) $productID;
+		}
+        if (is_numeric($productTypeID) && $productTypeID > 0) {
+			$whereClause .= " AND productTypeID = " . (int) $productTypeID;
 		}
 		if ($isThresholdStock == TRUE) {
 			$whereClause .= " AND (totalPurchasedQuantity + totalGoodSalesReturnQuantity - totalSoldQuantity - totalDamagedQuantity - totalBadSalesReturnQuantity) < thresholdUnit";
@@ -48,6 +51,7 @@ class Stock extends Model
 				symbol,productID,
 				unitsInProduct,
 				" . ($isGroupByGodown == TRUE ? 'godownID,godownName,' : '') . "
+                productTypeID,
 				productName,
 				thresholdUnit,
 				totalPurchasedQuantity,
@@ -71,7 +75,8 @@ class Stock extends Model
 					temp.productID,
 					product.unitsInProduct,
 					" . ($isGroupByGodown == TRUE ? 'temp.godownID,godown.name as godownName,' : '') . "
-					product.productName,
+					product.productTypeID,
+                    product.productName,
 					product.thresholdUnit,
 					SUM(temp.totalQuantityPurchased) AS totalPurchasedQuantity,
 					SUM(temp.totalUnitsPurchased) AS totalPurchasedUnits,

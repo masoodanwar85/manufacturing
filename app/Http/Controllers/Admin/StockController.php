@@ -22,10 +22,13 @@ class StockController extends Controller
      */
     public function index(Request $request)
     {
-		abort_if(Gate::denies('stock_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $productTypes = \App\Models\ProductType::all()->sortBy('productType');
+
+        $productTypeID = $request->get('productTypeID');
+        abort_if(Gate::denies('stock_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if ($request->ajax()) {
 
-            $query = Stock::getStock();
+            $query = Stock::getStock(null,FALSE,FALSE,null,$productTypeID);
 
             $grandTotal = array_sum(array_column($query,'inStockTotalPrice'));
             $table = Datatables::of($query);
@@ -84,7 +87,7 @@ class StockController extends Controller
             return $table->make(true);
         }
 
-        return view('admin.stock.index');
+        return view('admin.stock.index',compact('productTypes','productTypeID'));
     }
 
     /**
