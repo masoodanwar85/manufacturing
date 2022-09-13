@@ -24,11 +24,7 @@ class StockController extends Controller
     {
         $productTypes = \App\Models\ProductType::all()->sortBy('productType');
 
-        if ($request->has('productTypeID')) {
-            $productTypeID = $request->get('productTypeID');
-        } else {
-            $productTypeID = 4;
-        }
+        $productTypeID = $request->get('productTypeID');
         abort_if(Gate::denies('stock_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if ($request->ajax()) {
 
