@@ -91,6 +91,8 @@ class SalesOrderService {
 		for ($i=0; $i < $count; $i++) {
 			// Get Product Stock Availability
 			$product = \App\Models\Stock::getProducts($request->productID[$i]);
+			// dump($request->all());
+			// dump($product);
 			$updatedQuantity = $request->quantity[$i];
 
 			if (!empty($product) && $product[0]->quantityAvailable >= $updatedQuantity) {
@@ -99,7 +101,7 @@ class SalesOrderService {
 				// $stockDetails = \App\Models\Stock::getProductStockDetails($request->productID[$i]);
 				// TODO:: Fix in case of edit sales order and there is no stock available for that product in that godown.
 				$stockDetails = \App\Models\Stock::getProductStockDetails($request->productID[$i],$request->godownID[$i]);
-
+				// dd($stockDetails);
 				if (empty($stockDetails)) {
 					DB::rollback();
 					$request->session()->flash('error', 'Form tempering observed, so order not saved.');
@@ -144,7 +146,7 @@ class SalesOrderService {
 						} elseif ($stockDetailInfo->quantityAvailable == 0) {
 							$stockDetailStatus->quantity = 0;
 						} else {
-							$quantityRemaining -= $stockDetailInfo->quantityAvailable;
+							// $quantityRemaining -= $stockDetailInfo->quantityAvailable;
 							$stockDetailStatus->quantity = $stockDetailInfo->quantityAvailable;
 						}
 
