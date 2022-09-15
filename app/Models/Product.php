@@ -173,23 +173,22 @@ class Product extends Model
     public static function getSupplierAgentSummary($supplierID, $startDate, $endDate){
         DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
         $rawSQL = "
-        SELECT
-            purchaseorder.purchaseOrderDate,
-	        purchaseorderdetail.productID,
-	        SUM(purchaseorderdetail.quantity) AS quantity ,
-	        SUM(purchaseorderdetail.quantity * purchaseorderdetail.perUnitPrice) AS total	,
-	        product.productName
-        FROM
-            purchaseorderdetail
-            INNER JOIN purchaseorder ON purchaseorder.purchaseOrderID = purchaseorderdetail.purchaseOrderDetailID
-            INNER JOIN product ON product.productID = purchaseorderdetail.productID
-            
-        WHERE purchaseorder.supplierID = ".$supplierID." AND purchaseOrderDate BETWEEN '" . $startDate . "' AND '".$endDate."' 
-        GROUP BY purchaseorder.purchaseOrderDate,
-                 purchaseorderdetail.productID
-        ORDER BY  purchaseorder.purchaseOrderDate,
-                  purchaseorderdetail.productID
-        ";
+            SELECT
+                purchaseOrder.purchaseOrderDate,
+    	        purchaseOrderDetail.productID,
+    	        SUM(purchaseOrderDetail.quantity) AS quantity ,
+    	        SUM(purchaseOrderDetail.quantity * purchaseOrderDetail.perUnitPrice) AS total,
+    	        product.productName
+            FROM
+                purchaseOrderDetail
+                INNER JOIN purchaseOrder ON purchaseOrder.purchaseOrderID = purchaseOrderDetail.purchaseOrderDetailID
+                INNER JOIN product ON product.productID = purchaseOrderDetail.productID
+
+            WHERE purchaseOrder.supplierID = ".$supplierID." AND purchaseOrderDate BETWEEN '" . $startDate . "' AND '".$endDate."'
+            GROUP BY purchaseOrder.purchaseOrderDate,
+                     purchaseOrderDetail.productID
+            ORDER BY  purchaseOrder.purchaseOrderDate,
+                      purchaseOrderDetail.productID";
 
         return DB::select($rawSQL);
 
