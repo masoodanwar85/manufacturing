@@ -292,7 +292,7 @@ class ReportController extends Controller
                 $finalOrders[$period->toDateString()]['totalAmount'] = 0;
             }
 
-            $summary = \App\Models\Product::getSupplierAgentSummary($supplierID, $startDate, $endDate);
+            $summary = \App\Models\Product::getSupplierAgentSummary($supplierID, $startDate->toDateString(), $endDate->toDateString());
             foreach ($summary as $thisSummary) {
                 $finalOrders[$thisSummary->purchaseOrderDate]['totalAmount'] += $thisSummary->total;
                 $finalOrders[$thisSummary->purchaseOrderDate]['products'][$thisSummary->productID]['quantity'] += $thisSummary->quantity;

@@ -153,7 +153,7 @@ class Product extends Model
                 stockDetail.productID,
                 product.productName,
                 SUM(stockDetailStatus.quantity) as quantity,
-                (SUM((stockDetailStatus.quantity * stockDetailStatus.saleprice)) - SUM(salesOrder.discount)) AS total
+                (SUM((stockDetailStatus.quantity * stockDetailStatus.salePrice)) - SUM(salesOrder.discount)) AS total
             FROM salesOrder
             INNER JOIN salesOrderDetail on salesOrder.salesOrderID = salesOrderDetail.salesOrderID
             INNER JOIN stockDetailStatus on stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
@@ -176,14 +176,14 @@ class Product extends Model
             SELECT
                 purchaseOrder.purchaseOrderDate,
     	        purchaseOrderDetail.productID,
-    	        SUM(purchaseOrderDetail.quantity) AS quantity ,
+    	        SUM(purchaseOrderDetail.quantity) AS quantity,
     	        SUM(purchaseOrderDetail.quantity * purchaseOrderDetail.perUnitPrice) AS total,
     	        product.productName
             FROM
-                purchaseOrderDetail
-                INNER JOIN purchaseOrder ON purchaseOrder.purchaseOrderID = purchaseOrderDetail.purchaseOrderDetailID
+                purchaseOrder
+                INNER JOIN purchaseOrderDetail ON purchaseOrder.purchaseOrderID = purchaseOrderDetail.purchaseOrderID
                 INNER JOIN product ON product.productID = purchaseOrderDetail.productID
-            WHERE purchaseOrder.supplierID = ".$supplierID." AND purchaseOrderDate BETWEEN '" . $startDate . "' AND '".$endDate."'
+            WHERE purchaseOrder.supplierID = ".$supplierID." AND purchaseOrder.purchaseOrderDate BETWEEN '" . $startDate . "' AND '".$endDate."'
             GROUP BY purchaseOrder.purchaseOrderDate,
                      purchaseOrderDetail.productID
             ORDER BY  purchaseOrder.purchaseOrderDate,
