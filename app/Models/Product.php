@@ -183,7 +183,6 @@ class Product extends Model
                 purchaseOrderDetail
                 INNER JOIN purchaseOrder ON purchaseOrder.purchaseOrderID = purchaseOrderDetail.purchaseOrderDetailID
                 INNER JOIN product ON product.productID = purchaseOrderDetail.productID
-
             WHERE purchaseOrder.supplierID = ".$supplierID." AND purchaseOrderDate BETWEEN '" . $startDate . "' AND '".$endDate."'
             GROUP BY purchaseOrder.purchaseOrderDate,
                      purchaseOrderDetail.productID
