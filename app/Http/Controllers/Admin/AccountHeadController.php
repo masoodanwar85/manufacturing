@@ -215,7 +215,7 @@ class AccountHeadController extends Controller
         $filters['customerID'] = $request->customerID;
         $filters['headID'] = $request->headID;
 
-        $filters['fromDate'] = date('Y-m-d');
+        $filters['fromDate'] = date('Y-m-01');
         $filters['toDate'] = date('Y-m-d');
         $filters['transactionTypeNumber'] = "";
         if (!empty($request->fromDate) && strtotime($request->fromDate)) {
