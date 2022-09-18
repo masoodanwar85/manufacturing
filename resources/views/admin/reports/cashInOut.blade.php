@@ -20,16 +20,14 @@
                         <label for="inputFromDate">Month</label>
                         <input type="month" class="form-control" name="monthReport" value="{{ $monthReport }}" />
                     </div>
-                    {{--
                     <div class="form-group col-md-2">
-                        <label for="inputFromDate">From Date</label>
-                        <input type="date" class="form-control" name="fromDate" value="{{ $fromDate }}" />
+                        <label for="inputFromDate">In/Out</label>
+                        <select name="isDebit" class="form-control">
+                            <option value="">All</option>
+                            <option value="1" {!! $isDebit == 1 ? 'selected' : '' !!}>Cash In Only</option>
+                            <option value="0" {!! $isDebit == 0 ? 'selected' : '' !!}>Cash Out Only</option>
+                        </select>
                     </div>
-                    <div class="form-group col-md-2">
-                        <label for="inputFromDate">To Date</label>
-                        <input type="date" class="form-control" name="toDate" value="{{ date('Y-m-d',strtotime($toDate)) }}" />
-                    </div>
-                     --}}
                     <div class="form-group col-md-2">
                         <button style="margin-top:30px;" type="submit" class="btn btn-primary">Submit</button>
                     </div>

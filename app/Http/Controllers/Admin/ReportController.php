@@ -30,7 +30,11 @@ class ReportController extends Controller
 
     public function cashInOut(Request $request) {
         abort_if(Gate::denies('report_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $aryCashAllHeadIDs = \App\Models\AccountHead::whereIn('headID',[\Config::get('constants.account_heads.cash'),\Config::get('constants.account_heads.petty_cash')])->pluck('headID')->toArray();
+
+        $ary_cash_heads = [\Config::get('constants.account_heads.cash'),\Config::get('constants.account_heads.petty_cash')];
+        $aryCashAllHeadIDs = \App\Models\AccountHead::whereIn('headID',$ary_cash_heads)->pluck('headID')->toArray();
+
+        $isDebit = $request->isDebit;
 
         $monthReport = date('Y') . '-' . date('m');
 
@@ -66,11 +70,11 @@ class ReportController extends Controller
                             ->whereBetween('transaction.transactionDate',[$obFromDate,$obToDate->format('Y-m-d')])
                             ->first()->openingBalance;
 
-        $allTransactions = \App\Models\Transaction::with('transactionDetails')->whereBetween('transactionDate',[$fromDate,$toDate])->whereHas('transactionDetails', function($query) use ($aryCashAllHeadIDs) {
-            return $query->whereIn('headID',$aryCashAllHeadIDs);
+        $allTransactions = \App\Models\Transaction::with('transactionDetails')->whereBetween('transactionDate',[$fromDate,$toDate])->whereHas('transactionDetails', function($query) use ($aryCashAllHeadIDs,$isDebit) {
+            return ($isDebit === null ? $query->whereIn('headID',$aryCashAllHeadIDs) : $query->whereIn('headID',$aryCashAllHeadIDs)->where('isDebit', $isDebit));
         })->orderBy('transactionID', 'desc')->get();
 
-        return view('admin.reports.cashInOut', compact('allTransactions','aryCashAllHeadIDs','monthReport','openingBalance','fromDate','toDate'));
+        return view('admin.reports.cashInOut', compact('allTransactions','aryCashAllHeadIDs','monthReport','openingBalance','fromDate','toDate','isDebit'));
     }
 
     public function accounts() {
