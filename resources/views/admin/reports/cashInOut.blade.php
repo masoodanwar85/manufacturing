@@ -41,8 +41,8 @@
                     <tr class="table-info">
                         <th>Date</th>
                         <th>Description</th>
-                        <th>Cash In</th>
-                        <th>Cash Out</th>
+                        <th style="text-align:right;">Cash In</th>
+                        <th style="text-align:right;">Cash Out</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -58,7 +58,7 @@
                                         {{ $transactionDetail->description }} <i class="fas fa-arrow-right"></i> {{ $transactionDetail->subHead->headName }} <i class="fas fa-arrow-right"></i>
                                         {{ $transaction->transactionTypeNumber }}
                                     </td>
-                                    <td>
+                                    <td align="right">
                                         @if ($transactionDetail->isDebit == 1)
                                             <span style="color:green;"> @toPKR('$transactionDetail->amount','$transaction->exchangeRate','')</span>
                                             <?php
@@ -70,7 +70,7 @@
                                             ?>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td align="right">
                                         @if ($transactionDetail->isDebit == 0)
                                             <span style="color:red;">-@toPKR('$transactionDetail->amount','$transaction->exchangeRate','')</span>
                                             <?php
@@ -89,14 +89,14 @@
                     <tr>
                         <td>Until {{ $monthReport }}</td>
                         <td>Opening Balance as of {{ $monthReport }}</td>
-                        <td>
+                        <td align="right">
                             @if ($openingBalance > 0)
-                                <span style="color:green;">{{ $openingBalance }}</span>
+                                <span style="color:green;">@money('$openingBalance','')</span>
                             @endif
                         </td>
-                        <td>
+                        <td align="right">
                             @if ($openingBalance < 0)
-                                <span style="color:red;">-{{ $openingBalance }}</span>
+                                <span style="color:red;">-@money('$openingBalance','')</span>
                             @endif
                         </td>
                     </tr>
