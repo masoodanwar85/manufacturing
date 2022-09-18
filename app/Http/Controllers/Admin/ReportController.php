@@ -90,6 +90,7 @@ class ReportController extends Controller
 
     public function sales(Request $request) {
         abort_if(Gate::denies('report_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $isShowProducts = $request->isShowProducts;
         if (!empty($request->isSearchByBillBook)) {
             $isSearchByBillBook = $request->isSearchByBillBook;
         } else {
@@ -131,9 +132,13 @@ class ReportController extends Controller
 			$allSalesOrder = \App\Models\SalesOrder::with('transactions')->whereBetween('orderDate',[$fromDate,$toDate])->orderBy('orderDate', 'desc')->get();
 		}
 
+        if ($isShowProducts) {
+            $allSalesOrder->load('salesOrderDetails.stockDetailStatus.stockDetail.product');
+        }
+
 		// dd(DB::getQueryLog());
 
-		return view('admin.reports.sales', compact('allSalesOrder','monthReport','isSearchByBillBook','isSearchByCashBook'));
+		return view('admin.reports.sales', compact('allSalesOrder','monthReport','isSearchByBillBook','isSearchByCashBook','isShowProducts'));
 	}
 
     public function duplicates(Request $request) {

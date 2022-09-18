@@ -32,6 +32,10 @@
                         <input type="checkbox" name="isSearchByBillBook" value="1" @if($isSearchByBillBook == 1) checked @endif />
                     </div>
                     <div class="form-group col-md-2">
+                        <label for="inputFromDate">Show Products</label>
+                        <input type="checkbox" name="isShowProducts" value="1" @if($isShowProducts == 1) checked @endif />
+                    </div>
+                    <div class="form-group col-md-2">
                         <button style="margin-top:30px;" type="submit" class="btn btn-primary">Submit</button>
                     </div>
                     <div class="form-group col-md-2">
@@ -57,7 +61,18 @@
 						<tr>
 							<td>{{ date('d-m-Y',strtotime($saleOrder->orderDate)) }}</td>
 							<td><a href="/admin/sales/{{$saleOrder->salesOrderID}}" target="_blank">{{ $saleOrder->bookSerial }}</a></td>
-							<td>{{ $saleOrder->customer->customerName }} ({{ $saleOrder->customer->address }})</td>
+							<td>
+                                {{ $saleOrder->customer->customerName }} ({{ $saleOrder->customer->address }})
+                                @if($isShowProducts == 1)
+                                    <div class="row">
+                                        @foreach($saleOrder->salesOrderDetails as $saleOrderDetail)
+                                            <div class="col-2 text-secondary">
+                                                {{ $saleOrderDetail->stockDetailStatus->stockDetail->product->productName }} (Qty: {{ $saleOrderDetail->stockDetailStatus->quantity }})
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </td>
 							<td>
 								<?php
 									$salesOrderTransactionDetails = $saleOrder->transactions[0]->transactionDetails;
