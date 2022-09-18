@@ -31,6 +31,7 @@ class SalesOrderController extends Controller
         $filters['salesAgentID'] = $request->salesAgentID;
         $filters['customerID'] = $request->customerID;
         $filters['fromDate'] = date('Y-m-d');
+        $filters['fromDate'] = Carbon::now()->subYears(10)->toDateString();
         $filters['toDate'] = date('Y-m-d');
         if (!empty($request->fromDate) && Carbon::createFromFormat('Y-m-d',$request->fromDate)) {
             $filters['fromDate'] = Carbon::createFromFormat('Y-m-d',$request->fromDate)->toDateString();
