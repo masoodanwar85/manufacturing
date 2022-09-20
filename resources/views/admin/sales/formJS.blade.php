@@ -145,7 +145,7 @@
 
     function calculateProductRowTotal(elem) {
         var jQElem = $(elem);
-        var trElem = jQElem.parent().parent().parent().parent();
+        var trElem = jQElem.closest('tr');
         var areAllValuesFilled = true;
         var quantity,purchasePrice,total,salePrice,unitsInProduct;
         var discount = 0;
@@ -234,7 +234,7 @@
     function productChanged(selectProduct) {
         var jQElem = $(selectProduct);
         var productID = jQElem.find(':selected').val();
-		var trElem = jQElem.parent().parent().parent().parent();
+		var trElem = jQElem.closest('tr');
 		var quantityAvailable, purchasePrice,godownHTML,totalUnitsAvailableText,unitsInProduct;
 		if (productID == '') {
 			quantityAvailable = '';
@@ -256,8 +256,8 @@
 		trElem.find('input[name="quantity[]"]').attr('max',quantityAvailable);
 		trElem.find('input[name="purchasePrice[]"]').val(purchasePrice);
 		trElem.find('input[name="salePrice[]"]').val(purchasePrice);
-		updateQtyUnits(selectProduct);
-		// calculateProductRowTotal(selectProduct);
+		// updateQtyUnits(selectProduct);
+		calculateProductRowTotal(selectProduct);
 
         // if (checkProductSelected(productID)) {
 		//
@@ -291,7 +291,7 @@
 
     function quantityChanged(quantityField) {
         var jQElem = $(quantityField);
-		var trElem = jQElem.parent().parent().parent().parent();
+		var trElem = jQElem.closest('tr');
         var qty = jQElem.val();
         var maxQty = jQElem.attr('max');
         if (parseInt(qty) > parseInt(maxQty)) {
