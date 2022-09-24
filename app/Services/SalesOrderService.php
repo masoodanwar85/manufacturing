@@ -144,7 +144,7 @@ class SalesOrderService {
 						} elseif ($stockDetailInfo->quantityAvailable == 0) {
 							$stockDetailStatus->quantity = 0;
 						} else {
-							$quantityRemaining -= $stockDetailInfo->quantityAvailable;
+							// $quantityRemaining -= $stockDetailInfo->quantityAvailable;
 							$stockDetailStatus->quantity = $stockDetailInfo->quantityAvailable;
 						}
 
@@ -153,7 +153,7 @@ class SalesOrderService {
 						$stockDetailStatus->save();
 						// Insert stockDetailStatusID in salesOrderDetail
 						$salesOrder->stockDetailStatuses()->attach($stockDetailStatus->stockDetailStatusID);
-						$quantityUnitsRemaining-=$stockDetailInfo->quantityAvailable;
+						$quantityRemaining-=$stockDetailInfo->quantityAvailable;
 					}
 				}
 
