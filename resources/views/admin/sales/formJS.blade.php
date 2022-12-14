@@ -133,9 +133,11 @@
 
     function bindBillDiscountChanged() {
         $('input[name="discount"]').bind('keydown mouseup keypress blur keyup change', function(e) {
-            var firstProductDD = $('#myTable tbody tr td:first-child').find('select[name="productID[]"]');
-            if (firstProductDD.val() != '') {
-                quantityChanged(firstProductDD);
+            if (!isNaN(parseInt(e.target.value))) {
+                var firstProductDD = $('#myTable tbody tr td:first-child').find('select[name="productID[]"]');
+                if (firstProductDD.val() != '') {
+                    quantityChanged(firstProductDD);
+                }
             }
         });
     }
