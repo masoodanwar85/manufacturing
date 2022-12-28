@@ -75,12 +75,16 @@
                             </td>
 							<td>
 								<?php
-									$salesOrderTransactionDetails = $saleOrder->transactions[0]->transactionDetails;
-									foreach ($salesOrderTransactionDetails as $transactionDetail) {
-										if ($transactionDetail->isDebit == 0) {
-											$currentAmount=$transactionDetail->amount;
-											$currentBalance+=$currentAmount;
+									if (isset($saleOrder->transactions[0])) {
+										$salesOrderTransactionDetails = $saleOrder->transactions[0]->transactionDetails;
+										foreach ($salesOrderTransactionDetails as $transactionDetail) {
+											if ($transactionDetail->isDebit == 0) {
+												$currentAmount=$transactionDetail->amount;
+												$currentBalance+=$currentAmount;
+											}
 										}
+									} else {
+										$currentAmount = 0;
 									}
 								?>
 								<span style="color:green;">@money('$currentAmount','')</span>
