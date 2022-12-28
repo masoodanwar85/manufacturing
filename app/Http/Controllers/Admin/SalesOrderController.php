@@ -257,4 +257,22 @@ class SalesOrderController extends Controller
 		}
         return redirect()->route('sales.index');
     }
+
+	public function returns(Request $request)
+	{
+		abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+		die('Sales Return List');
+	}
+
+	public function create_return(Request $request)
+	{
+		abort_if(Gate::denies('sales_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+		die('Sales Return Form');
+	}
+
+	public function add_return(Request $request)
+	{
+		abort_if(Gate::denies('sales_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+		die('Sales Return Add Action...');
+	}
 }

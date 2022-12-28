@@ -44,6 +44,9 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
     Route::post('stock/transfer', [App\Http\Controllers\Admin\StockController::class,'transfer'])->name('stock.transfer');
 	Route::get('sales/{salesOrderID}/invoice', [App\Http\Controllers\Admin\SalesOrderController::class, 'invoice'])->name('sales.invoice');
 	Route::get('sales/{salesOrderID}/invoicePDF', [App\Http\Controllers\Admin\SalesOrderController::class, 'invoicePDF'])->name('sales.invoicePDF');
+	Route::get('sales/returns', [App\Http\Controllers\Admin\SalesOrderController::class, 'returns'])->name('sales.returns');
+	Route::get('sales/returns/create', [App\Http\Controllers\Admin\SalesOrderController::class, 'create_return'])->name('sales.create_return');
+	Route::post('sales/returns/add', [App\Http\Controllers\Admin\SalesOrderController::class, 'add_return'])->name('sales.add_return');
 	Route::get('customer/{customerID}/balance', [App\Http\Controllers\Admin\CustomerController::class, 'getBalance'])->name('customer.balance');
     Route::get('staff/{staffID}/balance', [App\Http\Controllers\Admin\StaffController::class, 'getBalance'])->name('staff.balance');
 	Route::get('supplier/{supplierID}/balance', [App\Http\Controllers\Admin\SupplierController::class, 'getBalance'])->name('supplier.balance');

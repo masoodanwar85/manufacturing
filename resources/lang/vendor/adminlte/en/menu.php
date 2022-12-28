@@ -36,6 +36,7 @@ return [
 	// 'sales_management'				=> 'SALES MANAGEMENT',
     'sales_management'				=> ' ---- SALES ----',
 	'sales_order'					=> 'Sales Order',
+	'sales_returns'					=> 'Sales Returns',
 	'customers'						=> 'Customers',
 	'payment'						=> 'Payment',
 	'receipt'						=> 'Receipt',

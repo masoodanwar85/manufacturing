@@ -323,6 +323,13 @@ return [
                     'can'  => ['sales_read','sales_create'],
 					'active' => ['admin/sales','regex:@^admin/sales/.*$@']
                 ],
+				[
+                    'text' => 'sales_returns',
+                    'url'  => 'admin/sales/returns',
+                    'icon' => 'fas fa-fw fa-undo',
+                    'can'  => ['sales_read','sales_create'],
+					'active' => ['admin/sales/returns','regex:@^admin/sales/returns/.*$@']
+                ],
                 [
                     'text' => 'customers',
                     'url'  => 'admin/customer',
