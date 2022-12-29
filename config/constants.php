@@ -70,6 +70,7 @@
             'manufacturing' => 6,
 			'isAvailableForSale' => '1,2',
 			'aryIsAvailableForSale' => [1,2],
+            'aryIsReturn' => [2,4],
 			'aryIsNotAvailableForSale' => [3,4,5,6],
 			'isNotAvailableForSale' => '3,4,5,6',
 			'isIncludeCustomers' => '2,3,4'

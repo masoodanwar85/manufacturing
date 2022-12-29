@@ -62,7 +62,7 @@ class SalesOrder extends Model
             $strWhere .= " AND temp.customerID = " . $filters['customerID'];
         }
         $rawSQL = "
-			SELECT temp.salesOrderID,temp.invoiceNumber,temp.bookSerial,temp.orderDate,temp.discount,temp.shippingCharges,temp.paymentDueDate,SUM(totalAmount) AS totalAmount,SUM(totalPaid) AS totalPaid,(SUM(totalAmount) - SUM(totalPaid)) AS remaining,customer.customerID,customer.customerName,customer.shopName
+			SELECT temp.salesOrderID,temp.invoiceNumber,temp.bookSerial,temp.orderDate,temp.discount,temp.shippingCharges,temp.paymentDueDate,(SUM(totalAmount) - SUM(salesReturnAmount)) AS totalAmount,SUM(totalPaid) AS totalPaid,(SUM(totalAmount) - SUM(salesReturnAmount) - SUM(totalPaid)) AS remaining,customer.customerID,customer.customerName,customer.shopName
 			FROM (
 				SELECT
 					salesOrder.salesOrderID,
@@ -75,7 +75,8 @@ class SalesOrder extends Model
 					salesOrder.shippingCharges,
                     salesOrder.paymentDueDate,
 					SUM(transactionDetail.amount) AS totalAmount,
-					0 AS totalPaid
+					0 AS totalPaid,
+                    0 AS salesReturnAmount
 				FROM salesOrder
 				INNER JOIN salesOrderTransaction ON salesOrderTransaction.salesOrderID = salesOrder.salesOrderID
 				INNER JOIN transactionDetail ON transactionDetail.transactionID = salesOrderTransaction.transactionID
@@ -93,18 +94,37 @@ class SalesOrder extends Model
 					salesOrder.shippingCharges,
                     salesOrder.paymentDueDate,
 					0 AS totalAmount,
-					SUM(transactionDetail.amount) AS totalPaid
+					SUM(transactionDetail.amount) AS totalPaid,
+                    0 AS salesReturnAmount
 				FROM salesOrder
 				INNER JOIN salesOrderTransaction ON salesOrderTransaction.salesOrderID = salesOrder.salesOrderID
 				INNER JOIN transactionDetail ON transactionDetail.transactionID = salesOrderTransaction.transactionID
 				WHERE transactionDetail.headID = " . \Config::get('constants.account_heads.cash') . " AND transactionDetail.isDebit = 1
+				GROUP BY salesOrder.salesOrderID
+                UNION
+                SELECT
+					salesOrder.salesOrderID,
+					salesOrder.customerID,
+                    salesOrder.salesAgentID,
+					salesOrder.invoiceNumber,
+                    salesOrder.bookSerial,
+					salesOrder.orderDate,
+					salesOrder.discount,
+					salesOrder.shippingCharges,
+                    salesOrder.paymentDueDate,
+					0 AS totalAmount,
+					0 AS totalPaid,
+                    SUM(stockDetailStatus.quantity * stockDetailStatus.salePrice) AS salesReturnAmount
+				FROM salesOrder
+                INNER JOIN salesOrderDetail ON salesOrderDetail.salesOrderID = salesOrder.salesOrderID
+                INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
+                WHERE stockDetailStatus.statusID in (2,4)
 				GROUP BY salesOrder.salesOrderID
 			) AS temp
 			INNER JOIN customer ON customer.customerID = temp.customerID
             WHERE 1=1 " . $strWhere . "
 			GROUP BY temp.salesOrderID,temp.invoiceNumber,temp.bookSerial,temp.orderDate,temp.discount,temp.shippingCharges,temp.paymentDueDate,customer.customerID,customer.customerName,customer.shopName
 			ORDER BY temp.salesOrderID DESC";
-
 		return DB::select($rawSQL);
 	}
 }

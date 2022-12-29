@@ -76,18 +76,29 @@
                         $totalDiscount = $salesOrder->discount;
 					?>
 					@foreach($salesOrder->stockDetailStatuses as $stockDetailStatus)
-						<tr>
-							<td>{{$stockDetailStatus->stockDetail->product->productName}} ({{$stockDetailStatus->stockDetail->product->category->categoryName}})</td>
+                        <?php
+                            $row_total = ($stockDetailStatus->quantity * $stockDetailStatus->salePrice);
+                            $is_return = false;
+                            if (in_array($stockDetailStatus->statusID,\Config::get('constants.stock_status.aryIsReturn'))) {
+                                $is_return = true;
+                                $row_total*=-1;
+                            }
+                        ?>
+						<tr @if($is_return) class="table-secondary" @endif>
+							<td>
+                                {{$stockDetailStatus->stockDetail->product->productName}} ({{$stockDetailStatus->stockDetail->product->category->categoryName}})
+                                @if($is_return) <span class="badge badge-danger">Return</span> @endif
+                            </td>
 							<td>{{$stockDetailStatus->quantity }}</td>
 							<td>{{$stockDetailStatus->godown->name}}</td>
 							<td>@money('$stockDetailStatus->salePrice * $stockDetailStatus->stockDetail->product->unitsInProduct')/-</td>
                             @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
                                 <td>@money('$stockDetailStatus->discount')/-</td>
                             @endif
-							<td>@money('($stockDetailStatus->quantity * $stockDetailStatus->salePrice)')/-</td>
+							<td>@money('$row_total')/-</td>
 						</tr>
 						<?php
-							$total+= ($stockDetailStatus->quantity * $stockDetailStatus->salePrice);
+							$total+= $row_total;
                             $totalDiscount += $stockDetailStatus->quantity * $stockDetailStatus->discount;
 						?>
 					@endforeach
@@ -165,17 +176,26 @@
 					?>
 					@foreach($salesOrder->stockDetailStatuses as $stockDetailStatus)
                         <?php
-                            $rowPurchaseTotal = $stockDetailStatus->stockDetail->purchasePrice * $stockDetailStatus->quantityUnits;
                             $rowSaleTotal = $stockDetailStatus->quantity * $stockDetailStatus->salePrice;
+                            $rowPurchaseTotal = $stockDetailStatus->stockDetail->purchasePrice * $stockDetailStatus->quantityUnits;
                             $rowDiscountTotal = $stockDetailStatus->quantity * $stockDetailStatus->discount;
+                            $is_return = false;
+                            if (in_array($stockDetailStatus->statusID,\Config::get('constants.stock_status.aryIsReturn'))) {
+                                $is_return = true;
+                                $rowSaleTotal*=-1;
+                                $rowPurchaseTotal*=-1;
+                            }
                             $rowProfitLoss = $rowSaleTotal - $rowDiscountTotal - $rowPurchaseTotal;
                             $totalPurchases += $rowPurchaseTotal;
                             $totalSales += $rowSaleTotal;
                             $totalNetSales += $rowSaleTotal - $rowDiscountTotal;
                             $totalDiscount += $rowDiscountTotal;
                         ?>
-						<tr>
-							<td>{{$stockDetailStatus->stockDetail->product->productName}} ({{$stockDetailStatus->stockDetail->product->category->categoryName}})</td>
+						<tr @if($is_return) class="table-secondary" @endif>
+							<td>
+                                {{$stockDetailStatus->stockDetail->product->productName}} ({{$stockDetailStatus->stockDetail->product->category->categoryName}})
+                                @if($is_return) <span class="badge badge-danger">Return</span> @endif
+                            </td>
                             <td>@money('$rowPurchaseTotal')</td>
 							<td>@money('$rowSaleTotal')</td>
                             @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
