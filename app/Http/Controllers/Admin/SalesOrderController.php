@@ -261,7 +261,14 @@ class SalesOrderController extends Controller
 	public function returns(Request $request)
 	{
 		abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		die('Sales Return List');
+		die('select
+	salesorder.*
+from
+	salesorder
+inner join salesorderdetail on salesOrder.salesOrderID = salesorderdetail.salesOrderID
+inner join stockdetailstatus on salesorderdetail.stockDetailStatusID = stockdetailstatus.stockDetailStatusID
+where
+	stockdetailstatus.statusID in (2, 4)');
 	}
 
 	public function create_return(Request $request)
