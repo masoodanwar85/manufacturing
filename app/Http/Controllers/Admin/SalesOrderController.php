@@ -59,6 +59,7 @@ class SalesOrderController extends Controller
                 $primaryKey = 'salesOrderID';
 
 				$startButton = '<a class="btn btn-xs btn-warning" href="' . route('sales.invoice', $row->salesOrderID) . '"> Invoice </a>';
+                $startButton .= ' <a class="btn btn-xs btn-secondary" href="' . route('sales.create_return', $row->salesOrderID) . '"> Return </a>';
 
                 return view('partials.datatablesActions', compact(
                     'viewGate',
@@ -271,15 +272,101 @@ where
 	stockdetailstatus.statusID in (2, 4)');
 	}
 
-	public function create_return(Request $request)
+	public function create_return(SalesOrder $sale)
 	{
 		abort_if(Gate::denies('sales_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		die('Sales Return Form');
+        $salesOrder = SalesOrder::with(['transactions.transactionDetails','stockDetailStatuses.stockDetail.product','stockDetailStatuses.godown'])->find($sale->salesOrderID);
+		$cashHeadID = \Config::get('constants.account_heads.cash');
+
+        $total = 0;
+        $paid = 0;
+        $totalDiscount = $salesOrder->discount;
+
+        $salesOrderInfo = [];
+        $cashHeadID = \Config::get('constants.account_heads.cash');
+
+        foreach($salesOrder->stockDetailStatuses as $stockDetailStatus) {
+            $key = 'product_' . $stockDetailStatus->stockDetail->productID . '_' . $stockDetailStatus->stockDetail->stockDetailID;
+
+            if (in_array($stockDetailStatus->statusID,\Config::get('constants.stock_status.aryIsReturn'))) {
+                $salesOrderInfo[$key]['quantity'] -= $stockDetailStatus->quantity;
+            } else {
+                $salesOrderInfo[$key] = [
+                    'stock_detail_id' => $stockDetailStatus->stockDetail->stockDetailID,
+                    'stock_detail_status_id' => $stockDetailStatus->stockDetailStatusID,
+                    'product' => $stockDetailStatus->stockDetail->product->productName,
+                    'product_id' => $stockDetailStatus->stockDetail->productID,
+                    'quantity' => $stockDetailStatus->quantity,
+                    'product_category' => $stockDetailStatus->stockDetail->product->category->categoryName,
+                    'godown_name' => $stockDetailStatus->godown->name,
+                    'sale_price' => $stockDetailStatus->salePrice,
+                    'units_in_product' => $stockDetailStatus->stockDetail->product->unitsInProduct,
+                    'discount' => $stockDetailStatus->discount
+                ];
+            }
+        }
+
+		return view('admin.sales.formSalesReturn', compact('salesOrder','salesOrderInfo','cashHeadID'));
 	}
 
-	public function add_return(Request $request)
+	public function add_return(SalesOrder $sale,Request $request)
 	{
-		abort_if(Gate::denies('sales_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		die('Sales Return Add Action...');
+        abort_if(Gate::denies('sales_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        DB::beginTransaction();
+		try {
+    		$aryFields = preg_grep("/^return_\d+_\d+$/", array_keys($request->all()));
+            foreach ($aryFields as $field) {
+                $arySplit = explode('_',$field);
+                $productID = $arySplit[1];
+                $stockDetailID = $arySplit[2];
+                $totalReturnQty = $request->{$field};
+                $returnQtyRemaining = $totalReturnQty;
+                $stockDetail = \App\Models\StockDetail::with('stockDetailStatuses')->where('stockDetailID', $stockDetailID)->where('productID', $productID)->first();
+                $stockDetailStatuses = $stockDetail->stockDetailStatuses;
+                // Fix bug here... StockDetailStatus is not getting the right result, it should show quantity sold minus sales return and then do whatever from that quantity
+                foreach ($stockDetailStatuses as $stockDetailStatusInfo) {
+                    if ($stockDetailStatusInfo->statusID == \Config::get('constants.stock_status.sold') && $returnQtyRemaining > 0) {
+                        $qty_remaining = 0;
+                        if ($returnQtyRemaining <= $stockDetailStatusInfo->quantity) {
+                            $qty_remaining = 0;
+                        } else {
+                            $qty_remaining = $returnQtyRemaining;
+                            $returnQtyRemaining = $stockDetailStatusInfo->quantity;
+                        }
+
+                        $stockDetailStatus = \App\Models\StockDetailStatus::create([
+                            'stockDetailID' => $stockDetailStatusInfo->stockDetailID,
+                            'statusID' => \Config::get('constants.stock_status.good_sales_return'),
+                            'batchID' => $stockDetailStatusInfo->batchID,
+                            'godownID' => $stockDetailStatusInfo->godownID,
+                            'quantity' => $returnQtyRemaining,
+                            'discount' => 0,
+                            'quantityUnits' => $returnQtyRemaining,
+                            'salePrice' => $stockDetailStatusInfo->salePrice,
+                            'createdByUserID' => Auth::id()
+                        ]);
+
+                        \App\Models\SalesOrderDetail::create([
+                            'salesOrderID' => $sale->salesOrderID,
+                            'stockDetailStatusID' => $stockDetailStatus->stockDetailStatusID
+                        ]);
+
+                        if ($qty_remaining == 0) {
+                            $returnQtyRemaining = 0;
+                        } else {
+                            $returnQtyRemaining = $qty_remaining - $returnQtyRemaining;
+                        }
+                    }
+                }
+            }
+            DB::commit();
+            $request->session()->flash('message', 'Sales Return recorded successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            dd($e);
+            $request->session()->flash('error', 'An error occurred while adding sales return!');
+        }
+        return redirect()->route('sales.index');
 	}
 }
