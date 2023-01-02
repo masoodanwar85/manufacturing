@@ -127,4 +127,43 @@ class SalesOrder extends Model
 			ORDER BY temp.salesOrderID DESC";
 		return DB::select($rawSQL);
 	}
+
+    public static function getSaleReturns($salesOrderID = 0,$filters = []) {
+	    DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+        $strWhere = "";
+        if ($salesOrderID > 0) {
+            $strWhere .= " AND salesOrder.salesOrderID = " . $salesOrderID;
+        }
+        if (isset($filters['salesAgentID']) && $filters['salesAgentID'] > 0) {
+            $strWhere .= " AND salesOrder.salesAgentID = " . $filters['salesAgentID'];
+        }
+        if (isset($filters['fromDate']) && isset($filters['toDate']) && Carbon::createFromFormat('Y-m-d',$filters['fromDate']) !== false && Carbon::createFromFormat('Y-m-d',$filters['toDate']) !== false) {
+            $strWhere .= " AND (salesOrder.orderDate BETWEEN '" . $filters['fromDate'] . "' AND '" . $filters['toDate'] . "')";
+        }
+        if (isset($filters['customerID']) && $filters['customerID'] > 0) {
+            $strWhere .= " AND salesOrder.customerID = " . $filters['customerID'];
+        }
+        $rawSQL = "
+			SELECT
+                salesOrder.salesOrderID,
+                salesOrder.customerID,
+                customer.customerName,
+                customer.shopName,
+                salesOrder.salesAgentID,
+                staff.staffName AS salesAgent,
+                salesOrder.invoiceNumber,
+                salesOrder.bookSerial,
+                salesOrder.orderDate,
+                salesOrder.paymentDueDate,
+                SUM(stockDetailStatus.quantity * stockDetailStatus.salePrice) AS salesReturnAmount
+            FROM salesOrder
+            INNER JOIN salesOrderDetail ON salesOrderDetail.salesOrderID = salesOrder.salesOrderID
+            INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
+            INNER JOIN customer ON customer.customerID = salesOrder.customerID
+            LEFT JOIN staff ON staff.staffID = salesOrder.salesAgentID
+            WHERE stockDetailStatus.statusID in (2,4) " . $strWhere . "
+            GROUP BY salesOrder.salesOrderID
+			ORDER BY salesOrder.salesOrderID DESC";
+		return DB::select($rawSQL);
+	}
 }

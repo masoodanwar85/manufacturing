@@ -261,15 +261,67 @@ class SalesOrderController extends Controller
 
 	public function returns(Request $request)
 	{
-		abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		die('select
-	salesorder.*
-from
-	salesorder
-inner join salesorderdetail on salesOrder.salesOrderID = salesorderdetail.salesOrderID
-inner join stockdetailstatus on salesorderdetail.stockDetailStatusID = stockdetailstatus.stockDetailStatusID
-where
-	stockdetailstatus.statusID in (2, 4)');
+        abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $filters = array();
+        $filters['salesAgentID'] = $request->salesAgentID;
+        $filters['customerID'] = $request->customerID;
+        $filters['fromDate'] = date('Y-m-d');
+        $filters['fromDate'] = Carbon::now()->subYears(10)->toDateString();
+        $filters['toDate'] = date('Y-m-d');
+        if (!empty($request->fromDate) && Carbon::createFromFormat('Y-m-d',$request->fromDate)) {
+            $filters['fromDate'] = Carbon::createFromFormat('Y-m-d',$request->fromDate)->toDateString();
+        }
+        if (!empty($request->toDate) && Carbon::createFromFormat('Y-m-d',$request->toDate)) {
+            $filters['toDate'] = Carbon::createFromFormat('Y-m-d',$request->toDate)->toDateString();
+        }
+
+        $salesAgentID = $this->salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
+        if ($salesAgentID != null) {
+            $filters['salesAgentID'] = $salesAgentID;
+        }
+
+        if ($request->ajax()) {
+            $table = Datatables::of(SalesOrder::getSaleReturns(0,$filters));
+
+            $table->addColumn('placeholder', '&nbsp;');
+            $table->addColumn('actions', '&nbsp;');
+
+            $table->editColumn('actions', function ($row) {
+                $viewGate   = 'sales_read';
+				$editGate 	= 'sales_updates';
+				$deleteGate = 'sales_deletes';
+				$crudRoutePart = 'sales';
+                $primaryKey = 'salesOrderID';
+
+				return view('partials.datatablesActions', compact(
+                    'viewGate',
+                    'editGate',
+                    'deleteGate',
+                    'crudRoutePart',
+                    'row',
+                    'primaryKey'
+                ));
+            });
+
+            $table->rawColumns(['actions', 'placeholder']);
+
+            return $table->make(true);
+        } else {
+
+            $customers = \App\Models\Customer::query();
+
+            if ($salesAgentID != null) {
+                $customers->where('salesAgentID', $salesAgentID);
+                $salesAgents = [];
+            } else {
+                $salesAgents = \App\Models\Staff::salesAgents()->get()->sortBy('staffName');
+            }
+
+            $customers = $customers->get()->sortBy('customerName');
+        }
+
+        return view('admin.sales.returns', compact('customers','filters','salesAgents'));
 	}
 
 	public function create_return(SalesOrder $sale)
