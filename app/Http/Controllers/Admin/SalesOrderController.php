@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SalesOrder;
+use App\Models\SalesOrderDetail;
 use Gate;
 use App\Http\Requests\StoreSalesOrderRequest;
 use App\Http\Requests\UpdateSalesOrderRequest;
@@ -170,7 +171,8 @@ class SalesOrderController extends Controller
 		$salesOrder = SalesOrder::with(['transactions.transactionDetails','stockDetailStatuses.stockDetail.product'])->find($salesOrderID);
 		$cashHeadID = \Config::get('constants.account_heads.cash');
 		$client = \App\Models\Client::find(\App\Models\User::find(Auth::id())->clientID);
-		return view('admin.sales.sb_invoice', compact('salesOrder','cashHeadID','client'));
+		$thisSaleOrderDetails = SalesOrderDetail::getSaleOrderDetails($salesOrderID);
+		return view('admin.sales.sb_invoice', compact('salesOrder','cashHeadID','client','thisSaleOrderDetails'));
     }
 
 	public function invoicePDF(int $salesOrderID)

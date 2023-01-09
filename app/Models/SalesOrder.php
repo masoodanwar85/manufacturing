@@ -118,7 +118,7 @@ class SalesOrder extends Model
 				FROM salesOrder
                 INNER JOIN salesOrderDetail ON salesOrderDetail.salesOrderID = salesOrder.salesOrderID
                 INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
-                WHERE stockDetailStatus.statusID in (2,4)
+                WHERE stockDetailStatus.statusID in (" . \Config::get('constants.stock_status.isReturn') . ")
 				GROUP BY salesOrder.salesOrderID
 			) AS temp
 			INNER JOIN customer ON customer.customerID = temp.customerID

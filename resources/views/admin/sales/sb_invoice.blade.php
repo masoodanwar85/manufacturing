@@ -79,21 +79,21 @@
                                     $totalAmount = 0;
 									$grandTotal = 0;
 								?>
-								@foreach($salesOrder->stockDetailStatuses as $stockDetailStatus)
+								@foreach($thisSaleOrderDetails as $thisSaleOrderDetail)
 									<tr>
-                                        <td>{{ $loop->iteration }}</td>
-										<td>{{$stockDetailStatus->stockDetail->product->productName}} ({{$stockDetailStatus->stockDetail->product->category->categoryName}})</td>
-										<td>@money('$stockDetailStatus->salePrice')</td>
-                                        <td>{{$stockDetailStatus->quantity}}</td>
+										<td>{{ $loop->iteration }}</td>
+										<td>{{$thisSaleOrderDetail->productName}} ({{$thisSaleOrderDetail->categoryName}})</td>
+										<td>@money('$thisSaleOrderDetail->salePrice')</td>
+                                        <td>{{$thisSaleOrderDetail->totalQty}}</td>
                                         @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
-                                            <td>@money('$stockDetailStatus->discount')</td>
+                                            <td>@money('$thisSaleOrderDetail->totalDiscount')</td>
                                         @endif
-										<td class="text-right">@money('($stockDetailStatus->quantity * $stockDetailStatus->salePrice)')</td>
+										<td class="text-right">@money('($thisSaleOrderDetail->totalQty * $thisSaleOrderDetail->salePrice)')</td>
 									</tr>
 									<?php
-										$total+= ($stockDetailStatus->quantity * $stockDetailStatus->salePrice);
-                                        $totalQty+=$stockDetailStatus->quantity;
-                                        $totalDiscount += $stockDetailStatus->quantity * $stockDetailStatus->discount;
+										$total+= ($thisSaleOrderDetail->totalQty * $thisSaleOrderDetail->salePrice);
+                                        $totalQty+=$thisSaleOrderDetail->totalQty;
+                                        $totalDiscount += $thisSaleOrderDetail->totalQty * $thisSaleOrderDetail->totalDiscount;
 									?>
 								@endforeach
 							</tbody>
