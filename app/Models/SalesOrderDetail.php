@@ -59,7 +59,7 @@ class SalesOrderDetail extends Model
 					0 AS returnQty,
 					SUM(stockDetailStatus.quantity) AS qty,
 					SUM(stockDetailStatus.salePrice * stockDetailStatus.quantity) AS totalPrice,
-					SUM(stockDetailStatus.discount * stockDetailStatus.quantity) as totalDiscount
+					stockDetailStatus.discount AS totalDiscount
 				FROM salesOrder
 				INNER JOIN salesOrderDetail ON salesOrderDetail.salesOrderID = salesOrder.salesOrderID
 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
@@ -75,7 +75,7 @@ class SalesOrderDetail extends Model
 					SUM(stockDetailStatus.quantity) AS returnQty,
 					SUM(stockDetailStatus.quantity * -1) AS qty,
 					SUM(stockDetailStatus.salePrice * stockDetailStatus.quantity) * -1 AS totalPrice,
-					SUM(stockDetailStatus.discount * stockDetailStatus.quantity) * -1 as totalDiscount
+					(stockDetailStatus.discount * -1) AS totalDiscount
 				FROM salesOrder
 				INNER JOIN salesOrderDetail ON salesOrderDetail.salesOrderID = salesOrder.salesOrderID
 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
