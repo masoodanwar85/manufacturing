@@ -63,7 +63,7 @@ class SalesOrderDetail extends Model
 				FROM salesOrder
 				INNER JOIN salesOrderDetail ON salesOrderDetail.salesOrderID = salesOrder.salesOrderID
 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
-				INNER JOIN stockDetail ON stockDetail.stockDetailID = stockdetailstatus.stockDetailID
+				INNER JOIN stockDetail ON stockDetail.stockDetailID = stockDetailStatus.stockDetailID
 				WHERE stockDetailStatus.statusID = " . \Config::get('constants.stock_status.sold') . " AND salesOrder.salesOrderID = " . $salesOrderID . "
 				GROUP BY salesOrder.salesOrderID,stockDetail.productID
 				UNION
@@ -79,7 +79,7 @@ class SalesOrderDetail extends Model
 				FROM salesOrder
 				INNER JOIN salesOrderDetail ON salesOrderDetail.salesOrderID = salesOrder.salesOrderID
 				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
-				INNER JOIN stockDetail ON stockDetail.stockDetailID = stockdetailstatus.stockDetailID
+				INNER JOIN stockDetail ON stockDetail.stockDetailID = stockDetailStatus.stockDetailID
 				WHERE stockDetailStatus.statusID in (" . \Config::get('constants.stock_status.isReturn') . ") AND salesOrder.salesOrderID = " . $salesOrderID . "
 				GROUP BY salesOrder.salesOrderID,stockDetailStatus.salePrice,stockDetail.productID
 			) AS temp
