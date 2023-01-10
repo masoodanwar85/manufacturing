@@ -84,7 +84,8 @@ class SalesOrderDetail extends Model
 				GROUP BY salesOrder.salesOrderID,stockDetailStatus.salePrice,stockDetail.productID
 			) AS temp
 			INNER JOIN product ON product.productID = temp.productID
-			INNER JOIN category ON product.categoryID = category.categoryID";
+			INNER JOIN category ON product.categoryID = category.categoryID
+			GROUP BY temp.salesOrderID,temp.productID,product.productName,category.categoryName,temp.salePrice";
 			// dd($rawSQL);
 		return DB::select($rawSQL);
 	}
