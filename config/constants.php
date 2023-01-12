@@ -1,6 +1,7 @@
 <?php
 
     return [
+        'decimal_conversion' => 100000,
         'account_heads' => [
             'assets' => 1,
             'liabilities' => 2,

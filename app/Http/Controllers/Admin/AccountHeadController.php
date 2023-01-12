@@ -280,7 +280,7 @@ class AccountHeadController extends Controller
             }
         }
 
-		$filterSubHeads = AccountHead::whereIn('parentHeadID', [\Config::get('constants.account_heads.customer'),\Config::get('constants.account_heads.staff'),\Config::get('constants.account_heads.expense')])->get();
+		$filterSubHeads = AccountHead::whereIn('parentHeadID', [\Config::get('constants.account_heads.customer'),\Config::get('constants.account_heads.staff'),\Config::get('constants.account_heads.expense')])->orderBy('headName','asc')->get();
 		return view('admin.accountHead.showPaymentsReceipts',compact('transactions','filters','customers','filterHeads','filterSubHeads'));
     }
 
