@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AccountHead;
+use App\Models\TransactionDetail;
 use Illuminate\Http\Request;
 use Gate;
 use Symfony\Component\HttpFoundation\Response;
@@ -214,6 +215,7 @@ class AccountHeadController extends Controller
         $filters['isIgnoreDates'] = $request->isIgnoreDates;
         $filters['customerID'] = $request->customerID;
         $filters['headID'] = $request->headID;
+        $filters['subHeadID'] = $request->subHeadID;
 
         $filters['fromDate'] = date('Y-m-01');
         $filters['toDate'] = date('Y-m-d');
@@ -238,6 +240,7 @@ class AccountHeadController extends Controller
             // $transactionQuery = $transactionQuery->whereBetween('dateCreated',[$filters['fromDate'],$filters['toDate']]);
 			$transactionQuery = $transactionQuery->whereBetween('transactionDate',[$filters['fromDate'],$filters['toDate']]);
         }
+
         if (strlen($request->transactionTypeNumber)) {
             $transactionQuery = $transactionQuery->where('transactionTypeNumber','like','%' . $request->transactionTypeNumber . '%');
         }
@@ -248,11 +251,17 @@ class AccountHeadController extends Controller
             });
         }
 
+        if (is_numeric($filters['subHeadID'])) {
+            $transactionQuery = $transactionQuery->whereIn('transactionID', function($transactionQuery) use ($filters) {
+                return $transactionQuery->select(DB::raw('transactionID FROM transactionDetail WHERE subHeadID = ' . $filters['subHeadID']));
+            });
+            $filters['subHeadName'] = AccountHead::where('headID', $filters['subHeadID'])->pluck('headName')->first();
+        }
+
         if (is_numeric($filters['customerID'])) {
             $transactionQuery = $transactionQuery->whereIn('transactionID', function($transactionQuery) use ($filters) {
                 return $transactionQuery->select(DB::raw('transactionID FROM transactionDetail WHERE subHeadID IN (SELECT headID FROM customer WHERE customerID = ' . $filters['customerID'] . ')'));
             });
-
         }
 
         $transactions = $transactionQuery->orderBy('transactionDate', 'desc')->orderBy('transactionTypeNumber','desc')->get();
@@ -260,7 +269,19 @@ class AccountHeadController extends Controller
         $customers = \App\Models\Customer::orderBy('customerName','asc')->get();
 
 		$filterHeads = \App\Models\AccountHead::whereIn('headID',[\Config::get('constants.account_heads.customer_receivable'),\Config::get('constants.account_heads.expense'),\Config::get('constants.account_heads.staff_receivable')])->orderBy('headName','asc')->get();
-		return view('admin.accountHead.showPaymentsReceipts',compact('transactions','filters','customers','filterHeads'));
+
+		foreach ($filterHeads as &$filterHead) {
+		    if ($filterHead->headID == \Config::get('constants.account_heads.customer_receivable')) {
+                $filterHead['filterHeadID'] = \Config::get('constants.account_heads.customer');
+            } elseif ($filterHead->headID == \Config::get('constants.account_heads.staff_receivable')) {
+                $filterHead['filterHeadID'] = \Config::get('constants.account_heads.staff');
+            } else {
+                $filterHead['filterHeadID'] = $filterHead->headID;
+            }
+        }
+
+		$filterSubHeads = AccountHead::whereIn('parentHeadID', [\Config::get('constants.account_heads.customer'),\Config::get('constants.account_heads.staff'),\Config::get('constants.account_heads.expense')])->get();
+		return view('admin.accountHead.showPaymentsReceipts',compact('transactions','filters','customers','filterHeads','filterSubHeads'));
     }
 
 	public function newPayment(Request $request) {

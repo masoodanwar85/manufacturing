@@ -26,11 +26,11 @@
 		<div class="card-body">
             <form>
                 <div class="form-row">
-                    <div class="form-group col-md-2">
+                    <div class="form-group col-md-1">
                         <label for="inputFromDate">From Date</label>
                         <input type="date" class="form-control" name="fromDate" value="{{ $filters['fromDate'] }}" />
                     </div>
-                    <div class="form-group col-md-2">
+                    <div class="form-group col-md-1">
                         <label for="inputToDate">To Date</label>
                         <input type="date" class="form-control" name="toDate" value="{{ date('Y-m-d',strtotime($filters['toDate'])) }}" />
                     </div>
@@ -40,11 +40,17 @@
                     </div>
 					<div class="form-group col-md-2">
                         <label for="selectHeadFilter">Head</label>
-                        <select name="headID" class="form-control">
+                        <select name="headID" id="headID" class="form-control">
                             <option value=""></option>
                             @foreach ($filterHeads as $head)
-                                <option value="{{ $head->headID }}" {!! $filters['headID'] == $head->headID ? 'selected' : '' !!} >{{ $head->headName }}</option>
+                                <option value="{{ $head->headID }}" filterHeadID="{{ $head->filterHeadID }}" {!! $filters['headID'] == $head->headID ? 'selected' : '' !!} >{{ $head->headName }}</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="selectSubHeadFilter">Sub Head</label>
+                        <select name="subHeadID" id="subHeadID" class="form-control">
+                            <option value="" @if($filters['subHeadID']) selected @endif>@if($filters['subHeadID']) {!! $filters['subHeadName'] !!} @endif</option>
                         </select>
                     </div>
                     <div class="form-group col-md-2">
@@ -140,6 +146,22 @@
         $(function () {
 			var total = $('table tbody tr td:nth-child(6)').toArray().reduce((partial_sum, a) => partial_sum + parseInt(a.innerHTML.replace(/,/g,'')),0);
 			$('#totals').html(total + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+
+			//generate SubHead By selecting Head
+            var subHeadInfo = {!! $filterSubHeads !!};
+            var headID = 0;
+            $('#headID').on('change',function () {
+                var element = $(this).find('option:selected');
+                var headID = element.attr("filterHeadID");
+                $('#subHeadID').html(`<option value=""></option>\n`);
+                subHeadInfo.map( (v) => {
+                    if(v.parentHeadID==headID){
+                        $('#subHeadID').append(`<option value="${v.headID}">${v.headName}</option>\n`);
+                    }
+                });
+            });
+
         });
     </script>
+
 @stop
