@@ -17,6 +17,18 @@
 			<form class="form-horizontal" action="{{ route('staff.update',$staff->staffID) }}" method="POST">
 				@csrf
 				@method('PUT')
+				<div class="form-group row {{ $errors->has('isActive') ? 'has-error' : '' }}">
+					<label for="isActive" class="col-sm-2 col-form-label">Active: *</label>
+					<div class="col-sm-10">
+						<input type="radio" name="isActive" class="form-check-inline @if($errors->has('isActive')) is-invalid @endif" value="1" required @if($staff->isActive==1) checked @endif><strong>Yes</strong>
+						<input type="radio" name="isActive" class="form-check-inline @if($errors->has('isActive')) is-invalid @endif ml-4" value="2" @if($staff->isActive==2) checked @endif><strong>No</strong>
+						@if($errors->has('isActive'))
+							<em class="invalid-feedback">
+								{{ $errors->first('isActive') }}
+							</em>
+						@endif
+					</div>
+				</div>
 				<div class="form-group row {{ $errors->has('staffName') ? 'has-error' : '' }}">
 					<label for="staffName" class="col-sm-2 col-form-label">Name: *</label>
 					<div class="col-sm-10">

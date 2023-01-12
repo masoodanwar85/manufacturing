@@ -27,6 +27,7 @@ class StoreStaffRequest extends FormRequest
      public function rules()
      {
          return [
+             'isActive' => 'required',
              'staffName' => 'bail|required',
              'staffTypeID' => 'required|numeric',
              'paymentFrequencyID' => 'required|numeric',
@@ -37,6 +38,7 @@ class StoreStaffRequest extends FormRequest
      public function messages()
      {
          return [
+             'isActive.required' => 'Active or InActive is required',
              'staffName.required' => 'Staff name is required',
              'staffTypeID.required' => 'Staff Type is required',
 			 'dateJoined.required' => 'Date Joined is required',

@@ -23,12 +23,16 @@ class StaffController extends Controller
     public function index(Request $request)
     {
 		abort_if(Gate::denies('staff_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $filters = array();
+        $filters['isActive'] = $request->input('isActive');
         if ($request->ajax()) {
             $query = DB::table('staff')
                         ->join('staffType','staff.staffTypeID','=','staffType.staffTypeID')
-						->select('staff.*','staffType.staffType')
-                        ->get();
-
+						->select('staff.*','staffType.staffType');
+            if (is_numeric($filters['isActive'])) {
+                $query->where('isActive',$filters['isActive']);
+            }
+            $query = $query->get();
             $table = Datatables::of($query);
 
             $table->addColumn('placeholder', '&nbsp;');
@@ -53,6 +57,14 @@ class StaffController extends Controller
             $table->editColumn('balance', function($row) {
                 return \App\Services\CurrencyService::getCurrencyFormatted(Staff::getBalance($row->staffID)[0]->totalPayable);
             });
+            $table->editColumn('isActive', function($row) {
+                if ($row->isActive == 1){
+                    $html =  "<span style='background: lightgreen'><strong>ACTIVE</strong></span>";
+                }elseif($row->isActive == 2){
+                    $html =  "<span style='background: orangered'><strong>INACTIVE</strong></span>";
+                }
+                return $html;
+            })->escapeColumns([]);
 
             $table->editColumn('staffName', function ($row) {
                 return $row->staffName ? $row->staffName : "";
@@ -74,7 +86,7 @@ class StaffController extends Controller
             return $table->make(true);
         }
 
-        return view('admin.staff.index');
+        return view('admin.staff.index',compact('filters'));
     }
 
     /**

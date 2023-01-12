@@ -13,7 +13,7 @@ class Staff extends Model
     protected $primaryKey = 'staffID';
 	protected $with = ['staffType','head'];
     public $timestamps = false;
-    protected $fillable = ['staffID','staffTypeID','paymentFrequencyID','paymentAmount','workHoursPerDay','headID','staffName','dateJoined','createdByUserID'];
+    protected $fillable = ['staffID','staffTypeID','paymentFrequencyID','paymentAmount','workHoursPerDay','headID','isActive','staffName','dateJoined','createdByUserID'];
 
     public function staffType()
     {

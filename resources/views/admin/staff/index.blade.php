@@ -19,6 +19,21 @@
 			@endcan
 		</div>
 		<div class="card-body">
+            <form id="filterForm">
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label for="inputTransactionTypeNumber">Status</label>
+                        <select name="isActive" id="isActive" class="form-control">
+                            <option value="" @if( empty($filters['isActive']) ) selected @endif>All</option>
+                            <option value="1" @if( $filters['isActive'] == 1 ) selected @endif>Active</option>
+                            <option value="2" @if( $filters['isActive'] == 2 ) selected @endif>InActive</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-1">
+                        <button style="margin-top:30px;" type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
 			<table class=" table table-bordered table-striped table-hover ajaxTable datatable datatable-staff">
 				<thead>
 					<tr>
@@ -27,6 +42,7 @@
 						<th>Date Joined</th>
 						<th>Salary</th>
                         <th>Balance</th>
+                        <th>IsActive</th>
 						<th>Date Created</th>
 						<th>Action</th>
 					</tr>
@@ -48,13 +64,19 @@
                 serverSide: true,
                 retrieve: true,
                 aaSorting: [],
-                ajax: "{{ route('staff.index') }}",
+                ajax: {
+                    url: "{{ route('staff.index') }}",
+                    data: function (d) {
+                        d.isActive = $('#isActive').val();
+                    },
+                },
                 columns: [
                     { data: 'staffName', name: 'staffName' },
                     { data: 'staffType', name: 'staffType' },
                     { data: 'dateJoined', name: 'dateJoined' },
 					{ data: 'salary', name: 'salary' },
                     { data: 'balance', name: 'balance' },
+                    { data: 'isActive', name: 'isActive' },
                     { data: 'dateCreated', name: 'dateCreated' },
                     { data: 'actions', name: 'Actions' }
                 ],

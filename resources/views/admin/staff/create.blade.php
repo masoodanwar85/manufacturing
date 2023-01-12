@@ -16,6 +16,18 @@
 		<div class="card-body">
 			<form class="form-horizontal" action="{{ route('staff.store') }}" method="POST">
 				@csrf
+				<div class="form-group row {{ $errors->has('isActive') ? 'has-error' : '' }}">
+					<label for="isActive" class="col-sm-2 col-form-label">Active: *</label>
+					<div class="col-sm-10">
+						<input type="radio" name="isActive" class="form-check-inline @if($errors->has('isActive')) is-invalid @endif" value="1" required checked><strong>Yes</strong>
+						<input type="radio" name="isActive" class="form-check-inline @if($errors->has('isActive')) is-invalid @endif ml-4" value="2" ><strong>No</strong>
+						@if($errors->has('isActive'))
+							<em class="invalid-feedback">
+								{{ $errors->first('isActive') }}
+							</em>
+						@endif
+					</div>
+				</div>
 				<div class="form-group row {{ $errors->has('staffName') ? 'has-error' : '' }}">
 					<label for="staffName" class="col-sm-2 col-form-label">Name: *</label>
 					<div class="col-sm-10">
