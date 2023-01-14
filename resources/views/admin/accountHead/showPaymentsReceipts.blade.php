@@ -50,7 +50,10 @@
                     <div class="form-group col-md-2">
                         <label for="selectSubHeadFilter">Sub Head</label>
                         <select name="subHeadID" id="subHeadID" class="form-control">
-                            <option value="" @if($filters['subHeadID']) selected @endif>@if($filters['subHeadID']) {!! $filters['subHeadName'] !!} @endif</option>
+                            <option value=""></option>
+                            @foreach ($subHeads as $subHead)
+                                <option value="{{ $subHead->headID }}" @if($filters['subHeadID'] == $subHead->headID) selected @endif>{{ $subHead['headName'] }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="form-group col-md-2">

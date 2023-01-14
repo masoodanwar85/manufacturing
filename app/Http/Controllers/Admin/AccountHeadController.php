@@ -281,7 +281,12 @@ class AccountHeadController extends Controller
         }
 
 		$filterSubHeads = AccountHead::whereIn('parentHeadID', [\Config::get('constants.account_heads.customer'),\Config::get('constants.account_heads.staff'),\Config::get('constants.account_heads.expense')])->orderBy('headName','asc')->get();
-		return view('admin.accountHead.showPaymentsReceipts',compact('transactions','filters','customers','filterHeads','filterSubHeads'));
+
+        if (is_numeric($filters['headID'])) {
+            $parentHeadID = $filters['headID'] == \Config::get('constants.account_heads.customer_receivable') ? \Config::get('constants.account_heads.customer') : ($filters['headID'] == \Config::get('constants.account_heads.staff_receivable') ? \Config::get('constants.account_heads.staff') : $filters['headID']);
+            $subHeads = $filterSubHeads->where('parentHeadID',$parentHeadID);
+        }
+		return view('admin.accountHead.showPaymentsReceipts',compact('transactions','filters','customers','filterHeads','filterSubHeads','subHeads'));
     }
 
 	public function newPayment(Request $request) {
