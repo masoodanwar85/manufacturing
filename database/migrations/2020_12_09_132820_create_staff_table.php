@@ -17,13 +17,13 @@ class CreateStaffTable extends Migration
 			$table->bigIncrements('staffID');
 			$table->unsignedBigInteger('staffTypeID');
 			$table->unsignedBigInteger('headID');
+            $table->tinyInteger('isActive')->default(1);
 			$table->string('staffName');
 			$table->date('dateJoined');
 			$table->unsignedBigInteger('createdByUserID');
             $table->integer('paymentFrequencyID')->default(1);
 			$table->decimal('paymentAmount',18,4)->default(0);
             $table->integer('workHoursPerDay')->default(8);
-            $table->tinyInteger('isActive')->default(1);
             $table->timestamp('dateCreated')->useCurrent();
             $table->foreign('staffTypeID')->references('staffTypeID')->on('staffType');
 			$table->foreign('headID')->references('headID')->on('accountHead');

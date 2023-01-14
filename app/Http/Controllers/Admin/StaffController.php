@@ -24,8 +24,10 @@ class StaffController extends Controller
     {
 
 		abort_if(Gate::denies('staff_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $filters = array();
-        $filters['isActive'] = $request->input('isActive');
+        $filters['isActive'] = '';
+        if ($request->filled('isActive')) {
+            $filters['isActive'] = $request->input('isActive');
+        }
         if ($request->ajax()) {
             $query = DB::table('staff')
                         ->join('staffType','staff.staffTypeID','=','staffType.staffTypeID')
@@ -59,12 +61,7 @@ class StaffController extends Controller
                 return \App\Services\CurrencyService::getCurrencyFormatted(Staff::getBalance($row->staffID)[0]->totalPayable);
             });
             $table->editColumn('isActive', function($row) {
-                if ($row->isActive == 1){
-                    $html =  "<span style='background: lightgreen'><strong>ACTIVE</strong></span>";
-                }elseif($row->isActive == 2){
-                    $html =  "<span style='background: orangered'><strong>INACTIVE</strong></span>";
-                }
-                return $html;
+                return $row->isActive == 1 ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">In-Active</span>';
             })->escapeColumns([]);
 
             $table->editColumn('staffName', function ($row) {

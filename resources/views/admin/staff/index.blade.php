@@ -24,9 +24,9 @@
                     <div class="form-group col-md-2">
                         <label for="inputTransactionTypeNumber">Status</label>
                         <select name="isActive" id="isActive" class="form-control">
-                            <option value="" @if( empty($filters['isActive']) ) selected @endif>All</option>
+                            <option value="">All</option>
                             <option value="1" @if( $filters['isActive'] == 1 ) selected @endif>Active</option>
-                            <option value="2" @if( $filters['isActive'] == 2 ) selected @endif>InActive</option>
+                            <option value="0" @if( filled($filters['isActive']) && $filters['isActive'] == 0 ) selected @endif>In-Active</option>
                         </select>
                     </div>
                     <div class="form-group col-md-1">
@@ -67,6 +67,7 @@
                 ajax: {
                     url: "{{ route('staff.index') }}",
                     data: function (d) {
+                        console.log(d);
                         d.isActive = $('#isActive').val();
                     },
                 },
