@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -181,6 +182,37 @@ class AccountHead extends Model
             }
         }
         return $aryReturned;
+    }
+
+    public static function getMonthlyReceivables($start_date = NULL,$end_date = NULL){
+        $strWhere = "";
+        if (Carbon::createFromFormat('Y-m-d', $start_date) !== false && Carbon::createFromFormat('Y-m-d', $end_date) !== false) {
+            $strWhere .= " AND (`transaction`.transactionDate BETWEEN '${start_date}' AND '${end_date}')";
+        }
+        $sql = "
+	        select concat_ws('-',month(customerAmount.transactionDate),year(customerAmount.transactionDate)) as transactionMonth, IFNULL(SUM(customerAmount.receivable ),0) AS receivables,IFNULL(SUM(customerAmount.received),0) AS received,(IFNULL(SUM(customerAmount.received),0) - IFNULL(SUM(customerAmount.receivable),0) ) as balance FROM (
+                select
+                    transaction.transactionDate,
+                    SUM(transactionDetail.amount) AS receivable,
+                    0 AS received
+                FROM transactionDetail
+                INNER JOIN `transaction` ON `transaction`.transactionID = transactionDetail.transactionID
+                WHERE transactionDetail.headID IN (" . \Config::get('constants.account_heads.customer_receivable') . "," . \Config::get('constants.account_heads.customer_payable') . ")  $strWhere AND isDebit = 1
+                group by transaction.transactionDate 
+                UNION
+                select
+                    transaction.transactionDate,
+                    0 AS receivable,
+                    SUM(transactionDetail.amount) AS received
+                FROM transactionDetail
+                INNER JOIN `transaction` ON `transaction`.transactionID = transactionDetail.transactionID
+                WHERE transactionDetail.headID IN (" . \Config::get('constants.account_heads.customer_receivable') . "," . \Config::get('constants.account_heads.customer_payable') . ") $strWhere AND isDebit = 0
+                group by transaction.transactionDate 
+            ) AS customerAmount
+            group by concat_ws('-',month(customerAmount.transactionDate),year(customerAmount.transactionDate))
+            order by customerAmount.transactionDate
+	    ";
+        return DB::select($sql);
     }
 
 }

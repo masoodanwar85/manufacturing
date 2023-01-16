@@ -84,4 +84,5 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
     Route::get('report/missing', [App\Http\Controllers\Admin\ReportController::class, 'missings'])->name('report.missings');
 	Route::get('report/daySummary', [App\Http\Controllers\Admin\ReportController::class, 'daySummary'])->name('report.daySummary');
 	Route::get('report/rangeSummary', [App\Http\Controllers\Admin\ReportController::class, 'rangeSummary'])->name('report.rangeSummary');
+	Route::get('report/receivables', [App\Http\Controllers\Admin\ReportController::class, 'receivables'])->name('report.receivables');
 });

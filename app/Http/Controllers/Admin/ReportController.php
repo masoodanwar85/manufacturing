@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AccountHead;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Gate;
 use Carbon\Carbon;
@@ -257,5 +259,17 @@ class ReportController extends Controller
         }
 
         return view('admin.reports.rangeSummary', compact('salesAgents','salesAgentID','startDate','endDate','finalOrders','aryProducts','salesAgentName'));
+    }
+
+    public function receivables(Request $request){
+        $monthlyReceivables = array();
+        $filter['start_date'] = $request->input('start_date');
+        $filter['end_date'] = $request->input('end_date');
+        if ( filled($request->input('start_date')) && filled($request->input('end_date')) ){
+            $start_date = $filter['start_date'] .'-01';
+            $end_date = Carbon::parse($filter['end_date'])->endOfMonth()->toDateString();
+            $monthlyReceivables = AccountHead::getMonthlyReceivables($start_date,$end_date);
+        }
+        return view('admin.reports.receivables',compact('monthlyReceivables','filter'));
     }
 }

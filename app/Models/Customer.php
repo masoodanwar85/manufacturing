@@ -89,4 +89,5 @@ class Customer extends Model
 		";
         return DB::select($rawSQL);
 	}
+
 }
