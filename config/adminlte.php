@@ -463,6 +463,13 @@ return [
                     'can'  => ['report_read'],
 					'active' => ['admin/report/missing']
                 ],
+                [
+                    'text' => 'receivables',
+                    'url'  => 'admin/report/receivables',
+                    'icon' => 'fas fa-fw fa-hand-holding-usd',
+                    'can'  => ['report_read'],
+                    'active' => ['admin/report/receivables']
+                ],
             ],
         ],
 		[
