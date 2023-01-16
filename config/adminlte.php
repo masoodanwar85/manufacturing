@@ -464,7 +464,7 @@ return [
 					'active' => ['admin/report/missing']
                 ],
                 [
-                    'text' => 'receivables',
+                    'text' => 'Receivables',
                     'url'  => 'admin/report/receivables',
                     'icon' => 'fas fa-fw fa-hand-holding-usd',
                     'can'  => ['report_read'],
