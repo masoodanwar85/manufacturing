@@ -211,6 +211,7 @@ class AccountHeadController extends Controller
     public function paymentsReceipts(Request $request) {
         abort_if(Gate::denies('transaction_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $filters = array();
+        $subHeads = array();
 
         $filters['isIgnoreDates'] = $request->isIgnoreDates;
         $filters['customerID'] = $request->customerID;

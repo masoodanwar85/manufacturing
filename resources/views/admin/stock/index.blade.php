@@ -14,8 +14,9 @@
 		</div>
 		<div class="card-body">
             <form class="form-horizontal" role="form" method="post" id="stockSearch">
-                <div class="form-group row">
-                    <div class="col-2">
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label for="selectHeadFilter">Product Types</label>
                         <select name="productTypeID" class="form-control">
                             <option value="">All ProductTypes</option>
                             @foreach ($productTypes as $productType)
@@ -23,7 +24,25 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-lg-2">
+                    <div class="form-group col-md-2">
+                        <label for="filterProductID">Product</label>
+                        <select name="filterProductID" class="form-control">
+                            <option value="">All Products</option>
+                            @foreach ($products as $product)
+                                <option value="{{ $product->productID }}" {!! $product->productID == $filterProductID ? 'selected' : '' !!}>{{ $product->productName }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="filterGodown">Godows</label>
+                        <select name="filterGodownID" class="form-control">
+                            <option value="">All Godowns</option>
+                            @foreach ($godowns as $godown)
+                                <option value="{{ $godown->godownID }}" {!! $godown->godownID == $filterGodownID ? 'selected' : '' !!}>{{ $godown->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div style="margin-top:30px;" class="form-group col-md-2">
                         <button type="button" onclick="applyFilter();" class="btn btn-primary" name="button">Filter</button>
                     </div>
                 </div>

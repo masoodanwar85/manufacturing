@@ -23,16 +23,19 @@ class StockController extends Controller
     public function index(Request $request)
     {
         $productTypes = \App\Models\ProductType::all()->sortBy('productType');
+        $products = \App\Models\Product::all()->sortBy('product');
+        $godowns = \App\Models\Godown::all()->sortBy('godown');
 
         if ($request->has('productTypeID')) {
             $productTypeID = $request->get('productTypeID');
         } else {
             $productTypeID = 4;
         }
+        $filterProductID = $request->input('filterProductID');
+        $filterGodownID = $request->input('filterGodownID');
         abort_if(Gate::denies('stock_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if ($request->ajax()) {
-
-            $query = Stock::getStock(null,FALSE,FALSE,null,$productTypeID);
+            $query = Stock::getStock($filterProductID,FALSE,true,$filterGodownID,$productTypeID);
 
             $grandTotal = array_sum(array_column($query,'inStockTotalPrice'));
             $table = Datatables::of($query);
@@ -88,7 +91,7 @@ class StockController extends Controller
             return $table->make(true);
         }
 
-        return view('admin.stock.index',compact('productTypes','productTypeID'));
+        return view('admin.stock.index',compact('productTypes','productTypeID','products','filterProductID','godowns','filterGodownID'));
     }
 
     /**
