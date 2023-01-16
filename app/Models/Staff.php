@@ -58,13 +58,13 @@ class Staff extends Model
 		$rawSQL = "
 			SELECT IFNULL(SUM(staffAmount.amount),0) AS totalPayable FROM (
 				SELECT
-					SUM(transactionDetail.amount " . \Config::get('constants.client_settings.operatorToConvertToPKR') . " `transaction`.exchangeRate) AS amount
+					SUM(ROUND(transactionDetail.amount," . \Config::get('constants.client_settings.decimal_places') . ") " . \Config::get('constants.client_settings.operatorToConvertToPKR') . " `transaction`.exchangeRate) AS amount
 				FROM transactionDetail
 				INNER JOIN `transaction` ON `transaction`.transactionID = transactionDetail.transactionID
 				WHERE transactionDetail.headID IN (" . \Config::get('constants.account_heads.staff_receivable') . "," . \Config::get('constants.account_heads.salaries_payable') . "," . \Config::get('constants.account_heads.staff_payable') . ") " . ($staffID > 0 ? "AND subHeadID = " . $staffHeadID : "") . " AND isDebit = 1
 				UNION
 				SELECT
-					SUM(transactionDetail.amount * -1) " . \Config::get('constants.client_settings.operatorToConvertToPKR') . " `transaction`.exchangeRate AS amount
+					SUM(ROUND(transactionDetail.amount," . \Config::get('constants.client_settings.decimal_places') . ") * -1) " . \Config::get('constants.client_settings.operatorToConvertToPKR') . " `transaction`.exchangeRate AS amount
 				FROM transactionDetail
 				INNER JOIN `transaction` ON `transaction`.transactionID = transactionDetail.transactionID
 				WHERE transactionDetail.headID IN (" . \Config::get('constants.account_heads.staff_receivable') . "," . \Config::get('constants.account_heads.salaries_payable') . "," . \Config::get('constants.account_heads.staff_payable') . ") " . ($staffID > 0 ? "AND subHeadID = " . $staffHeadID : "") . " AND isDebit = 0

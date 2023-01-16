@@ -72,6 +72,9 @@
                     ?>
 					@foreach ($staffTransactions as $transaction)
 						@foreach ($transaction->transactionDetails as $transactionDetail)
+							<?php
+								$thisTransactionAmount = round($transactionDetail->amount,\Config::get('constants.client_settings.decimal_places'));
+							?>
                             @if ($transactionDetail->headID == \Config::get('constants.account_heads.staff_receivable') || $transactionDetail->headID == \Config::get('constants.account_heads.staff_payable'))
                             <?php
                             if ($last_month == '') {
@@ -87,8 +90,8 @@
                                     {{ $transaction->transactionTypeNumber }}
                                 </td>
                                 <td>{{ $transactionDetail->description }}</td>
-                                <td>@if ($transactionDetail->isDebit == 1) {{ $transactionDetail->amount }} @endif</td>
-                                <td>@if ($transactionDetail->isDebit == 0) {{ $transactionDetail->amount }} @endif</td>
+                                <td>@if ($transactionDetail->isDebit == 1) {{ $thisTransactionAmount }} @endif</td>
+                                <td>@if ($transactionDetail->isDebit == 0) {{ $thisTransactionAmount }} @endif</td>
                                 <td></td>
                             </tr>
                             @elseif ($transactionDetail->headID == \Config::get('constants.account_heads.salaries_payable'))
@@ -106,8 +109,8 @@
                                         {{ $transaction->transactionTypeNumber }}
                                     </td>
                                     <td>{{ $transactionDetail->description }}</td>
-                                    <td>@if ($transactionDetail->isDebit == 1) {{ $transactionDetail->amount }} @endif</td>
-                                    <td>@if ($transactionDetail->isDebit == 0) {{ $transactionDetail->amount }} @endif</td>
+                                    <td>@if ($transactionDetail->isDebit == 1) {{ $thisTransactionAmount }} @endif</td>
+                                    <td>@if ($transactionDetail->isDebit == 0) {{ $thisTransactionAmount }} @endif</td>
                                     <td></td>
                                 </tr>
 							@endif
