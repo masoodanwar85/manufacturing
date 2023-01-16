@@ -185,6 +185,7 @@ class AccountHead extends Model
     }
 
     public static function getMonthlyReceivables($start_date = NULL,$end_date = NULL){
+        DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
         $strWhere = "";
         if (Carbon::createFromFormat('Y-m-d', $start_date) !== false && Carbon::createFromFormat('Y-m-d', $end_date) !== false) {
             $strWhere .= " AND (`transaction`.transactionDate BETWEEN '${start_date}' AND '${end_date}')";
