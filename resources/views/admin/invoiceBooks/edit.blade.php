@@ -24,6 +24,9 @@
                             <option value="BB" {{ old('bookType',$invoiceBook->bookType) == 'BB' ? 'selected' : '' }}>Bill Book</option>
                             <option value="CB" {{ old('bookType',$invoiceBook->bookType) == 'CB' ? 'selected' : '' }}>Cash Book</option>
                             <option value="RB" {{ old('bookType',$invoiceBook->bookType) == 'RB' ? 'selected' : '' }}>Receipt Book</option>
+							<option value="SR" {{ old('bookType',$invoiceBook->bookType) == 'SR' ? 'selected' : '' }}>Stock Receiving</option>
+							<option value="TB" {{ old('bookType',$invoiceBook->bookType) == 'TB' ? 'selected' : '' }}>Transfer Book</option>
+							<option value="MB" {{ old('bookType',$invoiceBook->bookType) == 'MB' ? 'selected' : '' }}>Manufacturing Book</option>
                         </select>
 						@if($errors->has('bookType'))
 							<em class="invalid-feedback">

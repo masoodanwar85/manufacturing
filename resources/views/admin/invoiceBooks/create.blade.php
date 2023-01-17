@@ -23,6 +23,9 @@
                             <option value="BB">Bill Book</option>
                             <option value="CB">Cash Book</option>
                             <option value="RB">Receipt Book</option>
+							<option value="SR">Stock Receiving</option>
+							<option value="TB">Transfer Book</option>
+							<option value="MB">Manufacturing Book</option>
                         </select>
 						@if($errors->has('bookType'))
 							<em class="invalid-feedback">

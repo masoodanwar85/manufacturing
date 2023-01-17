@@ -187,6 +187,18 @@
                                 </select>
                             </div>
                         </div>
+						<div class="form-group row">
+                            <label for="inputPassword" class="col-sm-4 col-form-label">Book Serial #:</label>
+                            <div class="col-sm-4">
+                                <select class="form-control" name="bookType">
+									<option value="TB">TB</option>
+									<option value="SR">SR</option>
+                                </select>
+                            </div>
+							<div class="col-sm-4">
+								<input type="text" class="form-control" name="bookSerial" value="" required />
+							</div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
