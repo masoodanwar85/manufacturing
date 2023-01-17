@@ -387,6 +387,10 @@ class StockController extends Controller
         DB::beginTransaction();
 		try {
             if ($request->previousGodownID != $request->newGodownID) {
+				$bookSerialNumber = "";
+				if (strlen($request->bookSerial)) {
+					$bookSerialNumber = $request->bookType . '-' . $request->bookSerial;
+				}
 				$quantityRemaining = $request->quantityToMove;
 				$stockDetails = \App\Models\Stock::getProductStockDetails($request->productID,$request->previousGodownID);
                 foreach ($stockDetails as $key => $stockDetail) {
@@ -424,6 +428,7 @@ class StockController extends Controller
                             $newStockDetailStatus = \App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->replicate()->fill([
 								'quantity' => $stockDetailStatusRemaining,
 								'quantityUnits' => $stockDetailStatusRemaining,
+								'bookSerial' => $bookSerialNumber,
 								'godownID' => $request->newGodownID,
                                 'createdByUserID' => Auth::id()
 							])->save();
