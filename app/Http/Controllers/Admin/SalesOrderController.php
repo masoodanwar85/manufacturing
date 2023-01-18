@@ -59,6 +59,7 @@ class SalesOrderController extends Controller
                 $primaryKey = 'salesOrderID';
 
 				$startButton = '<a class="btn btn-xs btn-warning" href="' . route('sales.invoice', $row->salesOrderID) . '"> Invoice </a>';
+                $startButton .= ' <a class="btn btn-xs btn-secondary" href="' . route('sales.create_return', $row->salesOrderID) . '"> Return </a>';
 
                 return view('partials.datatablesActions', compact(
                     'viewGate',
@@ -255,6 +256,217 @@ class SalesOrderController extends Controller
 			dd($e);
 			$request->session()->flash('error', 'An error occurred while deleting sales order!');
 		}
+        return redirect()->route('sales.index');
+    }
+
+    public function returns(Request $request)
+    {
+        abort_if(Gate::denies('sales_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $filters = array();
+        $filters['salesAgentID'] = $request->salesAgentID;
+        $filters['customerID'] = $request->customerID;
+        $filters['fromDate'] = date('Y-m-d');
+        $filters['fromDate'] = Carbon::now()->subYears(10)->toDateString();
+        $filters['toDate'] = date('Y-m-d');
+        if (!empty($request->fromDate) && Carbon::createFromFormat('Y-m-d',$request->fromDate)) {
+            $filters['fromDate'] = Carbon::createFromFormat('Y-m-d',$request->fromDate)->toDateString();
+        }
+        if (!empty($request->toDate) && Carbon::createFromFormat('Y-m-d',$request->toDate)) {
+            $filters['toDate'] = Carbon::createFromFormat('Y-m-d',$request->toDate)->toDateString();
+        }
+
+        $salesAgentID = $this->salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
+        if ($salesAgentID != null) {
+            $filters['salesAgentID'] = $salesAgentID;
+        }
+
+        if ($request->ajax()) {
+            $table = Datatables::of(SalesOrder::getSaleReturns(0,$filters));
+
+            $table->addColumn('placeholder', '&nbsp;');
+            $table->addColumn('actions', '&nbsp;');
+
+            $table->editColumn('actions', function ($row) {
+                $viewGate   = 'sales_read';
+                $editGate 	= 'sales_updates';
+                $deleteGate = 'sales_deletes';
+                $crudRoutePart = 'sales';
+                $primaryKey = 'salesOrderID';
+
+                return view('partials.datatablesActions', compact(
+                    'viewGate',
+                    'editGate',
+                    'deleteGate',
+                    'crudRoutePart',
+                    'row',
+                    'primaryKey'
+                ));
+            });
+
+            $table->rawColumns(['actions', 'placeholder']);
+
+            return $table->make(true);
+        } else {
+
+            $customers = \App\Models\Customer::query();
+
+            if ($salesAgentID != null) {
+                $customers->where('salesAgentID', $salesAgentID);
+                $salesAgents = [];
+            } else {
+                $salesAgents = \App\Models\Staff::salesAgents()->get()->sortBy('staffName');
+            }
+
+            $customers = $customers->get()->sortBy('customerName');
+        }
+
+        return view('admin.sales.returns', compact('customers','filters','salesAgents'));
+    }
+
+    public function create_return(SalesOrder $sale)
+    {
+        abort_if(Gate::denies('sales_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $salesOrder = SalesOrder::with(['transactions.transactionDetails','stockDetailStatuses.stockDetail.product','stockDetailStatuses.godown'])->find($sale->salesOrderID);
+        $cashHeadID = \Config::get('constants.account_heads.cash');
+
+        $total = 0;
+        $paid = 0;
+        $totalDiscount = $salesOrder->discount;
+
+        $salesOrderInfo = [];
+        $cashHeadID = \Config::get('constants.account_heads.cash');
+
+        foreach($salesOrder->stockDetailStatuses as $stockDetailStatus) {
+            $key = 'product_' . $stockDetailStatus->stockDetail->productID . '_' . $stockDetailStatus->stockDetail->stockDetailID;
+
+            if (in_array($stockDetailStatus->statusID,\Config::get('constants.stock_status.aryIsReturn'))) {
+                $salesOrderInfo[$key]['quantity'] -= $stockDetailStatus->quantity;
+            } else {
+                $salesOrderInfo[$key] = [
+                    'stock_detail_id' => $stockDetailStatus->stockDetail->stockDetailID,
+                    'stock_detail_status_id' => $stockDetailStatus->stockDetailStatusID,
+                    'product' => $stockDetailStatus->stockDetail->product->productName,
+                    'product_id' => $stockDetailStatus->stockDetail->productID,
+                    'quantity' => $stockDetailStatus->quantity,
+                    'product_category' => $stockDetailStatus->stockDetail->product->category->categoryName,
+                    'godown_name' => $stockDetailStatus->godown->name,
+                    'sale_price' => $stockDetailStatus->salePrice,
+                    'units_in_product' => $stockDetailStatus->stockDetail->product->unitsInProduct,
+                    'discount' => $stockDetailStatus->discount
+                ];
+            }
+        }
+
+        return view('admin.sales.formSalesReturn', compact('salesOrder','salesOrderInfo','cashHeadID'));
+    }
+
+    public function add_return(SalesOrder $sale,Request $request)
+    {
+        abort_if(Gate::denies('sales_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        DB::beginTransaction();
+        try {
+            $aryFieldsGoodReturn = preg_grep("/^goodReturn_\d+_\d+$/", array_keys($request->all()));
+            $aryFieldsBadReturn = preg_grep("/^badReturn_\d+_\d+$/", array_keys($request->all()));
+            if (!blank($aryFieldsGoodReturn)){
+                foreach ($aryFieldsGoodReturn as $field) {
+                    $arySplit = explode('_',$field);
+                    $productID = $arySplit[1];
+                    $stockDetailID = $arySplit[2];
+                    $totalReturnQty = $request->{$field};
+                    $returnQtyRemaining = $totalReturnQty;
+                    $stockDetail = \App\Models\StockDetail::with('stockDetailStatuses')->where('stockDetailID', $stockDetailID)->where('productID', $productID)->first();
+                    $stockDetailStatuses = $stockDetail->stockDetailStatuses;
+                    // Fix bug here... StockDetailStatus is not getting the right result, it should show quantity sold minus sales return and then do whatever from that quantity
+                    foreach ($stockDetailStatuses as $stockDetailStatusInfo) {
+                        if ($stockDetailStatusInfo->statusID == \Config::get('constants.stock_status.sold') && $returnQtyRemaining > 0) {
+                            $qty_remaining = 0;
+                            if ($returnQtyRemaining <= $stockDetailStatusInfo->quantity) {
+                                $qty_remaining = 0;
+                            } else {
+                                $qty_remaining = $returnQtyRemaining;
+                                $returnQtyRemaining = $stockDetailStatusInfo->quantity;
+                            }
+
+                            $stockDetailStatus = \App\Models\StockDetailStatus::create([
+                                'stockDetailID' => $stockDetailStatusInfo->stockDetailID,
+                                'statusID' => \Config::get('constants.stock_status.good_sales_return'),
+                                'batchID' => $stockDetailStatusInfo->batchID,
+                                'godownID' => $stockDetailStatusInfo->godownID,
+                                'quantity' => $returnQtyRemaining,
+                                'discount' => 0,
+                                'quantityUnits' => $returnQtyRemaining,
+                                'salePrice' => $stockDetailStatusInfo->salePrice,
+                                'createdByUserID' => Auth::id()
+                            ]);
+
+                            \App\Models\SalesOrderDetail::create([
+                                'salesOrderID' => $sale->salesOrderID,
+                                'stockDetailStatusID' => $stockDetailStatus->stockDetailStatusID
+                            ]);
+
+                            if ($qty_remaining == 0) {
+                                $returnQtyRemaining = 0;
+                            } else {
+                                $returnQtyRemaining = $qty_remaining - $returnQtyRemaining;
+                            }
+                        }
+                    }
+                }
+            }
+            if(!blank($aryFieldsBadReturn)){
+                foreach ($aryFieldsBadReturn as $field) {
+                    $arySplit = explode('_',$field);
+                    $productID = $arySplit[1];
+                    $stockDetailID = $arySplit[2];
+                    $totalReturnQty = $request->{$field};
+                    $returnQtyRemaining = $totalReturnQty;
+                    $stockDetail = \App\Models\StockDetail::with('stockDetailStatuses')->where('stockDetailID', $stockDetailID)->where('productID', $productID)->first();
+                    $stockDetailStatuses = $stockDetail->stockDetailStatuses;
+                    // Fix bug here... StockDetailStatus is not getting the right result, it should show quantity sold minus sales return and then do whatever from that quantity
+                    foreach ($stockDetailStatuses as $stockDetailStatusInfo) {
+                        if ($stockDetailStatusInfo->statusID == \Config::get('constants.stock_status.sold') && $returnQtyRemaining > 0) {
+                            $qty_remaining = 0;
+                            if ($returnQtyRemaining <= $stockDetailStatusInfo->quantity) {
+                                $qty_remaining = 0;
+                            } else {
+                                $qty_remaining = $returnQtyRemaining;
+                                $returnQtyRemaining = $stockDetailStatusInfo->quantity;
+                            }
+
+                            $stockDetailStatus = \App\Models\StockDetailStatus::create([
+                                'stockDetailID' => $stockDetailStatusInfo->stockDetailID,
+                                'statusID' => \Config::get('constants.stock_status.bad_sales_return'),
+                                'batchID' => $stockDetailStatusInfo->batchID,
+                                'godownID' => $stockDetailStatusInfo->godownID,
+                                'quantity' => $returnQtyRemaining,
+                                'discount' => 0,
+                                'quantityUnits' => $returnQtyRemaining,
+                                'salePrice' => $stockDetailStatusInfo->salePrice,
+                                'createdByUserID' => Auth::id()
+                            ]);
+
+                            \App\Models\SalesOrderDetail::create([
+                                'salesOrderID' => $sale->salesOrderID,
+                                'stockDetailStatusID' => $stockDetailStatus->stockDetailStatusID
+                            ]);
+
+                            if ($qty_remaining == 0) {
+                                $returnQtyRemaining = 0;
+                            } else {
+                                $returnQtyRemaining = $qty_remaining - $returnQtyRemaining;
+                            }
+                        }
+                    }
+                }
+            }
+            DB::commit();
+            $request->session()->flash('message', 'Sales Return recorded successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            dd($e);
+            $request->session()->flash('error', 'An error occurred while adding sales return!');
+        }
         return redirect()->route('sales.index');
     }
 }

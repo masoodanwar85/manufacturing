@@ -321,7 +321,14 @@ return [
                     'url'  => 'admin/sales',
                     'icon' => 'fas fa-fw fa-share',
                     'can'  => ['sales_read','sales_create'],
-					'active' => ['admin/sales','regex:@^admin/sales/.*$@']
+					'active' => ['admin/sales','regex:@^admin/sales@']
+                ],
+                [
+                    'text' => 'Sales Returns',
+                    'url'  => 'admin/sales/returns',
+                    'icon' => 'fas fa-fw fa-undo',
+                    'can'  => ['sales_read','sales_create'],
+                    'active' => ['admin/sales/returns','regex:@^admin/sales/returns@']
                 ],
                 [
                     'text' => 'customers',
