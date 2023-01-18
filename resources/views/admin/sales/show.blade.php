@@ -70,25 +70,44 @@
 					</tr>
 				</thead>
 				<tbody>
+				<?php
+					$total = 0;
+					$paid = 0;
+					$totalDiscount = $salesOrder->discount;
+				?>
+				@foreach($salesOrder->stockDetailStatuses as $stockDetailStatus)
 					<?php
-						$total = 0;
-						$paid = 0;
+					$row_total = ($stockDetailStatus->quantity * $stockDetailStatus->salePrice);
+					$is_goodReturn = false;
+					$is_badReturn = false;
+					if ($stockDetailStatus->statusID == \Config::get('constants.stock_status.good_sales_return')) {
+						$is_goodReturn = true;
+						$row_total*=-1;
+					}
+					if ($stockDetailStatus->statusID == \Config::get('constants.stock_status.bad_sales_return')) {
+						$is_badReturn = true;
+						$row_total*=-1;
+					}
 					?>
-					@foreach($salesOrder->stockDetailStatuses as $stockDetailStatus)
-						<tr>
-							<td>{{$stockDetailStatus->stockDetail->product->productName}} ({{$stockDetailStatus->stockDetail->product->category->categoryName}})</td>
-							<td>{{$stockDetailStatus->quantity }}</td>
-							<td>{{$stockDetailStatus->godown->name}}</td>
-							<td>@money('$stockDetailStatus->salePrice * $stockDetailStatus->stockDetail->product->unitsInProduct')/-</td>
-                            @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
-                                <td>@money('$stockDetailStatus->discount')/-</td>
-                            @endif
-							<td>@money('($stockDetailStatus->quantity * $stockDetailStatus->salePrice)-($stockDetailStatus->quantity * $stockDetailStatus->discount)')/-</td>
-						</tr>
-						<?php
-							$total+= ($stockDetailStatus->quantityUnits * $stockDetailStatus->salePrice) - ($stockDetailStatus->quantityUnits * $stockDetailStatus->discount);
-						?>
-					@endforeach
+					<tr @if( $is_goodReturn || $is_badReturn ) class="table-secondary" @endif>
+						<td>
+							{{$stockDetailStatus->stockDetail->product->productName}} ({{$stockDetailStatus->stockDetail->product->category->categoryName}})
+							@if($is_goodReturn) <span class="badge badge-warning">Good Return</span> @endif
+							@if($is_badReturn) <span class="badge badge-danger">Bad Return</span> @endif
+						</td>
+						<td>{{$stockDetailStatus->quantity }}</td>
+						<td>{{$stockDetailStatus->godown->name}}</td>
+						<td>@money('$stockDetailStatus->salePrice * $stockDetailStatus->stockDetail->product->unitsInProduct')/-</td>
+						@if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
+							<td>@money('$stockDetailStatus->discount')/-</td>
+						@endif
+						<td>@money('$row_total')/-</td>
+					</tr>
+					<?php
+						$total+= $row_total;
+						$totalDiscount += $stockDetailStatus->quantity * $stockDetailStatus->discount;
+					?>
+				@endforeach
 				</tbody>
 				@foreach ($salesOrder->transactions as $transaction)
 					@foreach ($transaction->transactionDetails as $transactionDetail)
@@ -166,14 +185,30 @@
                             $rowPurchaseTotal = $stockDetailStatus->stockDetail->purchasePrice * $stockDetailStatus->quantityUnits;
                             $rowSaleTotal = $stockDetailStatus->quantity * $stockDetailStatus->salePrice;
                             $rowDiscountTotal = $stockDetailStatus->quantity * $stockDetailStatus->discount;
+						$is_goodReturn = false;
+						$is_badReturn = false;
+						if ($stockDetailStatus->statusID == \Config::get('constants.stock_status.good_sales_return')) {
+							$is_goodReturn = true;
+							$rowSaleTotal*=-1;
+							$rowPurchaseTotal*=-1;
+						}
+						if ($stockDetailStatus->statusID == \Config::get('constants.stock_status.bad_sales_return')) {
+							$is_badReturn = true;
+							$rowSaleTotal*=-1;
+							$rowPurchaseTotal*=-1;
+						}
                             $rowProfitLoss = $rowSaleTotal - $rowDiscountTotal - $rowPurchaseTotal;
                             $totalPurchases += $rowPurchaseTotal;
                             $totalSales += $rowSaleTotal;
                             $totalNetSales += $rowSaleTotal - $rowDiscountTotal;
                             $totalDiscount += $rowDiscountTotal;
                         ?>
-						<tr>
-							<td>{{$stockDetailStatus->stockDetail->product->productName}} ({{$stockDetailStatus->stockDetail->product->category->categoryName}})</td>
+						<tr @if($is_goodReturn || $is_badReturn) class="table-secondary" @endif>
+							<td>
+								{{$stockDetailStatus->stockDetail->product->productName}} ({{$stockDetailStatus->stockDetail->product->category->categoryName}})
+								@if($is_goodReturn) <span class="badge badge-warning">Good Return</span> @endif
+								@if($is_badReturn) <span class="badge badge-danger">Bad Return</span> @endif
+							</td>
                             <td>@money('$rowPurchaseTotal')</td>
 							<td>@money('$rowSaleTotal')</td>
                             @if ($globalSettings['client_settings.is_show_discount_per_product'] == 1)
