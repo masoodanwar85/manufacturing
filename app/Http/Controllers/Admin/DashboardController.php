@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
+use App\Services\ReportService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -23,7 +25,10 @@ class DashboardController extends Controller
 		$receivables['suppliers'] = \App\Models\Supplier::getBalance()[0]->totalPayable;
         $customers = \App\Models\Customer::orderBy('customerName')->get();
         $attendance = \App\Models\Attendance::where('attendanceDate',$today->toDateString())->first();
-		return view('admin.dashboard',compact('totalPurchases','totalSales','thresholdStocks','receivables','customers','attendance'));
+        $profitLoss['year'] = ReportService::getProfitLoss(Carbon::now()->startOfYear(), Carbon::now()->endOfYear());
+        $profitLoss['month'] = ReportService::getProfitLoss(Carbon::now()->startOfMonth(), Carbon::now());
+        $profitLoss['overall'] = ReportService::getProfitLoss();
+        return view('admin.dashboard',compact('totalPurchases','totalSales','thresholdStocks','receivables','customers','attendance','profitLoss'));
     }
 
     public function search(Request $request)
@@ -60,6 +65,5 @@ class DashboardController extends Controller
 
     public function test() {
 
-        dd($accountsReceivables);
     }
 }

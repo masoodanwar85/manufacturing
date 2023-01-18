@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AccountHead;
 use App\Models\Customer;
+use App\Services\ReportService;
 use Illuminate\Http\Request;
 use Gate;
 use Carbon\Carbon;
@@ -17,17 +18,28 @@ class ReportController extends Controller
 		return view('admin.reports.index');
 	}
 
-	public function profitLoss() {
-		abort_if(Gate::denies('report_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+	public function profitLoss(Request $request) {
+        abort_if(Gate::denies('report_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $filter = array();
+        $filter['start_date'] = $request->input('start_date');
+        $filter['end_date'] = $request->input('end_date');
         // Profit Or Loss = (Revenues / Income / Sales) - (Expense)
         $aryIncomeExpenseHeadIDs = [\Config::get('constants.account_heads.expense'),\Config::get('constants.account_heads.revenue')];
         $aryIncomeExpenseAllHeadIDs = \App\Models\AccountHead::whereIn('rootHeadID',$aryIncomeExpenseHeadIDs)->orWhereIn('headID',$aryIncomeExpenseHeadIDs)->pluck('headID')->toArray();
-        $allTransactions = \App\Models\Transaction::with('transactionDetails')->whereHas('transactionDetails', function($query) use ($aryIncomeExpenseAllHeadIDs) {
-            return $query->whereIn('headID',$aryIncomeExpenseAllHeadIDs);
-        })->orderBy('transactionID', 'asc')->get();
-
         $profitLoss = \App\Services\ReportService::getProfitLoss();
-        return view('admin.reports.profitLoss', compact('profitLoss','allTransactions','aryIncomeExpenseAllHeadIDs'));
+
+        $allTransactions = \App\Models\Transaction::with('transactionDetails')->whereHas('transactionDetails', function($query) use ($aryIncomeExpenseAllHeadIDs) {
+            $query->whereIn('headID',$aryIncomeExpenseAllHeadIDs);
+            return $query;
+        })->orderBy('transactionID', 'asc');
+
+        if ( filled($request->input('start_date')) && filled($request->input('end_date')) ){
+            $profitLoss = ReportService::getProfitLoss($filter['start_date'],$filter['end_date']);
+            $allTransactions = $allTransactions->whereBetween('transactionDate',[$filter['start_date'],$filter['end_date']]);
+        }
+
+        $allTransactions = $allTransactions->get();
+        return view('admin.reports.profitLoss', compact('profitLoss','allTransactions','aryIncomeExpenseAllHeadIDs','filter'));
 	}
 
     public function cashInOut(Request $request) {

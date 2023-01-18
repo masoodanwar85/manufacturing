@@ -10,6 +10,30 @@
     <div class="card card-default color-palette-box">
         <div class="card-header">
             <h3 class="card-title">
+                <i class="fas fa-search"></i> Profit/Loss Filter By Date
+            </h3>
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label for="inputFromDate">From Date</label>
+                        <input type="date" class="form-control" name="start_date" value="{{$filter['start_date']}}" />
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="inputFromDate">To Date</label>
+                        <input type="date" class="form-control" name="end_date" value="{{$filter['end_date']}}" />
+                    </div>
+                    <div class="form-group col-md-2">
+                        <button style="margin-top:30px;" type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card card-default color-palette-box">
+        <div class="card-header">
+            <h3 class="card-title">
                 <i class="fas fa-clipboard-list"></i> Profit/Loss Report
             </h3>
         </div>

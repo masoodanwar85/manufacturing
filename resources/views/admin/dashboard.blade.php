@@ -7,6 +7,7 @@
 @stop
 
 @section('content')
+@php use Carbon\Carbon @endphp
 	<div class="row">
 		@can('sales_create')
 		<div class="col">
@@ -241,7 +242,7 @@
         			<div class="col-12">
         				<div class="card card-warning">
         					<div class="card-header">
-        						<h3 class="card-title">Stock Alert &nbsp;&nbsp;<span title="{{ count($thresholdStocks) }} Products" class="badge bg-danger">{{ count($thresholdStocks) }}</span></h3>
+        						<h3 class="card-title">OverAll Profit Loss &nbsp;&nbsp;<span title="{{ count($thresholdStocks) }} Products" class="badge bg-danger">{{ count($thresholdStocks) }}</span></h3>
         						<div class="card-tools">
         							<button type="button" class="btn btn-tool" data-card-widget="maximize"><i class="fas fa-expand"></i></button>
         						</div>
@@ -299,6 +300,108 @@
         		</div>
         	</div>
         </div>
+		<div class="col">
+			@if (count($profitLoss))
+			<div class="row">
+				<div class="col-12">
+					<div class="card card-success">
+						<div class="card-header">
+							<h3 class="card-title">OverAll Profit/Loss &nbsp;&nbsp;</h3>
+							<div class="card-tools">
+								<button type="button" class="btn btn-tool" data-card-widget="maximize"><i class="fas fa-expand"></i></button>
+							</div>
+						</div>
+						<div class="card-body">
+							<table class="table table-hover table-sm">
+								<thead>
+								<tr>
+									<th>Profit</th>
+									<th>Revenue/Income</th>
+									<th>Expense</th>
+								</tr>
+								</thead>
+								<tbody>
+									<tr>
+									@if ( $profitLoss['overall'][0]->profitLoss > 0 )
+										<td>Rs {{round($profitLoss['overall'][0]->profitLoss,\Config::get('constants.client_settings.decimal_places'))}}/-</td>
+									@else
+										<td>Rs {{round($profitLoss['overall'][0]->profitLoss,\Config::get('constants.client_settings.decimal_places'))}}/-</td>
+									@endif
+										<td>Rs {{round($profitLoss['overall'][0]->totalRevenue,\Config::get('constants.client_settings.decimal_places'))}}/-</td>
+										<td>Rs {{round($profitLoss['overall'][0]->totalExpense,\Config::get('constants.client_settings.decimal_places'))}}/-</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="col-12">
+					<div class="card card-success">
+						<div class="card-header">
+							<h3 class="card-title">Year {{ Carbon::now()->format('Y') }} Profit/Loss </h3>
+							<div class="card-tools">
+								<button type="button" class="btn btn-tool" data-card-widget="maximize"><i class="fas fa-expand"></i></button>
+							</div>
+						</div>
+						<div class="card-body">
+							<table class="table table-hover table-sm">
+								<thead>
+								<tr>
+									<th>Profit</th>
+									<th>Revenue/Income</th>
+									<th>Expense</th>
+								</tr>
+								</thead>
+								<tbody>
+								<tr>
+									@if ( $profitLoss['year'][0]->profitLoss > 0 )
+										<td>Rs {{round($profitLoss['year'][0]->profitLoss,\Config::get('constants.client_settings.decimal_places'))}}/-</td>
+									@else
+										<td>Rs {{round($profitLoss['year'][0]->profitLoss,\Config::get('constants.client_settings.decimal_places'))}}/-</td>
+									@endif
+									<td>Rs {{round($profitLoss['year'][0]->totalRevenue,\Config::get('constants.client_settings.decimal_places'))}}/-</td>
+									<td>Rs {{round($profitLoss['year'][0]->totalExpense,\Config::get('constants.client_settings.decimal_places'))}}/-</td>
+								</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="col-12">
+					<div class="card card-success">
+						<div class="card-header">
+							<h3 class="card-title">{{ Carbon::now()->format('F') }} {{ Carbon::now()->format('Y') }} Profit/Loss </h3>
+							<div class="card-tools">
+								<button type="button" class="btn btn-tool" data-card-widget="maximize"><i class="fas fa-expand"></i></button>
+							</div>
+						</div>
+						<div class="card-body">
+							<table class="table table-hover table-sm">
+								<thead>
+								<tr>
+									<th>Profit</th>
+									<th>Revenue/Income</th>
+									<th>Expense</th>
+								</tr>
+								</thead>
+								<tbody>
+								<tr>
+									@if ( $profitLoss['month'][0]->profitLoss > 0 )
+										<td>Rs {{round($profitLoss['month'][0]->profitLoss,\Config::get('constants.client_settings.decimal_places'))}}/-</td>
+									@else
+										<td>Rs {{round($profitLoss['month'][0]->profitLoss,\Config::get('constants.client_settings.decimal_places'))}}/-</td>
+									@endif
+									<td>Rs {{round($profitLoss['month'][0]->totalRevenue,\Config::get('constants.client_settings.decimal_places'))}}/-</td>
+									<td>Rs {{round($profitLoss['month'][0]->totalExpense,\Config::get('constants.client_settings.decimal_places'))}}/-</td>
+								</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			@endif
+		</div>
     </div>
 @stop
 
