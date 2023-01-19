@@ -18,14 +18,17 @@
                 <div class="form-row">
                     <div class="form-group col-md-2">
                         <label for="inputFromDate">From Date</label>
-                        <input type="date" class="form-control" name="start_date" value="{{$filter['start_date']}}" />
+                        <input type="date" class="form-control" name="start_date" id="start_date"  value="{{$filter['start_date']}}" />
                     </div>
                     <div class="form-group col-md-2">
                         <label for="inputFromDate">To Date</label>
-                        <input type="date" class="form-control" name="end_date" value="{{$filter['end_date']}}" />
+                        <input type="date" class="form-control" name="end_date" id="end_date" value="{{$filter['end_date']}}" />
                     </div>
-                    <div class="form-group col-md-2">
+                    <div class="form-group mr-1">
                         <button style="margin-top:30px;" type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                    <div class="form-group">
+                        <button style="margin-top:30px;" type="button" class="btn btn-secondary" onclick="removeFilters()">Remove Filters</button>
                     </div>
                 </div>
             </form>
@@ -210,4 +213,14 @@
             letter-spacing: 3px;
         }
     </style>
+@stop
+
+@section('js')
+    <script>
+        function removeFilters() {
+            $('#start_date').val()
+            $('#end_date').val()
+            $('form').submit()
+        }
+    </script>
 @stop
