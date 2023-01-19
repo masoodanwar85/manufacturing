@@ -105,14 +105,16 @@ class ProductionController extends Controller
             ]);
         }
 
-        foreach ($request->expenseHeadID as $idx => $thisExpenseHeadID) {
-            $productionBOMExpense = ProductionBOMExpense::create([
-                'productionBOMID' => $productionBOM->productionBOMID,
-                'expenseHeadID' => $thisExpenseHeadID,
-                'amount' => $request->expenseAmount[$idx],
-                'createdByUserID' => Auth::id()
-            ]);
-        }
+		if ($request->filled('expenseHeadID')) {
+			foreach ($request->expenseHeadID as $idx => $thisExpenseHeadID) {
+				$productionBOMExpense = ProductionBOMExpense::create([
+					'productionBOMID' => $productionBOM->productionBOMID,
+					'expenseHeadID' => $thisExpenseHeadID,
+					'amount' => $request->expenseAmount[$idx],
+					'createdByUserID' => Auth::id()
+				]);
+			}
+		}
 
         $request->session()->flash('message', 'Production created successfully!');
         return redirect()->route('production.index');
@@ -217,14 +219,16 @@ class ProductionController extends Controller
                     ]);
                 }
 
-                foreach ($request->expenseHeadID as $idx => $thisExpenseHeadID) {
-                    $productionBOMExpense = ProductionBOMExpense::create([
-                        'productionBOMID' => $production->productionBOMID,
-                        'expenseHeadID' => $thisExpenseHeadID,
-                        'amount' => $request->expenseAmount[$idx],
-                        'createdByUserID' => Auth::id()
-                    ]);
-                }
+				if ($request->filled('expenseHeadID')) {
+					foreach ($request->expenseHeadID as $idx => $thisExpenseHeadID) {
+						$productionBOMExpense = ProductionBOMExpense::create([
+							'productionBOMID' => $production->productionBOMID,
+							'expenseHeadID' => $thisExpenseHeadID,
+							'amount' => $request->expenseAmount[$idx],
+							'createdByUserID' => Auth::id()
+						]);
+					}
+				}
 
                 $is_success = true;
                 if ($production->productionStageID == 1) {
@@ -316,14 +320,15 @@ class ProductionController extends Controller
         $production = ProductionBOM::with('items')->where('productionBOMID',$productionBOMID)->first();
         foreach ($production->items as $productionBOMItem) {
             // Check for stock for this product
-            $productStockQty = Arr::first(\App\Models\Stock::getStock($productID = $productionBOMItem->productID,false,true,\Config::get('constants.production_stages.default_factory_id')))->inStockQuantity;
+			$stockInfo = \App\Models\Stock::getStock($productID = $productionBOMItem->productID,false,true,\Config::get('constants.production_stages.default_factory_id'));
+            $productStockQty = Arr::first($stockInfo)->inStockQuantity;
             // dd($productStockQty,$production,$productionBOMItem);
             $quantityRemaining = $productionBOMItem->quantity * $production->quantity;
             if ($productStockQty >= $quantityRemaining) {
                 // Change stock status to manufacturing
                 // Moving Stock to Manufacturing Status
                 $stockDetails = \App\Models\Stock::getProductStockDetails($productID = $productionBOMItem->productID,\Config::get('constants.production_stages.default_factory_id'));
-                foreach ($stockDetails as $stockDetailInfo) {
+				foreach ($stockDetails as $stockDetailInfo) {
                     // dd($stockDetailInfo);
                     if ($quantityRemaining == 0) {
                         break;
@@ -351,6 +356,7 @@ class ProductionController extends Controller
                             $stockDetailStatus->quantity = 0;
                         } else {
                             $quantityRemaining -= $stockDetailInfo->quantityAvailable;
+							$quantityUnitsRemaining-=$stockDetailInfo->quantityAvailable;
                             $stockDetailStatus->quantity = $stockDetailInfo->quantityAvailable;
                         }
 
@@ -359,7 +365,6 @@ class ProductionController extends Controller
                         $stockDetailStatus->productionBOMID = $production->productionBOMID;
                         $stockDetailStatus->save();
                         // Insert stockDetailStatusID in salesOrderDetail
-                        $quantityUnitsRemaining-=$stockDetailInfo->quantityAvailable;
                     }
                 }
                 // End
