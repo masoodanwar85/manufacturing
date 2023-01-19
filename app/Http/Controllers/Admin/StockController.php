@@ -22,6 +22,8 @@ class StockController extends Controller
      */
     public function index(Request $request)
     {
+		abort_if(Gate::denies('stock_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
         $productTypes = \App\Models\ProductType::all()->sortBy('productType');
         $products = \App\Models\Product::all()->sortBy('product');
         $godowns = \App\Models\Godown::all()->sortBy('godown');
@@ -33,9 +35,12 @@ class StockController extends Controller
         }
         $filterProductID = $request->input('filterProductID');
         $filterGodownID = $request->input('filterGodownID');
-        abort_if(Gate::denies('stock_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if ($request->ajax()) {
-            $query = Stock::getStock($filterProductID,FALSE,true,$filterGodownID,$productTypeID);
+			$isGroupByGodown = false;
+			if (is_numeric($filterGodownID)) {
+				$isGroupByGodown = true;
+			}
+            $query = Stock::getStock($filterProductID,FALSE,$isGroupByGodown,$filterGodownID,$productTypeID);
 
             $grandTotal = array_sum(array_column($query,'inStockTotalPrice'));
             $table = Datatables::of($query);
