@@ -93,6 +93,8 @@ class ProductionController extends Controller
         abort_if(Gate::denies('production_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 		$request->merge(['createdByUserID' => Auth::id()]);
 
+        $request['productionStageID'] = \Config::get('constants.production_stages.finished');
+
         $productionBOM = ProductionBOM::create($request->all());
 
         foreach ($request->productItemID as $idx => $thisProductItemID) {
@@ -115,6 +117,80 @@ class ProductionController extends Controller
 				]);
 			}
 		}
+
+		//Add stockDetailStatus with statusID =  $retStatus = $this->addStockDetailStatus($production->productionBOMID);
+
+        if ($productionBOM->productionStageID == \Config::get('constants.production_stages.finished')) {
+
+
+            $retStatus = $this->addStockDetailStatus($productionBOM->productionBOMID);
+            $is_success = $retStatus['success'];
+            $errorMsg = $retStatus['message'];
+
+            $stockToAdd = [];
+            foreach ($request->productItemID as $idx => $thisProductItemID) {
+                $thisProduct = $productionBOM->items()->where('productID', $thisProductItemID)->first();
+                $thisProduct->update([
+                    'consumed' => $request->productItemQuantity[$idx]
+                ]);
+
+                // If Quantity is Less, then put back to Factory Stock
+                if ($request->productItemQuantity[$idx] < $thisProduct->quantity) {
+                    // Add this product to stock
+                    $stockToAdd[] = ['productID' => $thisProductItemID, 'quantityToAdd' => $thisProduct->quantity - $request->productItemQuantityConsumed[$idx]];
+                }
+            }
+
+            if (count($stockToAdd) > 0) {
+                $stock = \App\Models\Stock::create([
+                    'productionBOMID' => $productionBOM->productionBOMID,
+                    'createdByUserID' => Auth::id()
+                ]);
+
+                foreach ($stockToAdd as $thisStock) {
+                    $stockDetail = $stock->stockDetails()->create([
+                        'productID' => $thisStock['productID'],
+                        'godownID' => \Config::get('constants.production_stages.default_factory_id'),
+                        'quantity' => $thisStock['quantityToAdd'],
+                        'quantityUnits' => $thisStock['quantityToAdd'],
+                        'purchasePrice' => 0
+                    ]);
+
+                    $stockDetail->stockDetailStatuses()->create([
+                        'statusID' => \Config::get('constants.stock_status.quetta_godown'),
+                        'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
+                        'godownID' => \Config::get('constants.production_stages.default_factory_id'),
+                        'bookSerial' => $request->mb.$request->bookSerial,
+                        'quantity' => $thisStock['quantityToAdd'],
+                        'quantityUnits' => $thisStock['quantityToAdd'],
+                        'createdByUserID' => Auth::id()
+                    ]);
+                }
+            }
+
+            $stock = \App\Models\Stock::create([
+                'productionBOMID' => $productionBOM->productionBOMID,
+                'createdByUserID' => Auth::id()
+            ]);
+            $stockDetail = $stock->stockDetails()->create([
+                'productID' => $request->productID,
+                'godownID' => \Config::get('constants.production_stages.default_factory_id'),
+                'quantity' => $request->quantity,
+                'quantityUnits' => $request->quantity,
+                'purchasePrice' => 0
+            ]);
+
+            $stockDetail->stockDetailStatuses()->create([
+                'statusID' => \Config::get('constants.stock_status.quetta_godown'),
+                'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
+                'godownID' => \Config::get('constants.production_stages.default_factory_id'),
+                'bookSerial' => $request->mb.$request->bookSerial,
+                'quantity' => $request->quantity,
+                'quantityUnits' => $request->quantity,
+                'createdByUserID' => Auth::id()
+            ]);
+            $is_success = true;
+        }
 
         $request->session()->flash('message', 'Production created successfully!');
         return redirect()->route('production.index');
@@ -203,6 +279,27 @@ class ProductionController extends Controller
                         ]);
                     }
                 }
+
+                $stock = \App\Models\Stock::create([
+                    'productionBOMID' => $production->productionBOMID,
+                    'createdByUserID' => Auth::id()
+                ]);
+                $stockDetail = $stock->stockDetails()->create([
+                    'productID' => $request->productID,
+                    'godownID' => \Config::get('constants.production_stages.default_factory_id'),
+                    'quantity' => $request->quantity,
+                    'quantityUnits' => $request->quantity,
+                    'purchasePrice' => 0
+                ]);
+
+                $stockDetail->stockDetailStatuses()->create([
+                    'statusID' => \Config::get('constants.stock_status.quetta_godown'),
+                    'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
+                    'godownID' => \Config::get('constants.production_stages.default_factory_id'),
+                    'quantity' => $request->quantity,
+                    'quantityUnits' => $request->quantity,
+                    'createdByUserID' => Auth::id()
+                ]);
                 $is_success = true;
             } else {
                 $production->update($request->all());
@@ -239,7 +336,6 @@ class ProductionController extends Controller
                 }
             }
 
-
             if ($is_success) {
                 DB::commit();
     			$request->session()->flash('message', 'Production updated successfully!');
@@ -247,8 +343,6 @@ class ProductionController extends Controller
                 DB::rollback();
                 $request->session()->flash('error', 'An error occurred while updating production!');
             }
-
-
 		} catch (Exception $e) {
 			DB::rollback();
 			$request->session()->flash('error', 'An error occurred while updating production!');

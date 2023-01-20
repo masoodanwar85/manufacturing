@@ -43,6 +43,24 @@
 						@endif
 					</div>
 				</div>
+                <div class="form-group row {{ $errors->has('bookSerial') ? 'has-error' : '' }}">
+                    <label for="bookSerial" class="col-sm-2 col-form-label">Book Serial#: *</label>
+                    <div class="col-sm-10">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="hidden" name="mb" value="MB">MB
+                                </div>
+                            </div>
+                            <input type="text" name="bookSerial" class="form-control @if($errors->has('bookSerial')) is-invalid @endif" value="{{ old('bookSerial', '') }}" required>
+                        </div>
+                        @if($errors->has('bookSerial'))
+                            <em class="invalid-feedback">
+                                {{ $errors->first('bookSerial') }}
+                            </em>
+                        @endif
+                    </div>
+                </div>
 
                 <h3>BOM Details</h3>
 
