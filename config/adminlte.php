@@ -477,6 +477,13 @@ return [
                     'can'  => ['report_read'],
                     'active' => ['admin/report/receivables']
                 ],
+                [
+                    'text' => 'Monthly Defaulters ',
+                    'url'  => 'admin/report/monthlyDefaulters',
+                    'icon' => 'fas fa-fw fa-dollar-sign',
+                    'can'  => ['report_read'],
+                    'active' => ['admin/report/monthlyDefaulters']
+                ],
             ],
         ],
 		[

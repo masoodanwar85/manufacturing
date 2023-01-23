@@ -9,6 +9,7 @@ use App\Services\ReportService;
 use Illuminate\Http\Request;
 use Gate;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -283,5 +284,16 @@ class ReportController extends Controller
             $monthlyReceivables = AccountHead::getMonthlyReceivables($start_date,$end_date);
         }
         return view('admin.reports.receivables',compact('monthlyReceivables','filter'));
+    }
+
+    public function monthlyDefaulters(){
+        $expiredDefaulters = false;
+        $customers = Customer::query();
+        $salesAgentID = $this->salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
+        if ($salesAgentID != null) {
+            $customers->where('salesAgentID', $salesAgentID);
+        }
+        $customers = $customers->get();
+        return view('admin.reports.monthlyDefaulters',compact('customers'));
     }
 }

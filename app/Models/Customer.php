@@ -74,13 +74,13 @@ class Customer extends Model
         }
 		$rawSQL = "
 			SELECT IFNULL(SUM(customerAmount.amount),0) AS totalPayable FROM (
-				SELECT
+				SELECT				
 					SUM(transactionDetail.amount) AS amount
 				FROM transactionDetail
 				INNER JOIN `transaction` ON `transaction`.transactionID = transactionDetail.transactionID
 				WHERE transactionDetail.headID IN (" . \Config::get('constants.account_heads.customer_receivable') . "," . \Config::get('constants.account_heads.customer_payable') . ") " . ($customerID != 0 ? "AND subHeadID = " . $customerHeadID : "") . " AND isDebit = 1
 				UNION
-				SELECT
+				SELECT				
 					SUM(transactionDetail.amount * -1) AS amount
 				FROM transactionDetail
 				INNER JOIN `transaction` ON `transaction`.transactionID = transactionDetail.transactionID
@@ -89,5 +89,4 @@ class Customer extends Model
 		";
         return DB::select($rawSQL);
 	}
-
 }
