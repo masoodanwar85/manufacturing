@@ -49,7 +49,7 @@
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <div class="input-group-text">
-                                    <input type="hidden" name="mb" value="MB">MB
+                                    <input type="hidden" name="mb" value="MB">MB -
                                 </div>
                             </div>
                             <input type="text" name="bookSerial" class="form-control @if($errors->has('bookSerial')) is-invalid @endif" value="{{ old('bookSerial', '') }}" required>
