@@ -89,4 +89,29 @@ class Customer extends Model
 		";
         return DB::select($rawSQL);
 	}
+
+	public static function getMonthlyDefaulters(){
+        DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+	    $rawSQL = "
+                select
+                    customer.customerName,
+                    tdOuter.subHeadID,
+                    SUM(case when tdOuter.isDebit = 0 then CAST(tdOuter.amount as SIGNED) * -1
+                    else tdOuter.amount end) as transactionAmount,
+                    (
+                        select transaction.dateCreated 
+                        from transactiondetail
+                        inner join transaction on transaction.transactionID = transactionDetail.transactionID
+                        where headID in (" . \Config::get('constants.account_heads.customer_receivable') . ") and isDebit = 0 and subHeadID = tdOuter.subHeadID
+                        order by transaction.dateCreated DESC
+                        limit 0,1
+                    ) as lastReceivingDate
+                from customer
+                inner join transactionDetail tdOuter on tdOuter.subHeadID = customer.headID and tdOuter.headID in (" . \Config::get('constants.account_heads.customer_receivable') . "," . \Config::get('constants.account_heads.customer_payable') . ")
+                inner join transaction on transaction.transactionID = tdOuter.transactionID 
+                group by customer.customerName,tdOuter.subHeadID
+                having transactionAmount > 0 and (DATE_FORMAT(lastReceivingDate,'%Y-%m-01') < DATE_FORMAT(NOW(),'%Y-%m-01')) 
+	    ";
+        return DB::select($rawSQL);
+    }
 }

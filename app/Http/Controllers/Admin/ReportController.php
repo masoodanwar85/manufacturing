@@ -287,13 +287,8 @@ class ReportController extends Controller
     }
 
     public function monthlyDefaulters(){
-        $expiredDefaulters = false;
-        $customers = Customer::query();
-        $salesAgentID = $this->salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
-        if ($salesAgentID != null) {
-            $customers->where('salesAgentID', $salesAgentID);
-        }
-        $customers = $customers->get();
-        return view('admin.reports.monthlyDefaulters',compact('customers'));
+        $monthlyDefaulters  = Customer::getMonthlyDefaulters();
+//        dd($monthlyDefaulters);
+        return view('admin.reports.monthlyDefaulters',compact('monthlyDefaulters'));
     }
 }

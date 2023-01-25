@@ -17,28 +17,16 @@
                 <tr>
                     <th>Customer</th>
                     <th>Balance</th>
-                    <th width="10%">Current Status</th>
+                    <th>Last Receiving Date</th>
                 </tr>
                 </thead>
                 <tbody>
-                @foreach($customers as $customer)
-                    @if(\App\Models\Customer::getBalance($customer->customerID)[0]->totalPayable > 0)
+                @foreach($monthlyDefaulters as $d)
                     <tr>
-                        <td>{{$customer->customerName}}</td>
-                        <td>
-                            {{\App\Services\CurrencyService::getCurrencyFormatted(\App\Models\Customer::getBalance($customer->customerID)[0]->totalPayable)}}
-                        </td>
-                        @if(\App\Models\Customer::getBalance($customer->customerID)[0]->transactionDate <= now()->subMonth())
-                        <td class="table-danger">
-                           Not Paid This Month
-                        </td>
-                        @else
-                        <td>
-                            Paid This Month
-                        </td>
-                        @endif
+                        <td>{{$d->customerName}}</td>
+                        <td>@money('$d->transactionAmount')</td>
+                        <td>{{date('d-m-Y', strtotime($d->lastReceivingDate))}}</td>
                     </tr>
-                    @endif
                 @endforeach
                 </tbody>
             </table>

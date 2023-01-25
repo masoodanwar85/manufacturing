@@ -73,14 +73,17 @@ class PurchaseOrderService {
 			for ($i=0; $i < $countExpense; $i++) {
 				$transactionID = \App\Services\TransactionService::addTransaction(1,$request->expenseExchangeRate[$i],$request->batchID,null,0,$purchaseOrder->purchaseOrderDate);
 
-				 $parentAccountHead = \App\Models\AccountHead::whereRaw('headID IN (SELECT parentHeadID from accountHead WHERE headID = ' . $request->headID[$i] . ')')->first();
+				$parentAccountHead = \App\Models\AccountHead::whereRaw('headID IN (SELECT parentHeadID from accountHead WHERE headID = ' . $request->headID[$i] . ')')->first();
+
+				$debitHeadID = $parentAccountHead->headID;
+			    $creditHeadID = \Config::get('constants.account_heads.accounts_payable');
 				// Transaction Details
 
 				// Debit
-				\App\Services\TransactionService::addTransactionDetail($transactionID,$parentAccountHead->headID,$request->headID[$i],1,$request->amount[$i],'Expense incurred from Supplier/Customer to Owner');
+				\App\Services\TransactionService::addTransactionDetail($transactionID,$debitHeadID,$request->headID[$i],1,$request->amount[$i],'Expense incurred from Supplier/Customer to Owner');
 
 				//Credit
-				\App\Services\TransactionService::addTransactionDetail($transactionID,\Config::get('constants.account_heads.accounts_payable'),$request->headID[$i],0,$request->amount[$i],'Payable Expense incurred from Supplier/Customer to Owner');
+				\App\Services\TransactionService::addTransactionDetail($transactionID,$creditHeadID,$request->headID[$i],0,$request->amount[$i],'Payable Expense incurred from Supplier/Customer to Owner');
 
 				$purchaseOrder->transactions()->attach($transactionID, ['isExpense' => 1]);
 			}
