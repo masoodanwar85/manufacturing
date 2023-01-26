@@ -25,7 +25,7 @@
                     <tr>
                         <td>{{$d->customerName}}</td>
                         <td>@money('$d->transactionAmount')</td>
-                        <td>{{ date('F d, Y', strtotime($d->lastReceivingDate)) }}</td>
+                        <td>{!! $d->lastReceivingDate == null ? 'Not Received Yet' : date('F d, Y', strtotime($d->lastReceivingDate)) !!}</td>
                     </tr>
                 @endforeach
                 </tbody>
