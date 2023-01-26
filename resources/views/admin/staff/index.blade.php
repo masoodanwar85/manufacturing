@@ -42,7 +42,7 @@
 						<th>Date Joined</th>
 						<th>Salary</th>
                         <th>Balance</th>
-                        <th>IsActive</th>
+                        <th>Status</th>
 						<th>Date Created</th>
 						<th>Action</th>
 					</tr>

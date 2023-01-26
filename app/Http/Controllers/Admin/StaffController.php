@@ -25,6 +25,9 @@ class StaffController extends Controller
 
 		abort_if(Gate::denies('staff_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $filters['isActive'] = '';
+        if (!$request->has('isActive')) {
+            $request['isActive'] = 1;
+        }
         if ($request->filled('isActive')) {
             $filters['isActive'] = $request->input('isActive');
         }
