@@ -235,7 +235,7 @@ class AccountHeadController extends Controller
         $filters['toDate'] = date("Y-m-t H:i:s", $tsFromDate);
 
         $transactionQuery = \App\Models\Transaction::query();
-        $transactionQuery = $transactionQuery->where('isPaymentReceipt',1);
+        // $transactionQuery = $transactionQuery->where('isPaymentReceipt',1);
 
 		if ($filters['isIgnoreDates'] != 1) {
             // $transactionQuery = $transactionQuery->whereBetween('dateCreated',[$filters['fromDate'],$filters['toDate']]);
