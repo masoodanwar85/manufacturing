@@ -181,7 +181,9 @@ class ReportController extends Controller
 
         if (!$orders->isEmpty()) {
 
-            $salesAgentName = \App\Models\Staff::find($salesAgentID)->staffName;
+			if ($salesAgentID != null) {
+				$salesAgentName = \App\Models\Staff::find($salesAgentID)->staffName;
+			}
 
             foreach ($products as $product) {
                 $aryProducts[$product['productID']]['productName'] = $product['productName'];

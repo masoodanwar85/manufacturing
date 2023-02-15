@@ -17,6 +17,14 @@
 				.card-body {
 					font-size:5px;
 				}
+				table {
+					border-collapse: collapse;
+					border: 1px solid grey;
+				}
+				table td {
+					border-collapse: collapse;
+					border: 1px solid grey;
+				}
 			}
 		</style>
 	</head>

@@ -117,7 +117,7 @@ class Product extends Model
     public static function getSalesAgentDaySummary($salesAgentID, $orderDate) {
         DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
         $rawSQL = "
-            select
+            SELECT
                 salesOrder.salesOrderID,
                 salesOrder.customerID,
                 customer.shopName,
@@ -126,19 +126,19 @@ class Product extends Model
                 product.productName,
                 SUM(stockDetailStatus.quantity) as quantity,
                 (SUM((stockDetailStatus.quantity * stockDetailStatus.saleprice)) - salesOrder.discount) as total
-            from salesOrder
-            inner join customer on customer.customerID = salesOrder.customerID
-            inner join salesOrderDetail on salesOrder.salesOrderID = salesOrderDetail.salesOrderID
-            inner join stockDetailStatus on stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
-            inner join stockDetail on stockDetail.stockDetailID = stockDetailStatus.stockDetailID
-            inner join product on product.productID = stockDetail.productID
-            where salesOrder.salesAgentID = " . $salesAgentID . " and salesOrder.orderDate = '" . $orderDate . "'
-            group by
+            FROM salesOrder
+            INNER JOIN customer on customer.customerID = salesOrder.customerID
+            INNER JOIN salesOrderDetail on salesOrder.salesOrderID = salesOrderDetail.salesOrderID
+            INNER JOIN stockDetailStatus on stockDetailStatus.stockDetailStatusID = salesOrderDetail.stockDetailStatusID
+            INNER JOIN stockDetail on stockDetail.stockDetailID = stockDetailStatus.stockDetailID
+            INNER JOIN product on product.productID = stockDetail.productID
+            WHERE 1=1 " . ($salesAgentID != null ? "AND salesOrder.salesAgentID = ${salesAgentID}" : "") . " AND salesOrder.orderDate = '" . $orderDate . "'
+            GROUP BY
                 salesOrder.salesOrderID,
                 salesOrder.customerID,
                 salesOrder.orderDate,
                 stockDetail.productID
-            order by
+            ORDER BY
                 salesOrder.salesOrderID,
                 stockDetail.productID
         ";
