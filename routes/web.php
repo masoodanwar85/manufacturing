@@ -54,6 +54,8 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
     Route::post('invoiceBooks/updateBookSerials', [App\Http\Controllers\Admin\InvoiceBooksController::class, 'updateBookSerials'])->name('invoiceBooks.updateBookSerials');
     Route::get('invoiceBooks/{bookType}/nextSerial', [App\Http\Controllers\Admin\InvoiceBooksController::class, 'getNextSerialNumber'])->name('invoiceBooks.nextSerial');
 	Route::post('invoiceBooks/voidSerial', [App\Http\Controllers\Admin\InvoiceBooksController::class, 'voidSerialNumber'])->name('invoiceBooks.voidSerial');
+	Route::get('production/new', [App\Http\Controllers\Admin\ProductionController::class, 'new'])->name('production.new');
+	Route::post('production/save', [App\Http\Controllers\Admin\ProductionController::class, 'save'])->name('production.save');
 	Route::get('production/{production}/nextStage', [App\Http\Controllers\Admin\ProductionController::class, 'nextStage'])->name('production.nextStage');
     Route::get('sales/returns', [App\Http\Controllers\Admin\SalesOrderController::class, 'returns'])->name('sales.returns');
     Route::get('sales/returns/{sale}', [App\Http\Controllers\Admin\SalesOrderController::class, 'create_return'])->name('sales.create_return');

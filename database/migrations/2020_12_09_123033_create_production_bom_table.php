@@ -15,11 +15,13 @@ class CreateProductionBOMTable extends Migration
     {
         Schema::create('productionBOM', function (Blueprint $table) {
 			$table->bigIncrements('productionBOMID');
+            $table->unsignedBigInteger('productionID');
 			$table->unsignedBigInteger('productID');
 			$table->integer('quantity')->default(1);
             $table->integer('productionStageID')->default(0);
 			$table->unsignedBigInteger('createdByUserID');
 			$table->timestamp('dateCreated')->useCurrent();
+            $table->foreign('productionID')->references('productionID')->on('production');
 			$table->foreign('productID')->references('productID')->on('product');
 			$table->foreign('createdByUserID')->references('userID')->on('users');
         });

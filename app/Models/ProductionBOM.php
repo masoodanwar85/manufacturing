@@ -13,7 +13,12 @@ class ProductionBOM extends Model
     protected $primaryKey = 'productionBOMID';
 	protected $with = ['product'];
     public $timestamps = false;
-    protected $fillable = ['productID','quantity','productionStageID','createdByUserID'];
+    protected $fillable = ['productionID','productID','quantity','productionStageID','createdByUserID'];
+
+    public function production()
+    {
+        return $this->belongsTo('App\Models\Production','productionID','productionID');
+    }
 
     public function product()
     {

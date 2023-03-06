@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Gate;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\Production;
 use App\Models\ProductionBOM;
 use App\Models\ProductionBOMItem;
 use App\Models\ProductionBOMExpense;
@@ -78,8 +79,15 @@ class ProductionController extends Controller
     public function create()
     {
         abort_if(Gate::denies('production_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $BOMProducts = \App\Models\Product::with(['BOM.items','BOM.expenses.head'])->where('isBOM',1)->get()->sortBy('productName');
+        $BOMProducts = \App\Models\Product::with(['category','BOM.items','BOM.expenses.head'])->where('isBOM',1)->get()->sortBy('productName');
         return view('admin.production.create',compact('BOMProducts'));
+    }
+
+    public function new()
+    {
+        abort_if(Gate::denies('production_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $BOMProducts = \App\Models\Product::with(['category','BOM.items','BOM.expenses.head'])->where('isBOM',1)->get()->sortBy('productName');
+        return view('admin.production.new',compact('BOMProducts'));
     }
 
     /**
@@ -202,6 +210,148 @@ class ProductionController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollback();
+			$request->session()->flash('error', 'An error occurred while creating production!');
+        }
+        return redirect()->route('production.index');
+    }
+
+    public function save(Request $request)
+    {
+		abort_if(Gate::denies('production_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        DB::beginTransaction();
+        $is_success = true;
+        
+        try {
+            $request->merge(['createdByUserID' => Auth::id()]);
+            $request->merge(['isCompleted' => 1]);
+            $request->merge(['serial' => $request->mb.'-'.$request->bookSerial]);
+            $request->merge(['productionStageID' => \Config::get('constants.production_stages.finished')]);
+            // dd($request->all());
+            $production = Production::create($request->all());
+                        
+            foreach ($request->productIDs as $prodIdx => $productValue) {
+                $ary_product = explode('_',$productValue);
+                $productID = $ary_product[0];
+                $uuid = $ary_product[1];
+                $request->productID = $productID;
+                $request->productQty = $request['quantity'][$prodIdx];
+                $productionBOM = ProductionBOM::create([
+                    'productionID' => $production->productionID,
+                    'productID' => $productID,
+                    'quantity' => $request->productQty,
+                    'productionStageID' => $request->productionStageID,
+                    'createdByUserID' => Auth::id()
+                ]);
+
+                $productItemIDValue = 'productItemIDs_' . $uuid;
+                $productItemIDQty = 'productItemQuantitys_' . $uuid;
+                $productItemIDPrice = 'productItemPrices_' . $uuid;
+
+                foreach ($request[$productItemIDValue] as $idx => $thisProductItemID) {
+                    $productionBOMItem = ProductionBOMItem::create([
+                        'productionBOMID' => $productionBOM->productionBOMID,
+                        'productID' => $thisProductItemID,
+                        'quantity' => $request[$productItemIDQty][$idx],
+                        'unitPrice' => $request[$productItemIDPrice][$idx],
+                        'createdByUserID' => Auth::id()
+                    ]);
+                }
+    
+                if ($request->filled('expenseHeadIDs')) {
+                    foreach ($request->expenseHeadIDs as $idx => $thisExpenseHeadID) {
+                        $productionBOMExpense = ProductionBOMExpense::create([
+                            'productionBOMID' => $productionBOM->productionBOMID,
+                            'expenseHeadID' => $thisExpenseHeadID,
+                            'amount' => $request->expenseAmounts[$idx],
+                            'createdByUserID' => Auth::id()
+                        ]);
+                    }
+                }
+
+                //Add stockDetailStatus with statusID =  $retStatus = $this->addStockDetailStatus($production->productionBOMID);
+    
+                // if ($productionBOM->productionStageID == \Config::get('constants.production_stages.finished')) {}
+    
+                $retStatus = $this->addStockDetailStatus($productionBOM->productionBOMID);
+                $is_success = $retStatus['success'];
+                $errorMsg = $retStatus['message'];
+
+                if (!$is_success) {
+                    DB::rollback();
+                    $request->session()->flash('error', $errorMsg);
+                    dd($errorMsg);
+                    // return redirect()->route('production.index');
+                } else {
+                    $stockToAdd = [];
+                    foreach ($request[$productItemIDValue] as $idx => $thisProductItemID) {
+                        $thisProduct = $productionBOM->items()->where('productID', $thisProductItemID)->first();
+                        $thisProduct->update([
+                            'consumed' => $request[$productItemIDQty][$idx]
+                        ]);
+        
+                        // If Quantity is Less, then put back to Factory Stock
+                        if ($request[$productItemIDQty][$idx] < $thisProduct->quantity) {
+                            // Add this product to stock
+                            $stockToAdd[] = ['productID' => $thisProductItemID, 'quantityToAdd' => $thisProduct->quantity - $request->productItemQuantityConsumed[$idx]];
+                        }
+                    }
+        
+                    if (count($stockToAdd) > 0) {
+                        $stock = \App\Models\Stock::create([
+                            'productionBOMID' => $productionBOM->productionBOMID,
+                            'createdByUserID' => Auth::id()
+                        ]);
+        
+                        foreach ($stockToAdd as $thisStock) {
+                            $stockDetail = $stock->stockDetails()->create([
+                                'productID' => $thisStock['productID'],
+                                'godownID' => \Config::get('constants.production_stages.default_factory_id'),
+                                'quantity' => $thisStock['quantityToAdd'],
+                                'quantityUnits' => $thisStock['quantityToAdd'],
+                                'purchasePrice' => 0
+                            ]);
+        
+                            $stockDetail->stockDetailStatuses()->create([
+                                'statusID' => \Config::get('constants.stock_status.quetta_godown'),
+                                'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
+                                'godownID' => \Config::get('constants.production_stages.default_factory_id'),
+                                'bookSerial' => $request->mb.$request->bookSerial,
+                                'quantity' => $thisStock['quantityToAdd'],
+                                'quantityUnits' => $thisStock['quantityToAdd'],
+                                'createdByUserID' => Auth::id()
+                            ]);
+                        }
+                    }
+        
+                    $stock = \App\Models\Stock::create([
+                        'productionBOMID' => $productionBOM->productionBOMID,
+                        'createdByUserID' => Auth::id()
+                    ]);
+                    $stockDetail = $stock->stockDetails()->create([
+                        'productID' => $request->productID,
+                        'godownID' => \Config::get('constants.production_stages.default_factory_id'),
+                        'quantity' => $request->productQty,
+                        'quantityUnits' => $request->productQty,
+                        'purchasePrice' => 0
+                    ]);
+        
+                    $stockDetail->stockDetailStatuses()->create([
+                        'statusID' => \Config::get('constants.stock_status.quetta_godown'),
+                        'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
+                        'godownID' => \Config::get('constants.production_stages.default_factory_id'),
+                        'bookSerial' => $request->mb.$request->bookSerial,
+                        'quantity' => $request->productQty,
+                        'quantityUnits' => $request->productQty,
+                        'createdByUserID' => Auth::id()
+                    ]);
+                }
+            }
+
+            DB::commit();
+            $request->session()->flash('message', 'Production created successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            dd($e);
 			$request->session()->flash('error', 'An error occurred while creating production!');
         }
         return redirect()->route('production.index');
