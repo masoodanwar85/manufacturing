@@ -6,6 +6,14 @@
         View
     </a>
 @endcan
+@if (isset($showGate))
+    @can($showGate)
+        <a class="btn btn-xs btn-primary" href="{{ route($showGateRoute, $row->$primaryKey) }}">
+            View
+        </a>
+    @endcan
+@endif
+
 @can($editGate)
     <a class="btn btn-xs btn-info" href="{{ route($crudRoutePart . '.edit', $row->$primaryKey) }}">
         Edit

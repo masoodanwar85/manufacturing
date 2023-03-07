@@ -71,6 +71,54 @@ class ProductionController extends Controller
         return view('admin.production.index');
     }
 
+    public function list(Request $request)
+    {
+		abort_if(Gate::denies('production_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if ($request->ajax()) {
+
+            $query = Production::with(['boms.product','boms.items','boms.expenses'])->get();
+
+            $table = Datatables::of($query);
+
+            $table->addColumn('placeholder', '&nbsp;');
+            $table->addColumn('actions', '&nbsp;');
+
+            $table->editColumn('actions', function ($row) {
+                $viewGate      = 'productions_read';
+                $showGate      = 'production_read';
+                $editGate      = 'production_update';
+                $deleteGate    = 'production_delete';
+                $crudRoutePart = 'production';
+                $primaryKey = 'productionID';
+                $showGateRoute = 'production.view';
+                return view('partials.datatablesActions', compact(
+                    'viewGate',
+                    'showGate',
+                    'editGate',
+                    'deleteGate',
+                    'crudRoutePart',
+                    'row',
+                    'showGateRoute',
+                    'primaryKey'
+                ));
+            });
+
+            $table->editColumn('productName', function ($row) {
+                $products = "";
+                foreach ($row->boms as $bom) {
+                    $products .= $bom->product->productName . ' ( ' . $bom->quantity . ' ) ';
+                    $products .= ' ';
+                }
+                return $products;
+            });
+			$table->rawColumns(['actions', 'placeholder']);
+
+            return $table->make(true);
+        }
+
+        return view('admin.production.list');
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -86,7 +134,7 @@ class ProductionController extends Controller
     public function new()
     {
         abort_if(Gate::denies('production_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $BOMProducts = \App\Models\Product::with(['category','BOM.items','BOM.expenses.head'])->where('isBOM',1)->get()->sortBy('productName');
+        $BOMProducts = \App\Models\Product::with(['BOM.items','BOM.expenses.head','category'])->where('isBOM',1)->get()->sortBy('productName');
         return view('admin.production.new',compact('BOMProducts'));
     }
 
@@ -280,7 +328,7 @@ class ProductionController extends Controller
                     DB::rollback();
                     $request->session()->flash('error', $errorMsg);
                     dd($errorMsg);
-                    // return redirect()->route('production.index');
+                    return redirect()->route('production.index');
                 } else {
                     $stockToAdd = [];
                     foreach ($request[$productItemIDValue] as $idx => $thisProductItemID) {
@@ -367,6 +415,13 @@ class ProductionController extends Controller
     {
         abort_if(Gate::denies('production_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         dd($production);
+    }
+
+    public function view(Production $production)
+    {
+        abort_if(Gate::denies('production_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $production->load(['boms.product','boms.items','boms.expenses']);
+        return view('admin.production.view', compact('production'));
     }
 
     /**

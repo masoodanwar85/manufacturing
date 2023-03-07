@@ -304,7 +304,7 @@ return [
                 ],
 				[
                     'text' => 'production',
-                    'url'  => 'admin/production',
+                    'url'  => 'admin/production/list',
                     'icon' => 'fas fa-fw fa-cube',
                     'can'  => ['production_create'],
 					'active' => ['admin/production']
