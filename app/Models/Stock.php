@@ -13,7 +13,7 @@ class Stock extends Model
     protected $primaryKey = 'stockID';
 	protected $with = ['stockDetails'];
     public $timestamps = false;
-    protected $fillable = ['stockID','purchaseOrderID','productionBOMID','createdByUserID'];
+    protected $fillable = ['stockID','purchaseOrderID','productionID','createdByUserID'];
 
 	public function stockDetails()
     {
@@ -25,9 +25,9 @@ class Stock extends Model
         return $this->belongsTo('App\Models\PurchaseOrder','purchaseOrderID','purchaseOrderID');
     }
 
-    public function productionBOMs()
+    public function production()
     {
-        return $this->belongsTo('App\Models\ProductionBOM','productionBOMID','productionBOMID');
+        return $this->belongsTo('App\Models\Production','productionID','productionID');
     }
 
 	public static function getStock($productID = null,$isThresholdStock = FALSE,$isGroupByGodown = FALSE, $godownID = null, $productTypeID = null) {

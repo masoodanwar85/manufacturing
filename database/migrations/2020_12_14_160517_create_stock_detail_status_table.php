@@ -16,11 +16,10 @@ class CreateStockDetailStatusTable extends Migration
         Schema::create('stockDetailStatus', function (Blueprint $table) {
 			$table->bigIncrements('stockDetailStatusID');
 			$table->unsignedBigInteger('stockDetailID');
-            $table->foreignId('productionBOMID')->nullable()->constrained('productionBOM','productionBOMID');
+            $table->foreignId('productionID')->nullable()->constrained('production','productionID');
 			$table->unsignedInteger('statusID');
 			$table->unsignedBigInteger('batchID');
             $table->unsignedBigInteger('godownID');
-			$table->string('bookSerial')->nullable();
 			$table->bigInteger('quantity');
             $table->bigInteger('discount')->default(0);
 			$table->integer('quantityUnits');

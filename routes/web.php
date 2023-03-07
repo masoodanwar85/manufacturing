@@ -56,6 +56,7 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
 	Route::post('invoiceBooks/voidSerial', [App\Http\Controllers\Admin\InvoiceBooksController::class, 'voidSerialNumber'])->name('invoiceBooks.voidSerial');
 	Route::get('production/list', [App\Http\Controllers\Admin\ProductionController::class, 'list'])->name('production.list');
 	Route::get('production/view/{production}', [App\Http\Controllers\Admin\ProductionController::class, 'view'])->name('production.view');
+	Route::get('production/{production}/change', [App\Http\Controllers\Admin\ProductionController::class, 'change'])->name('production.change');
 	Route::get('production/new', [App\Http\Controllers\Admin\ProductionController::class, 'new'])->name('production.new');
 	Route::post('production/save', [App\Http\Controllers\Admin\ProductionController::class, 'save'])->name('production.save');
 	Route::get('production/{production}/nextStage', [App\Http\Controllers\Admin\ProductionController::class, 'nextStage'])->name('production.nextStage');

@@ -18,4 +18,9 @@ class Production extends Model
     {
         return $this->hasMany('App\Models\ProductionBOM','productionID','productionID');
     }
+
+    public function stock()
+    {
+        return $this->hasOne('App\Models\Stock','productionID','productionID');
+    }
 }

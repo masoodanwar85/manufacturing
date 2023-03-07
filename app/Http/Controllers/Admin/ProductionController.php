@@ -223,7 +223,6 @@ class ProductionController extends Controller
                             'statusID' => \Config::get('constants.stock_status.quetta_godown'),
                             'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
                             'godownID' => \Config::get('constants.production_stages.default_factory_id'),
-                            'bookSerial' => $request->mb.$request->bookSerial,
                             'quantity' => $thisStock['quantityToAdd'],
                             'quantityUnits' => $thisStock['quantityToAdd'],
                             'createdByUserID' => Auth::id()
@@ -247,7 +246,6 @@ class ProductionController extends Controller
                     'statusID' => \Config::get('constants.stock_status.quetta_godown'),
                     'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
                     'godownID' => \Config::get('constants.production_stages.default_factory_id'),
-                    'bookSerial' => $request->mb.$request->bookSerial,
                     'quantity' => $request->quantity,
                     'quantityUnits' => $request->quantity,
                     'createdByUserID' => Auth::id()
@@ -346,7 +344,7 @@ class ProductionController extends Controller
         
                     if (count($stockToAdd) > 0) {
                         $stock = \App\Models\Stock::create([
-                            'productionBOMID' => $productionBOM->productionBOMID,
+                            'productionID' => $production->productionID,
                             'createdByUserID' => Auth::id()
                         ]);
         
@@ -363,7 +361,6 @@ class ProductionController extends Controller
                                 'statusID' => \Config::get('constants.stock_status.quetta_godown'),
                                 'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
                                 'godownID' => \Config::get('constants.production_stages.default_factory_id'),
-                                'bookSerial' => $request->mb.$request->bookSerial,
                                 'quantity' => $thisStock['quantityToAdd'],
                                 'quantityUnits' => $thisStock['quantityToAdd'],
                                 'createdByUserID' => Auth::id()
@@ -372,7 +369,7 @@ class ProductionController extends Controller
                     }
         
                     $stock = \App\Models\Stock::create([
-                        'productionBOMID' => $productionBOM->productionBOMID,
+                        'productionID' => $production->productionID,
                         'createdByUserID' => Auth::id()
                     ]);
                     $stockDetail = $stock->stockDetails()->create([
@@ -387,7 +384,6 @@ class ProductionController extends Controller
                         'statusID' => \Config::get('constants.stock_status.quetta_godown'),
                         'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
                         'godownID' => \Config::get('constants.production_stages.default_factory_id'),
-                        'bookSerial' => $request->mb.$request->bookSerial,
                         'quantity' => $request->productQty,
                         'quantityUnits' => $request->productQty,
                         'createdByUserID' => Auth::id()
@@ -402,7 +398,7 @@ class ProductionController extends Controller
             dd($e);
 			$request->session()->flash('error', 'An error occurred while creating production!');
         }
-        return redirect()->route('production.index');
+        return redirect()->route('production.list');
     }
 
     /**
@@ -421,6 +417,7 @@ class ProductionController extends Controller
     {
         abort_if(Gate::denies('production_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $production->load(['boms.product','boms.items','boms.expenses']);
+        // dd($production);
         return view('admin.production.view', compact('production'));
     }
 
@@ -436,6 +433,14 @@ class ProductionController extends Controller
 		$BOMProducts = \App\Models\Product::with(['BOM.items','BOM.expenses.head'])->where('isBOM',1)->get()->sortBy('productName');
 		$production->load(['items','expenses.head']);
         return view('admin.production.edit',compact('BOMProducts','production'));
+    }
+
+    public function change(Production $production)
+    {
+        abort_if(Gate::denies('production_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+		$BOMProducts = \App\Models\Product::with(['BOM.items','BOM.expenses.head'])->where('isBOM',1)->get()->sortBy('productName');
+		$production->load(['boms.product','boms.items','boms.expenses']);
+        return view('admin.production.change',compact('BOMProducts','production'));
     }
 
     /**
@@ -472,7 +477,7 @@ class ProductionController extends Controller
 
                 if (count($stockToAdd) > 0) {
                     $stock = \App\Models\Stock::create([
-                        'productionBOMID' => $production->productionBOMID,
+                        'productionID' => $production->productionID,
                         'createdByUserID' => Auth::id()
                     ]);
 
@@ -497,7 +502,7 @@ class ProductionController extends Controller
                 }
 
                 $stock = \App\Models\Stock::create([
-                    'productionBOMID' => $production->productionBOMID,
+                    'productionID' => $production->productionID,
                     'createdByUserID' => Auth::id()
                 ]);
                 $stockDetail = $stock->stockDetails()->create([
@@ -573,18 +578,40 @@ class ProductionController extends Controller
      * @param  \App\Models\ProductionBOM  $productionBOM
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ProductionBOM $production,Request $request)
+    public function destroy(Production $production,Request $request)
     {
 		abort_if(Gate::denies('production_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 		DB::beginTransaction();
 		try {
-			$production->expenses()->delete();
-			$production->items()->delete();
-			$production->delete();
+            $stocks = \App\Models\Stock::where('productionID', $production->productionID)->get();
+            foreach ($stocks as $stock) {
+                foreach ($stock->stockDetails as $stockDetail) {
+                    foreach ($stockDetail->stockDetailStatuses as $stockDetailStatus) {
+                        $stockDetailStatus->delete();
+                    }
+                    $stockDetail->delete();
+                }
+                $stock->delete();
+            }
+
+            \App\Models\StockDetailStatus::where('productionID', $production->productionID)->delete();
+
+            foreach ($production->boms as $bom) {
+                foreach ($bom->items as $item) {
+                    $item->delete();
+                }
+                foreach ($bom->expenses as $expense) {
+                    $expense->delete();
+                }
+                $bom->delete();
+            }
+
+            $production->delete();
 			DB::commit();
 			$request->session()->flash('message', 'Production deleted successfully!');
 		} catch (Exception $e) {
 			DB::rollback();
+            dd($e);
 			$request->session()->flash('error', 'An error occurred while deleting production!');
 		}
 
@@ -627,8 +654,8 @@ class ProductionController extends Controller
     public function addStockDetailStatus(int $productionBOMID) {
         $is_success = true;
         $errorMsg = '';
-        $production = ProductionBOM::with('items')->where('productionBOMID',$productionBOMID)->first();
-        foreach ($production->items as $productionBOMItem) {
+        $productionBOM = ProductionBOM::with('items')->where('productionBOMID',$productionBOMID)->first();
+        foreach ($productionBOM->items as $productionBOMItem) {
             // Check for stock for this product
 			$stockInfo = \App\Models\Stock::getStock($productID = $productionBOMItem->productID,false,true,\Config::get('constants.production_stages.default_factory_id'));
             if ($stockInfo == null) {
@@ -638,7 +665,7 @@ class ProductionController extends Controller
             }
             $productStockQty = Arr::first($stockInfo)->inStockQuantity;
             // dd($productStockQty,$production,$productionBOMItem);
-            $quantityRemaining = $productionBOMItem->quantity * $production->quantity;
+            $quantityRemaining = $productionBOMItem->quantity * $productionBOM->quantity;
             $quantityUnitsRemaining = $quantityRemaining;
             if ($productStockQty >= $quantityRemaining) {
                 // Change stock status to manufacturing
@@ -660,7 +687,7 @@ class ProductionController extends Controller
                     if ($stockDetailInfo->quantityAvailable >= $quantityRemaining) {
                         $stockDetailStatus->quantity = $quantityRemaining;
                         $stockDetailStatus->quantityUnits = $quantityUnitsRemaining;
-                        $stockDetailStatus->productionBOMID = $production->productionBOMID;
+                        $stockDetailStatus->productionID = $productionBOM->productionID;
                         $stockDetailStatus->save();
                         break;
                     } else {
@@ -679,7 +706,7 @@ class ProductionController extends Controller
 
                         $stockDetailStatus->quantityUnits = $stockDetailInfo->quantityAvailable;
                         $stockDetailStatus->godownID = $stockDetailInfo->godownID;
-                        $stockDetailStatus->productionBOMID = $production->productionBOMID;
+                        $stockDetailStatus->productionID = $productionBOM->productionID;
                         $stockDetailStatus->save();
                         // Insert stockDetailStatusID in salesOrderDetail
                     }
@@ -691,7 +718,7 @@ class ProductionController extends Controller
                 // ]);
             } else {
                 $is_success = false;
-                $errorMsg = 'Required quantity for ' . $productionBOMItem->product->productName . ' is ' . $productionBOMItem->quantity * $production->quantity  . ' and stock has ' . $productStockQty;
+                $errorMsg = 'Required quantity for ' . $productionBOMItem->product->productName . ' is ' . $productionBOMItem->quantity * $productionBOM->quantity  . ' and stock has ' . $productStockQty;
                 break;
             }
         }
