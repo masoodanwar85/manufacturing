@@ -31,6 +31,6 @@ class CreateProductionTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('productionBOM');
+        Schema::dropIfExists('production');
     }
 }
