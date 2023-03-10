@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class ProductionBOMItem extends Model
 {
     use HasFactory;
-    protected $table = 'ProductionBOMItem';
+    protected $table = 'productionBOMItem';
     protected $primaryKey = 'productionBOMItemID';
 	protected $with = ['product'];
     public $timestamps = false;
