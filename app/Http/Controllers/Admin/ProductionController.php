@@ -660,7 +660,7 @@ class ProductionController extends Controller
 			$stockInfo = \App\Models\Stock::getStock($productID = $productionBOMItem->productID,false,true,\Config::get('constants.production_stages.default_factory_id'));
             if ($stockInfo == null) {
                 $is_success = false;
-                $errorMsg = 'Please make sure all the raw materials have been shifted to Factory!';
+                $errorMsg = 'Please make sure "' . $productionBOMItem->product->productName . '" have been shifted to Factory!';
                 break;
             }
             $productStockQty = Arr::first($stockInfo)->inStockQuantity;

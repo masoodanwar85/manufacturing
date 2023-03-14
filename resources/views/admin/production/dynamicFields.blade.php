@@ -7,8 +7,9 @@
                     <option value="{{ $product->productID }}_product_unique_id">{{ $product->productName }}</option>
                 @endforeach
             </select>
+            <a href="javascript:void(0);" style="display:block;text-align:center;" onclick="$('#sub-row_product_unique_id').toggle();">Show/Hide Items</a>
         </div>
-        <div class="col-sm-12">
+        <div class="col-sm-12" id="sub-row_product_unique_id" style="display:none;">
             <br />
             <table class="table table-striped table-bordered table-sm">
                 <thead>
