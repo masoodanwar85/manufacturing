@@ -20,6 +20,7 @@ class CreateStockDetailStatusTable extends Migration
 			$table->unsignedInteger('statusID');
 			$table->unsignedBigInteger('batchID');
             $table->unsignedBigInteger('godownID');
+            $table->string('bookSerial')->nullable();
 			$table->bigInteger('quantity');
             $table->bigInteger('discount')->default(0);
 			$table->integer('quantityUnits');
