@@ -43,26 +43,33 @@
     			<div class="info-box mb-3">
     				<span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
     				<div class="info-box-content">
-    					<span class="info-box-text">Payments</span>
+    					<span class="info-box-text">Payments / Receipts</span>
     					<span class="info-box-number"></span>
     				</div>
     			</div>
             </a>
-			<a style="color:white;" href="{{ route('accountHead.payment') }}" type="button" class="btn btn-block btn-success btn-lg"><i class="fas fa-plus-circle"></i> New Payment</a>
+			<div class="row">
+				<div class="col">
+					<a style="color:white;" href="{{ route('accountHead.receipt') }}" type="button" class="btn btn-block btn-info btn-lg"><i class="fas fa-plus-circle"></i> New Receipt</a>
+				</div>
+				<div class="col">
+					<a style="color:white;" href="{{ route('accountHead.payment') }}" type="button" class="btn btn-block btn-success btn-lg"><i class="fas fa-plus-circle"></i> New Payment</a>
+				</div>
+			</div>
 		</div>
 		@endcan
 		@can('sales_create')
 		<div class="col">
-            <a href="{{ route('accountHead.paymentsReceipts') }}">
+            <a href="{{ route('production.list') }}">
     			<div class="info-box mb-3">
     				<span class="info-box-icon bg-info elevation-1"><i class="fas fa-shopping-cart"></i></span>
     				<div class="info-box-content">
-    					<span class="info-box-text">Receipts</span>
+    					<span class="info-box-text">Production</span>
     					<span class="info-box-number"></span>
     				</div>
     			</div>
             </a>
-			<a style="color:white;" href="{{ route('accountHead.receipt') }}" type="button" class="btn btn-block btn-info btn-lg"><i class="fas fa-plus-circle"></i> New Receipt</a>
+			<a style="color:white;" href="{{ route('production.new') }}" type="button" class="btn btn-block btn-info btn-lg"><i class="fas fa-plus-circle"></i> New Production</a>
 		</div>
 		@endcan
 	</div>

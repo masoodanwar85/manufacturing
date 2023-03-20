@@ -35,6 +35,13 @@
         @endforeach
     };
 
+	function bindRemoveClick() {
+		$('button.removeProductRow').bind('click', function() {
+			$(this).closest('tr').remove();
+			calculateProductRowTotal();
+		});
+	}
+
 	function addProductRow() {
 		const uniqueID = create_UUID();
 		const regExp = /product_unique_id/gi;
@@ -42,7 +49,7 @@
         strPORowHTML = strPORowHTML.replace(/<span class="separator"><\/span>/g,'</td><td>');
 		strPORowHTML = strPORowHTML.replace(regExp,uniqueID);
         $('table#main > tbody').append('<tr><td>' + strPORowHTML + '</td></tr>');
-        // bindRemoveClick();
+        bindRemoveClick();
         bindQuantityChanged();
 	}
 
