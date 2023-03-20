@@ -237,6 +237,10 @@ class AccountHeadController extends Controller
         $transactionQuery = \App\Models\Transaction::query();
         // $transactionQuery = $transactionQuery->where('isPaymentReceipt',1);
 
+        $transactionQuery = $transactionQuery->whereNotIn('transactionID', function($transactionQuery) {
+            return $transactionQuery->select(DB::raw('transactionID FROM transactionDetail WHERE headID = ' . \Config::get('constants.account_heads.customer_receivable'). ' AND isDebit = 1'));
+        });
+
 		if ($filters['isIgnoreDates'] != 1) {
             // $transactionQuery = $transactionQuery->whereBetween('dateCreated',[$filters['fromDate'],$filters['toDate']]);
 			$transactionQuery = $transactionQuery->whereBetween('transactionDate',[$filters['fromDate'],$filters['toDate']]);
@@ -269,7 +273,11 @@ class AccountHeadController extends Controller
 
         $customers = \App\Models\Customer::orderBy('customerName','asc')->get();
 
-		$filterHeads = \App\Models\AccountHead::whereIn('headID',[\Config::get('constants.account_heads.customer_receivable'),\Config::get('constants.account_heads.expense'),\Config::get('constants.account_heads.staff_receivable')])->orderBy('headName','asc')->get();
+		$filterHeads = \App\Models\AccountHead::whereIn('headID',[
+            \Config::get('constants.account_heads.customer_receivable'),
+            \Config::get('constants.account_heads.expense'),
+            \Config::get('constants.account_heads.staff_receivable')
+        ])->orderBy('headName','asc')->get();
 
 		foreach ($filterHeads as &$filterHead) {
 		    if ($filterHead->headID == \Config::get('constants.account_heads.customer_receivable')) {
@@ -281,7 +289,11 @@ class AccountHeadController extends Controller
             }
         }
 
-		$filterSubHeads = AccountHead::whereIn('parentHeadID', [\Config::get('constants.account_heads.customer'),\Config::get('constants.account_heads.staff'),\Config::get('constants.account_heads.expense')])->orderBy('headName','asc')->get();
+		$filterSubHeads = AccountHead::whereIn('parentHeadID', [
+            \Config::get('constants.account_heads.customer'),
+            \Config::get('constants.account_heads.staff'),
+            \Config::get('constants.account_heads.expense')
+        ])->orderBy('headName','asc')->get();
 
         if (is_numeric($filters['headID'])) {
             $parentHeadID = $filters['headID'] == \Config::get('constants.account_heads.customer_receivable') ? \Config::get('constants.account_heads.customer') : ($filters['headID'] == \Config::get('constants.account_heads.staff_receivable') ? \Config::get('constants.account_heads.staff') : $filters['headID']);
