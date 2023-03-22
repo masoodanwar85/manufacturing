@@ -14,6 +14,14 @@
     @endcan
 @endif
 
+@if (isset($editGateRoute))
+    @can($changeGate)
+        <a class="btn btn-xs btn-info" href="{{ route($editGateRoute, $row->$primaryKey) }}">
+            Edit
+        </a>
+    @endcan
+@endif
+
 @can($editGate)
     <a class="btn btn-xs btn-info" href="{{ route($crudRoutePart . '.edit', $row->$primaryKey) }}">
         Edit

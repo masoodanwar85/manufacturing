@@ -86,19 +86,23 @@ class ProductionController extends Controller
             $table->editColumn('actions', function ($row) {
                 $viewGate      = 'productions_read';
                 $showGate      = 'production_read';
-                $editGate      = 'production_update';
+                $editGate      = 'productions_update';
+                $changeGate      = 'production_update';
                 $deleteGate    = 'production_delete';
                 $crudRoutePart = 'production';
                 $primaryKey = 'productionID';
                 $showGateRoute = 'production.view';
+                $editGateRoute = 'production.change';
                 return view('partials.datatablesActions', compact(
                     'viewGate',
                     'showGate',
+                    'changeGate',
                     'editGate',
                     'deleteGate',
                     'crudRoutePart',
                     'row',
                     'showGateRoute',
+                    'editGateRoute',
                     'primaryKey'
                 ));
             });
@@ -135,7 +139,8 @@ class ProductionController extends Controller
     {
         abort_if(Gate::denies('production_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $BOMProducts = \App\Models\Product::with(['BOM.items','BOM.expenses.head','category'])->where('isBOM',1)->get()->sortBy('productName');
-        return view('admin.production.new',compact('BOMProducts'));
+        $now = date('Y-m-d');
+        return view('admin.production.new',compact('BOMProducts','now'));
     }
 
     /**
@@ -263,10 +268,20 @@ class ProductionController extends Controller
 
     public function save(Request $request)
     {
-		abort_if(Gate::denies('production_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        DB::beginTransaction();
+		DB::beginTransaction();
+        if ($this->add($request)) {
+            DB::commit();
+            $request->session()->flash('message', 'Production created successfully!');
+        } else {
+            DB::rollback();
+        }
+        return redirect()->route('production.list');
+    }
+
+    private function add(Request $request) 
+    {
+        abort_if(Gate::denies('production_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $is_success = true;
-        
         try {
             $request->merge(['createdByUserID' => Auth::id()]);
             $request->merge(['isCompleted' => 1]);
@@ -323,10 +338,8 @@ class ProductionController extends Controller
                 $errorMsg = $retStatus['message'];
 
                 if (!$is_success) {
-                    DB::rollback();
                     $request->session()->flash('error', $errorMsg);
-                    dd($errorMsg);
-                    return redirect()->route('production.index');
+                    return $is_success;
                 } else {
                     $stockToAdd = [];
                     foreach ($request[$productItemIDValue] as $idx => $thisProductItemID) {
@@ -390,15 +403,11 @@ class ProductionController extends Controller
                     ]);
                 }
             }
-
-            DB::commit();
-            $request->session()->flash('message', 'Production created successfully!');
         } catch (\Exception $e) {
-            DB::rollback();
-            dd($e);
-			$request->session()->flash('error', 'An error occurred while creating production!');
+            $is_success = false;
+			$request->session()->flash('error', 'An error occurred while creating production! ' . $e->getMessage());
         }
-        return redirect()->route('production.list');
+        return $is_success;
     }
 
     /**
@@ -441,6 +450,18 @@ class ProductionController extends Controller
 		$BOMProducts = \App\Models\Product::with(['BOM.items','BOM.expenses.head'])->where('isBOM',1)->get()->sortBy('productName');
 		$production->load(['boms.product','boms.items','boms.expenses']);
         return view('admin.production.change',compact('BOMProducts','production'));
+    }
+
+    public function changeUpdate(Production $production, Request $request) 
+    {
+        DB::beginTransaction();
+        if ($this->delete($production) && $this->add($request)) {
+            DB::commit();
+            $request->session()->flash('message', 'Production created successfully!');
+        } else {
+            DB::rollback();
+        }
+        return redirect()->route('production.list');
     }
 
     /**
@@ -580,9 +601,23 @@ class ProductionController extends Controller
      */
     public function destroy(Production $production,Request $request)
     {
-		abort_if(Gate::denies('production_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 		DB::beginTransaction();
-		try {
+        if ($this->delete($production)) {
+            DB::commit();
+			$request->session()->flash('message', 'Production deleted successfully!');
+        } else {
+            DB::rollback();
+            $request->session()->flash('error', 'An error occurred while deleting production!');
+        }
+
+        return redirect()->route('production.list');
+    }
+
+    private function delete(Production $production) 
+    {
+        abort_if(Gate::denies('production_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $is_success = true;
+        try {
             $stocks = \App\Models\Stock::where('productionID', $production->productionID)->get();
             foreach ($stocks as $stock) {
                 foreach ($stock->stockDetails as $stockDetail) {
@@ -607,16 +642,14 @@ class ProductionController extends Controller
             }
 
             $production->delete();
-			DB::commit();
-			$request->session()->flash('message', 'Production deleted successfully!');
+			
 		} catch (Exception $e) {
-			DB::rollback();
-            dd($e);
-			$request->session()->flash('error', 'An error occurred while deleting production!');
+			$is_success = false;	
 		}
-
-        return redirect()->route('production.index');
+        return $is_success;
     }
+
+
 
     public function nextStage(ProductionBOM $production,Request $request)
     {

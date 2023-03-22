@@ -12,7 +12,7 @@ class Production extends Model
     protected $table = 'production';
     protected $primaryKey = 'productionID';
 	public $timestamps = false;
-    protected $fillable = ['serial','description','isCompleted','createdByUserID'];
+    protected $fillable = ['productionDate','serial','description','isCompleted','createdByUserID'];
 
     public function boms()
     {

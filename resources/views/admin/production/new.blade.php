@@ -35,6 +35,18 @@
                     </div>
                 </div>
 
+				<div class="form-group row {{ $errors->has('productionDate') ? 'has-error' : '' }}">
+                    <label for="productionDate" class="col-sm-2 col-form-label">Date: *</label>
+					<div class="col-sm-3">
+	                    <input type="date" name="productionDate" class="form-control @if($errors->has('productionDate')) is-invalid @endif" value="{{ old('productionDate',$now) }}" required>
+	                    @if($errors->has('productionDate'))
+	                        <em class="invalid-feedback">
+	                            {{ $errors->first('productionDate') }}
+	                        </em>
+	                    @endif
+					</div>
+                </div>
+
                 <div class="row">
 					<div class="col-md-12 col-xs-12">
 						<div class="x_panel">

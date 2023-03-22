@@ -4,7 +4,12 @@
 	{{ \App\Services\CurrencyService::strJSConvertToPKR() }}
 
 	$(function() {
-		addProductRow();
+		
+		@if ($isNew == false)
+			calculateProductRowTotal();
+		@else
+			addProductRow();
+		@endif
 		bindQuantityChanged();
 	});
 

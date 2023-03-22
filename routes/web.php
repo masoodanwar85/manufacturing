@@ -59,6 +59,7 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
 	Route::get('production/{production}/change', [App\Http\Controllers\Admin\ProductionController::class, 'change'])->name('production.change');
 	Route::get('production/new', [App\Http\Controllers\Admin\ProductionController::class, 'new'])->name('production.new');
 	Route::post('production/save', [App\Http\Controllers\Admin\ProductionController::class, 'save'])->name('production.save');
+	Route::post('production/{production}/changeUpdate', [App\Http\Controllers\Admin\ProductionController::class, 'changeUpdate'])->name('production.changeUpdate');
 	Route::get('production/{production}/nextStage', [App\Http\Controllers\Admin\ProductionController::class, 'nextStage'])->name('production.nextStage');
     Route::get('sales/returns', [App\Http\Controllers\Admin\SalesOrderController::class, 'returns'])->name('sales.returns');
     Route::get('sales/returns/{sale}', [App\Http\Controllers\Admin\SalesOrderController::class, 'create_return'])->name('sales.create_return');

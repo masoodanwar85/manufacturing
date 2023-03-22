@@ -24,7 +24,7 @@
 					<tr>
 						<th>Serial</th>
 						<th>Product (Quantity)</th>
-						<th>Date Created</th>
+						<th>Production Date</th>
 						<th>Action</th>
 					</tr>
 				</thead>
@@ -47,7 +47,7 @@
                 columns: [
                     { data: 'productName', name: 'productName' },
                     { data: 'serial', name: 'serial' },
-                    { data: 'dateCreated', name: 'dateCreated' },
+                    { data: 'productionDate', name: 'productionDate' },
                     { data: 'actions', name: 'Actions' }
                 ],
                 order: [[ 1, 'desc' ]],

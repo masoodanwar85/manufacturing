@@ -15,6 +15,7 @@ class CreateProductionTable extends Migration
     {
         Schema::create('production', function (Blueprint $table) {
 			$table->bigIncrements('productionID');
+            $table->date('productionDate');
             $table->string('serial')->nullable();
 			$table->text('description')->nullable();
 			$table->tinyInteger('isCompleted')->default(0);
