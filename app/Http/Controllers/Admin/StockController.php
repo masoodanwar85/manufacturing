@@ -112,6 +112,14 @@ class StockController extends Controller
 		return view('admin.stock.create',compact('products','godowns'));
     }
 
+    public function createMultiTransfer() 
+    {
+        abort_if(Gate::denies('stock_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $products = Stock::getProducts();
+		$godownProducts = Stock::getGodownProducts();
+        return view('admin.stock.formMultiTransfer',compact('products','godownProducts'));
+    }
+
     /**
      * Store a newly created resource in storage.
      *

@@ -42,6 +42,8 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
     Route::post('purchase/doCustomizedShift', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'doCustomizedShift'])->name('purchase.doCustomizedShift');
 	Route::get('stock/{productID}/view', [App\Http\Controllers\Admin\StockController::class, 'view'])->name('stock.view');
     Route::post('stock/transfer', [App\Http\Controllers\Admin\StockController::class,'transfer'])->name('stock.transfer');
+	Route::get('stock/createMultiTransfer', [App\Http\Controllers\Admin\StockController::class,'createMultiTransfer'])->name('stock.createMultiTransfer');
+	Route::post('stock/multiTransfer', [App\Http\Controllers\Admin\StockController::class,'multiTransfer'])->name('stock.multiTransfer');
 	Route::get('sales/{salesOrderID}/invoice', [App\Http\Controllers\Admin\SalesOrderController::class, 'invoice'])->name('sales.invoice');
 	Route::get('sales/{salesOrderID}/invoicePDF', [App\Http\Controllers\Admin\SalesOrderController::class, 'invoicePDF'])->name('sales.invoicePDF');
 	Route::get('customer/{customerID}/balance', [App\Http\Controllers\Admin\CustomerController::class, 'getBalance'])->name('customer.balance');
