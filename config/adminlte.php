@@ -484,6 +484,13 @@ return [
                     'can'  => ['report_read'],
                     'active' => ['admin/report/monthlyDefaulters']
                 ],
+                [
+                    'text' => 'Stock Transfer ',
+                    'url'  => 'admin/report/stockTransfer',
+                    'icon' => 'fas fa-fw fa-exchange-alt',
+                    'can'  => ['report_read'],
+                    'active' => ['admin/report/stockTransfer']
+                ],
             ],
         ],
 		[

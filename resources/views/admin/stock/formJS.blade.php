@@ -1,10 +1,12 @@
 @section('plugins.Select2', true)
 
 <script type="text/javascript">
+    var finalProducts = {};
     $(function() {
         addSORow();
         bindRemoveClick();
     });
+    
 
     var productsInfo = {
         @foreach ($products as $product)
@@ -52,10 +54,28 @@
         @endforeach
 	};
 
+    function filterProducts() {
+        finalProducts = {};
+        var selectedGodownID = $('select[name="transferFrom"]').val();
+        var productElem = $('select[name="productID[]"] option');
+        productElem.removeAttr('disabled');
+        Object.keys(godownProductsInfo).forEach((prodID,idx) => {
+            var productInfo = godownProductsInfo[prodID];
+            var godownInfo = productInfo.godowns;
+            var res = godownInfo.filter((godown, gdIdx) => parseInt(godown.godownID) === parseInt(selectedGodownID));
+            if (res.length) {
+                finalProducts[prodID] = {productName: productInfo.productName, unit: productInfo.unit, unitsInProduct: productInfo.unitsInProduct, godowns: res};
+            }
+        });
+
+        productElem.each(function() {
+            if (Object.keys(finalProducts).indexOf($(this).val()) == -1) $(this).attr('disabled','disabled');
+        });
+    }
+
     function bindRemoveClick() {
         $('button.removeSORow').bind('click', function() {
-            $(this).parent().parent().remove();
-            calculateGrandTotal();
+            $(this).closest('tr').remove();
         });
     }
 
@@ -94,38 +114,24 @@
         var jQElem = $(selectProduct);
         var productID = jQElem.find(':selected').val();
 		var trElem = jQElem.closest('tr');
-		var quantityAvailable, purchasePrice,godownHTML,totalUnitsAvailableText,unitsInProduct;
+		var quantityAvailable,totalUnitsAvailableText,unitsInProduct;
 		if (productID == '') {
 			quantityAvailable = '';
-			purchasePrice = '';
-			godownHTML = '';
 			totalUnitsAvailableText = '';
 			unitsInProduct = 0;
 		} else {
-			purchasePrice = productsInfo[productID].purchasePrice;
-			quantityAvailable = productsInfo[productID].quantityAvailable;
-			godownHTML = makeProductGodownsDD(productID);
+			quantityAvailable = finalProducts[productID].godowns[0].quantityAvailable;
 			totalUnitsAvailableText = productUnitText(productID);
 			unitsInProduct = productsInfo[productID].unitsInProduct;
 		}
-		trElem.find('.godown').html(godownHTML);
-        trElem.find('select[name="godownID[]"]').prop('selectedIndex',1);
 		trElem.find('input[name="unitsInProduct[]"]').val(unitsInProduct);
 		trElem.find('.totalUnitsAvailable').text(totalUnitsAvailableText);
 		trElem.find('input[name="quantity[]"]').attr('max',quantityAvailable);
-		trElem.find('input[name="purchasePrice[]"]').val(purchasePrice);
-		trElem.find('input[name="salePrice[]"]').val(purchasePrice);
-		// updateQtyUnits(selectProduct);
-		calculateProductRowTotal(selectProduct);
-
-        // if (checkProductSelected(productID)) {
-		//
-        // }
     }
 
 	function productUnitText(productID,quantityAvailable = 0) {
 		if (quantityAvailable == 0) {
-			quantityAvailable = productsInfo[productID].quantityAvailable;
+			quantityAvailable = finalProducts[productID].godowns[0].quantityAvailable;
 		}
 		var totalUnitsAvailableText = quantityAvailable;
 		return totalUnitsAvailableText;

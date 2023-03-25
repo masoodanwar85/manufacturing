@@ -291,4 +291,18 @@ class ReportController extends Controller
 //        dd($monthlyDefaulters);
         return view('admin.reports.monthlyDefaulters',compact('monthlyDefaulters'));
     }
+
+    public function stockTransfer() 
+    {
+        $stockTransfers = DB::table("stockDetailStatus")
+                            ->join('stockDetail','stockDetail.stockDetailID','=','stockDetailStatus.stockDetailID')
+                            ->join('godown AS newGodown','newGodown.godownID','=','stockDetailStatus.godownID')
+                            ->join('godown AS prevGodown','prevGodown.godownID','=','stockdetail.godownID')
+                            ->select("stockDetailStatus.statusID", "stockDetailStatus.godownID", "stockDetailStatus.bookSerial", "stockDetailStatus.transferDate", "stockDetail.godownID AS previousGodownID", "newGodown.name AS newGodownName", "prevGodown.name AS prevGodownName")
+                            ->whereNotNull("stockDetailStatus.bookSerial")
+                            ->orderBy("stockDetailStatus.transferDate","desc")
+                            ->groupBy(["stockDetailStatus.statusID","stockDetailStatus.godownID","stockDetailStatus.bookSerial","stockDetailStatus.transferDate","stockDetail.godownID"])
+                            ->get();
+        return view('admin.reports.stockTransfer', compact('stockTransfers'));
+    }
 }

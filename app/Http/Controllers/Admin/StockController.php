@@ -117,7 +117,9 @@ class StockController extends Controller
         abort_if(Gate::denies('stock_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $products = Stock::getProducts();
 		$godownProducts = Stock::getGodownProducts();
-        return view('admin.stock.formMultiTransfer',compact('products','godownProducts'));
+        $now = date('Y-m-d');
+        $godowns = \App\Models\Godown::all();
+        return view('admin.stock.formMultiTransfer',compact('products','godownProducts','now','godowns'));
     }
 
     /**
@@ -399,79 +401,12 @@ class StockController extends Controller
         abort_if(Gate::denies('stock_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         DB::beginTransaction();
 		try {
-            if ($request->previousGodownID != $request->newGodownID) {
-				$bookSerialNumber = "";
-				if (strlen($request->bookSerial)) {
-					$bookSerialNumber = $request->bookType . '-' . $request->bookSerial;
-				}
-				$quantityRemaining = $request->quantityToMove;
-				$stockDetails = \App\Models\Stock::getProductStockDetails($request->productID,$request->previousGodownID);
-                foreach ($stockDetails as $key => $stockDetail) {
-
-					$stockDetailStatuses = \App\Models\StockDetailStatus::where('stockDetailID',$stockDetail->stockDetailID)->where('godownID',$request->previousGodownID)->get();
-
-					$stockDetailStatusesAvailable = $stockDetailStatuses->whereIn('statusID',\Config::get('constants.stock_status.aryIsAvailableForSale'));
-					$stockDetailStatusTotal = $stockDetailStatusesAvailable->sum('quantity');
-					$stockDetailStatusTotalSold = $stockDetailStatuses->whereIn('statusID',\Config::get('constants.stock_status.aryIsNotAvailableForSale'))->sum('quantity');
-
-					$stockDetailStatusTotalAvailable = $stockDetailStatusTotal - $stockDetailStatusTotalSold;
-
-					if ($stockDetailStatusTotalAvailable == 0) {
-						continue;
-					}
-
-					if ($quantityRemaining == 0) {
-                        break;
-                    }
-
-					if ($stockDetailStatusTotalAvailable >= $quantityRemaining) {
-						$stockDetailStatusRemaining = $quantityRemaining;
-					} else {
-						$stockDetailStatusRemaining = $stockDetailStatusTotalAvailable;
-					}
-
-                    foreach ($stockDetailStatusesAvailable as $stockDetailStatus) {
-                        if ($stockDetailStatus->quantity <= $stockDetailStatusRemaining) {
-							$stockDetailStatusRemaining -= $stockDetailStatus->quantity;
-							\App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->update([
-								'godownID' => $request->newGodownID
-							]);
-							$quantityRemaining -= $stockDetailStatus->quantity;
-						} else {
-                            $newStockDetailStatus = \App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->replicate()->fill([
-								'quantity' => $stockDetailStatusRemaining,
-								'quantityUnits' => $stockDetailStatusRemaining,
-								'bookSerial' => $bookSerialNumber,
-								'godownID' => $request->newGodownID,
-                                'createdByUserID' => Auth::id()
-							])->save();
-
-							\App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->update([
-								'quantity' => $stockDetailStatus->quantity - $stockDetailStatusRemaining,
-								'quantityUnits' => $stockDetailStatus->quantity - $stockDetailStatusRemaining
-							]);
-
-							$quantityRemaining -= $stockDetailStatusRemaining;
-							$stockDetailStatusRemaining = 0;
-							break;
-						}
-
-						if ($stockDetailStatusRemaining == 0 || $quantityRemaining == 0) {
-							break;
-						}
-					}
-                    if ($quantityRemaining == 0) {
-                        break;
-                    }
-				}
-
-                if ($quantityRemaining != 0) {
-                    DB::rollback();
-                    $request->session()->flash('error', 'Stock does not match!');
-                } else {
-                    DB::commit();
-                    $request->session()->flash('message', 'Stock transferred successfully!');
-                }
+            $transferDate = date('Y-m-d');
+            if ($this->doTransfer($request->previousGodownID,$request->newGodownID,$transferDate,$request->productID,$request->quantityToMove,$request->bookType, $request->bookSerial)) {
+                DB::commit();
+                $request->session()->flash('message', 'Stock transferred successfully!');
+            } else {
+                DB::rollback();    
             }
         } catch (\Exception $e) {
             DB::rollback();
@@ -479,6 +414,118 @@ class StockController extends Controller
             $request->session()->flash('error', 'An error occurred while transferring stock!');
         }
         return redirect()->route('stock.view',$request->productID);
+    }
+
+    public function multiTransfer(Request $request) 
+    {
+        abort_if(Gate::denies('stock_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        DB::beginTransaction();
+		try {
+            $is_success = true;
+            foreach ($request->productID as $idx => $thisProductID)
+            {
+                $quantityToMove = $request['quantity'][$idx];
+                if (!$this->doTransfer($request->transferFrom,$request->transferTo,$request->transferDate,$thisProductID,$quantityToMove,$request->bookType, $request->bookSerial)) {
+                    $is_success = false;
+                    break;
+                }
+            }
+            if ($is_success) {
+                DB::commit();
+                $request->session()->flash('message', 'Stock transferred successfully!');
+            } else {
+                DB::rollBack();
+                $request->session()->flash('error', 'An error occurred while transferring stock!');
+            }
+        } catch (\Exception $e) {
+            DB::rollback();
+            $request->session()->flash('error', 'An error occurred while transferring stock!');
+        }
+        return redirect()->route('stock.index');
+    }
+
+    private function doTransfer($previousGodownID,$newGodownID,$transferDate,$productID,$quantityToMove,$bookType = '', $bookSerial = '')
+    {
+        $request = new Request;
+        $is_success = true;
+        try {
+            if ($previousGodownID != $newGodownID) {
+                $bookSerialNumber = "";
+                if (strlen($bookSerial)) {
+                    $bookSerialNumber = $bookType . '-' . $bookSerial;
+                }
+                $quantityRemaining = $quantityToMove;
+                $stockDetails = Stock::getProductStockDetails($productID,$previousGodownID);
+                foreach ($stockDetails as $key => $stockDetail) {
+    
+                    $stockDetailStatuses = \App\Models\StockDetailStatus::where('stockDetailID',$stockDetail->stockDetailID)->where('godownID',$previousGodownID)->get();
+    
+                    $stockDetailStatusesAvailable = $stockDetailStatuses->whereIn('statusID',\Config::get('constants.stock_status.aryIsAvailableForSale'));
+                    $stockDetailStatusTotal = $stockDetailStatusesAvailable->sum('quantity');
+                    $stockDetailStatusTotalSold = $stockDetailStatuses->whereIn('statusID',\Config::get('constants.stock_status.aryIsNotAvailableForSale'))->sum('quantity');
+    
+                    $stockDetailStatusTotalAvailable = $stockDetailStatusTotal - $stockDetailStatusTotalSold;
+    
+                    if ($stockDetailStatusTotalAvailable == 0) {
+                        continue;
+                    }
+    
+                    if ($quantityRemaining == 0) {
+                        break;
+                    }
+    
+                    if ($stockDetailStatusTotalAvailable >= $quantityRemaining) {
+                        $stockDetailStatusRemaining = $quantityRemaining;
+                    } else {
+                        $stockDetailStatusRemaining = $stockDetailStatusTotalAvailable;
+                    }
+    
+                    foreach ($stockDetailStatusesAvailable as $stockDetailStatus) {
+                        if ($stockDetailStatus->quantity <= $stockDetailStatusRemaining) {
+                            $stockDetailStatusRemaining -= $stockDetailStatus->quantity;
+                            \App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->update([
+                                'godownID' => $newGodownID
+                            ]);
+                            $quantityRemaining -= $stockDetailStatus->quantity;
+                        } else {
+                            $newStockDetailStatus = \App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->replicate()->fill([
+                                'quantity' => $stockDetailStatusRemaining,
+                                'quantityUnits' => $stockDetailStatusRemaining,
+                                'bookSerial' => $bookSerialNumber,
+                                'godownID' => $newGodownID,
+                                'transferDate' => $transferDate,
+                                'createdByUserID' => Auth::id()
+                            ])->save();
+    
+                            \App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->update([
+                                'quantity' => $stockDetailStatus->quantity - $stockDetailStatusRemaining,
+                                'quantityUnits' => $stockDetailStatus->quantity - $stockDetailStatusRemaining
+                            ]);
+    
+                            $quantityRemaining -= $stockDetailStatusRemaining;
+                            $stockDetailStatusRemaining = 0;
+                            break;
+                        }
+    
+                        if ($stockDetailStatusRemaining == 0 || $quantityRemaining == 0) {
+                            break;
+                        }
+                    }
+                    if ($quantityRemaining == 0) {
+                        break;
+                    }
+                }
+    
+                if ($quantityRemaining != 0) {
+                    $request->session()->flash('error', 'Stock does not match!');
+                    $is_success = false;
+                    return $is_success;
+                }
+            }
+        } catch (\Exception $ex) {
+            $is_success = false;
+        }
+        return $is_success;
     }
 
     /**

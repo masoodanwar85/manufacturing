@@ -11,6 +11,11 @@
 			<h3 class="card-title">
 				<i class="fas fa-cubes"></i> Stock
 			</h3>
+            @can('stock_create')
+			<a class="btn btn-primary btn-sm float-right" href="{{ route('stock.createMultiTransfer') }}">
+				<i class="fas fa-exchange-alt"></i> Multi Transfer
+			</a>
+			@endcan
 		</div>
 		<div class="card-body">
             <form class="form-horizontal" role="form" method="post" id="stockSearch">

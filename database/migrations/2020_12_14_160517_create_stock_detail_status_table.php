@@ -25,6 +25,7 @@ class CreateStockDetailStatusTable extends Migration
             $table->bigInteger('discount')->default(0);
 			$table->integer('quantityUnits');
 			$table->decimal('salePrice',18,4)->nullable();
+            $table->date('transferDate');
 			$table->unsignedBigInteger('createdByUserID');
 			$table->timestamp('dateCreated')->useCurrent();
             $table->foreign('stockDetailID')->references('stockDetailID')->on('stockDetail');
