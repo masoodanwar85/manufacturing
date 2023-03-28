@@ -294,6 +294,7 @@ class ReportController extends Controller
 
     public function stockTransfer() 
     {
+        DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
         $stockTransfers = DB::table("stockDetailStatus")
                             ->join('stockDetail','stockDetail.stockDetailID','=','stockDetailStatus.stockDetailID')
                             ->join('godown AS newGodown','newGodown.godownID','=','stockDetailStatus.godownID')
