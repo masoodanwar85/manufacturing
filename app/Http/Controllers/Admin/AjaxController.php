@@ -30,7 +30,7 @@ class AjaxController extends Controller
                             ->join('stockDetail','stockDetail.stockDetailID','=','stockDetailStatus.stockDetailID')
 							->join('product','product.productID','=','stockDetail.productID')
                             ->join('godown AS newGodown','newGodown.godownID','=','stockDetailStatus.godownID')
-                            ->join('godown AS prevGodown','prevGodown.godownID','=','stockdetail.godownID')
+                            ->join('godown AS prevGodown','prevGodown.godownID','=','stockDetail.godownID')
                             ->select("stockDetailStatus.statusID", "stockDetailStatus.quantity", "stockDetailStatus.bookSerial", "stockDetailStatus.transferDate", "product.productName", "newGodown.name AS newGodownName", "prevGodown.name AS prevGodownName")
                             ->where("stockDetailStatus.bookSerial", $arguments['bookSerial'])
                             ->get();
