@@ -229,6 +229,7 @@ class ProductionController extends Controller
                             'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
                             'godownID' => \Config::get('constants.production_stages.default_factory_id'),
                             'quantity' => $thisStock['quantityToAdd'],
+                            'transferDate' => date('Y-m-d'),
                             'quantityUnits' => $thisStock['quantityToAdd'],
                             'createdByUserID' => Auth::id()
                         ]);
@@ -252,6 +253,7 @@ class ProductionController extends Controller
                     'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
                     'godownID' => \Config::get('constants.production_stages.default_factory_id'),
                     'quantity' => $request->quantity,
+                    'transferDate' => date('Y-m-d'),
                     'quantityUnits' => $request->quantity,
                     'createdByUserID' => Auth::id()
                 ]);
@@ -375,6 +377,7 @@ class ProductionController extends Controller
                                 'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
                                 'godownID' => \Config::get('constants.production_stages.default_factory_id'),
                                 'quantity' => $thisStock['quantityToAdd'],
+                                'transferDate' => date('Y-m-d'),
                                 'quantityUnits' => $thisStock['quantityToAdd'],
                                 'createdByUserID' => Auth::id()
                             ]);
@@ -398,6 +401,7 @@ class ProductionController extends Controller
                         'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
                         'godownID' => \Config::get('constants.production_stages.default_factory_id'),
                         'quantity' => $request->productQty,
+                        'transferDate' => date('Y-m-d'),
                         'quantityUnits' => $request->productQty,
                         'createdByUserID' => Auth::id()
                     ]);
@@ -516,6 +520,7 @@ class ProductionController extends Controller
                             'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
                             'godownID' => \Config::get('constants.production_stages.default_factory_id'),
                             'quantity' => $thisStock['quantityToAdd'],
+                            'transferDate' => date('Y-m-d'),
                             'quantityUnits' => $thisStock['quantityToAdd'],
                             'createdByUserID' => Auth::id()
                         ]);
@@ -539,6 +544,7 @@ class ProductionController extends Controller
                     'batchID' => \App\Services\BatchService::getCurrentBatch()->batchID,
                     'godownID' => \Config::get('constants.production_stages.default_factory_id'),
                     'quantity' => $request->quantity,
+                    'transferDate' => date('Y-m-d'),
                     'quantityUnits' => $request->quantity,
                     'createdByUserID' => Auth::id()
                 ]);
@@ -715,6 +721,7 @@ class ProductionController extends Controller
                         $stockDetailStatus->batchID = \App\Services\BatchService::getCurrentBatch()->batchID;
                         $stockDetailStatus->godownID = \Config::get('constants.production_stages.default_factory_id');
                         $stockDetailStatus->salePrice = null;
+                        $stockDetailStatus->transferDate = date('Y-m-d');
                         $stockDetailStatus->createdByUserID = Auth::id();
                     }
                     if ($stockDetailInfo->quantityAvailable >= $quantityRemaining) {
