@@ -126,6 +126,7 @@ class SalesOrderService {
 						$stockDetailStatus->godownID = $stockDetailInfo->godownID;
 						$stockDetailStatus->salePrice = str_replace(',','',$request->salePrice[$i]);
 						$stockDetailStatus->discount = str_replace(',','',$request->product_discount[$i]);
+						$stockDetailStatus->transferDate = date('Y-m-d');
 						$stockDetailStatus->createdByUserID = Auth::id();
 					}
 					if ($stockDetailInfo->quantityAvailable >= $quantityRemaining) {

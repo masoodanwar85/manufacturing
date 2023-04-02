@@ -182,6 +182,7 @@ class PurchaseOrderService {
 		$stockDetailStatus->stockDetailID = $stockDetail->stockDetailID;
 		$stockDetailStatus->statusID = \Config::get('constants.stock_status.quetta_godown');
 		$stockDetailStatus->godownID = $purchase->lastGodownID;
+		$stockDetailStatus->transferDate = date('Y-m-d');
 		$stockDetailStatus->batchID = $purchase->batchID;
 		if ($updatedQuantity > 0) {
 			$stockDetailStatus->quantity = $updatedQuantity;
