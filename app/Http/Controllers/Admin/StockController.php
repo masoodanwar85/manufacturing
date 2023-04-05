@@ -585,4 +585,129 @@ class StockController extends Controller
 	// 	}
     //     return redirect()->route('stock.index');
     // }
+
+    public function reduceStockFix() {
+        $aryProducts = [
+            ['productID' => 34,'qty' => 194, 'godownID' => 2]
+        ];
+
+        foreach ($aryProducts as $product) {
+            $productID = $product['productID'];
+            $qty = $product['qty'];
+            $godownID = $product['godownID'];
+            $productStock = Stock::getStock($productID,FALSE,TRUE, $godownID, null);
+            $quantityToReduce = $productStock[0]->inStockQuantity - $qty;
+
+            $stockDetails = \App\Models\StockDetail::with('stock')->where('productID', $productID)->where('godownID', $godownID)->orderBy('stockID','DESC')->get();
+            
+            foreach ($stockDetails as $stockDetail) {
+                if ($quantityToReduce == 0) break;
+
+                $productionID = $stockDetail->stock->productionID;
+                $stockID = $stockDetail->stockID;
+                $stockDetailStatuses = \App\Models\StockDetailStatus::where('stockDetailID', $stockDetail->stockDetailID)->get();
+                
+                $availableQty = 0;
+                $unAvailableQty = 0;
+                $canBeReduced = 0;
+                foreach ($stockDetailStatuses as $stockDetailStatus) {
+                    if (in_array($stockDetailStatus->statusID,\Config::get('constants.stock_status.aryIsAvailableForSale'))) {
+                        $availableQty+=$stockDetailStatus->quantity;
+                    } else {
+                        $unAvailableQty+=$stockDetailStatus->quantity;
+                    }
+                }
+
+                $canBeReduced = $availableQty - $unAvailableQty;
+
+                if ($canBeReduced > 0) {
+                    $productionBOM = \App\Models\ProductionBOM::with('items')->where('productionID', $productionID)->where('productID', $productID)->first();
+                    if ($unAvailableQty > 0 || $quantityToReduce < $canBeReduced) {
+                        // Some Available
+
+                        if ($quantityToReduce < $canBeReduced) {
+                            $canBeReduced = $quantityToReduce;
+                        }
+
+                        // UPDATE stockDetailStatus SET quantity = 3, quantityUnits = 3 WHERE stockDetailStatusID = 5976;
+                        // UPDATE stockDetailStatus SET quantity = 6, quantityUnits = 6 WHERE stockDetailStatusID = 5975;
+                        // UPDATE stockDetailStatus SET quantity = 3, quantityUnits = 3 WHERE stockDetailStatusID = 5974;
+                        // UPDATE stockDetailStatus SET quantity = 60, quantityUnits = 60 WHERE stockDetailStatusID = 5973;
+
+                        foreach ($productionBOM->items as $productionBOMItem) {
+                            $itemProductID = $productionBOMItem->productID;
+                            $itemQuantity = $productionBOM->quantity * $productionBOMItem->quantity;
+                            
+                            $itemStockDetailStatus = \App\Models\StockDetailStatus::whereHas('stockDetail', function($q) use ($itemProductID) { 
+                                $q->where('productID', $itemProductID); 
+                            })->where('productionID',$productionID)->where('quantity',$itemQuantity)->first();
+
+                            if ($itemStockDetailStatus != null) {
+                                $updatedQuantity = $itemQuantity - ($canBeReduced * $productionBOMItem->quantity);
+                                echo 'UPDATE stockDetailStatus SET quantity = ' . $updatedQuantity . ', quantityUnits = ' . $updatedQuantity . ' WHERE stockDetailStatusID = ' . $itemStockDetailStatus->stockDetailStatusID . ';';
+                                echo '<br />';
+                            } else {
+                                dd('Multiple Stock Values');
+                            }
+                        }
+
+                        $updatedReducedQuantity = $productionBOM->quantity - $canBeReduced;
+
+                        // UPDATE productionBOM SET quantity = 3 WHERE productionBOMID = 171;
+                        echo 'UPDATE productionBOM SET quantity = ' . $updatedReducedQuantity . ' WHERE productionBOMID = ' . $productionBOM->productionBOMID . ';';
+                        echo '<br />';
+                        
+                        // UPDATE stockDetailStatus SET quantity = 3, quantityUnits = 3 WHERE stockDetailStatusID = 5977;
+                        $updatedProductStockDetailStatus = \App\Models\StockDetailStatus::where('stockDetailID', $stockDetail->stockDetailID)->whereIn('statusID',[1,2])->get();
+                        if ($updatedProductStockDetailStatus->count() > 1) {
+                            dd('Please Have a Look Here...');
+                        }
+                        echo 'UPDATE stockDetailStatus SET quantity = ' . $updatedReducedQuantity . ',quantityUnits = ' . $updatedReducedQuantity . ' WHERE stockDetailStatusID = ' . $updatedProductStockDetailStatus[0]->stockDetailStatusID . ';';
+                        echo '<br />';
+                        // UPDATE stockDetail SET quantity = 3, quantityUnits = 3 WHERE stockDetailID = 688;
+                        echo 'UPDATE stockDetail SET quantity = ' . $updatedReducedQuantity . ', quantityUnits = ' . $updatedReducedQuantity . ' WHERE stockDetailID = ' . $stockDetail->stockDetailID . ';';
+                        
+                        $quantityToReduce-=$canBeReduced;
+                        // echo '<br />-----------' . $quantityToReduce . '-------------<br />';
+
+                    } else {
+                        // All Available
+                        
+                        // DELETE FROM stockDetailStatus WHERE stockDetailStatusID IN (5760,5759,5758,5757);
+                        foreach ($productionBOM->items as $productionBOMItem) {
+                            $itemProductID = $productionBOMItem->productID;
+                            $itemQuantity = $productionBOM->quantity * $productionBOMItem->quantity;
+                            
+                            $itemStockDetailStatus = \App\Models\StockDetailStatus::whereHas('stockDetail', function($q) use ($itemProductID) { 
+                                $q->where('productID', $itemProductID); 
+                            })->where('productionID',$productionID)->where('quantity',$itemQuantity)->first();
+
+                            echo 'DELETE FROM stockDetailStatus WHERE stockDetailStatusID = ' . $itemStockDetailStatus->stockDetailStatusID . ';';
+                            echo '<br />';
+                        }
+                        // DELETE FROM productionBOMItem WHERE productionBOMID = 127;
+                        echo 'DELETE FROM productionBOMItem WHERE productionBOMID = ' . $productionBOM->productionBOMID . ';';
+                        echo '<br />';
+
+                        // DELETE FROM productionBOM WHERE productionBOMID = 127;
+                        echo 'DELETE FROM productionBOM WHERE productionBOMID = ' . $productionBOM->productionBOMID . ';';
+                        echo '<br />';
+
+                        // DELETE FROM stockDetailStatus WHERE stockDetailID = 644;
+                        echo 'DELETE FROM stockDetailStatus WHERE stockDetailID = ' . $stockDetail->stockDetailID . ';';
+                        echo '<br />';
+                        // DELETE FROM stockDetail WHERE stockID = 285;
+                        echo 'DELETE FROM stockDetail WHERE stockID = ' . $stockDetail->stockID . ';';
+                        echo '<br />';
+                        // DELETE FROM stock WHERE stockID = 285;
+                        echo 'DELETE FROM stock WHERE stockID = ' . $stockDetail->stockID . ';';
+                        
+                        $quantityToReduce-=$productionBOM->quantity;
+                        // echo '<br />-----------' . $quantityToReduce . '-------------<br />';
+                    }
+                }
+                
+            }
+        }
+    }
 }

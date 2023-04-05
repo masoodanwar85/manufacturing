@@ -26,11 +26,13 @@ class CreateStockDetailStatusTable extends Migration
 			$table->integer('quantityUnits');
 			$table->decimal('salePrice',18,4)->nullable();
             $table->date('transferDate');
+            $table->unsignedBigInteger('productionBOMItemID')->nullable();
 			$table->unsignedBigInteger('createdByUserID');
 			$table->timestamp('dateCreated')->useCurrent();
             $table->foreign('stockDetailID')->references('stockDetailID')->on('stockDetail');
 			$table->foreign('statusID')->references('statusID')->on('stockStatus');
 			$table->foreign('batchID')->references('batchID')->on('batch');
+            $table->foreign('productionBOMItemID')->references('productionBOMItemID')->on('productionBOMItem');
             $table->foreign('godownID')->references('godownID')->on('godown');
 			$table->foreign('createdByUserID')->references('userID')->on('users');
         });

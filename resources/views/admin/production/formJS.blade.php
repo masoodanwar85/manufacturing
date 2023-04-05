@@ -7,6 +7,7 @@
 		
 		@if ($isNew == false)
 			calculateProductRowTotal();
+			bindRemoveClick();
 		@else
 			addProductRow();
 		@endif

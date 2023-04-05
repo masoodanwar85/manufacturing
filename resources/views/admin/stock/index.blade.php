@@ -39,7 +39,7 @@
                         </select>
                     </div>
                     <div class="form-group col-md-2">
-                        <label for="filterGodown">Godows</label>
+                        <label for="filterGodown">Godowns</label>
                         <select name="filterGodownID" class="form-control">
                             <option value="">All Godowns</option>
                             @foreach ($godowns as $godown)
