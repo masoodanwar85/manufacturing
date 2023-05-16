@@ -17,6 +17,7 @@ class CreateSalesOrderTable extends Migration
 			$table->bigIncrements('salesOrderID');
 			$table->unsignedBigInteger('customerID');
             $table->foreignId('salesAgentID')->nullable()->constrained('staff','staffID');
+            $table->foreignId('salesOrderStatusID')->default(1)->constrained('salesOrderStatus','salesOrderStatusID');
 			$table->string('invoiceNumber');
             $table->string('bookSerial')->nullable();
 			$table->date('orderDate');

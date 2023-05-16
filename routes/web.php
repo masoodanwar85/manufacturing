@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -75,6 +76,7 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
     Route::resource('attendance', App\Http\Controllers\Admin\AttendanceController::class);
 	Route::resource('stock', App\Http\Controllers\Admin\StockController::class);
 	Route::resource('sales', App\Http\Controllers\Admin\SalesOrderController::class);
+	Route::resource('delivery', App\Http\Controllers\Admin\DeliveryController::class);
 	Route::resource('customer', App\Http\Controllers\Admin\CustomerController::class);
     Route::resource('invoiceBooks', App\Http\Controllers\Admin\InvoiceBooksController::class);
 	Route::resource('setting', App\Http\Controllers\Admin\SettingController::class)->only(['edit','update']);

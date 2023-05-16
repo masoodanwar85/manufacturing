@@ -34,6 +34,11 @@ class Godown extends Model
         return $this->hasMany('App\Models\StockDetailStatus','godownID','godownID');
     }
 
+    public function deliveries()
+    {
+        return $this->hasMany('App\Models\Delivery','godownID','godownID');
+    }
+
 	public static function getBalance($godownID,$isHeadID = FALSE) {
 		$godownHeadID = $godownID;
 		if ($isHeadID == FALSE) {

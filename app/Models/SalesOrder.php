@@ -46,6 +46,16 @@ class SalesOrder extends Model
 		return $this->belongsToMany('App\Models\StockDetailStatus','salesOrderDetail','salesOrderID','stockDetailStatusID');
 	}
 
+    public function deliveryDetails()
+    {
+        return $this->hasMany('App\Models\DeliveryDetails','salesOrderID','salesOrderID');
+    }
+
+    public function salesOrderStatus()
+    {
+        return $this->belongsTo('App\Models\SalesOrderStatus','salesOrderStatusID','salesOrderStatusID');
+    }
+
 	public static function getSaleOrders($salesOrderID = 0,$filters = []) {
 	    DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
         $strWhere = "";
