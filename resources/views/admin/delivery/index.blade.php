@@ -26,10 +26,7 @@
 						<th>Route</th>
 						<th>Godown</th>
 						<th>Transport</th>
-						<th>CreatedByUser</th>
-						<th>UpdatedByUser</th>
 						<th>Date Created</th>
-						<th>Date Updated</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -56,10 +53,7 @@
                 { data: 'route', name: 'route' },
 				{ data: 'godown', name: 'godown' },
                 { data: 'transport', name: 'transport' },
-                { data: 'createdByUser', name: 'createdByUser' },
-                { data: 'updatedByUser', name: 'updatedByUser' },
                 { data: 'dateCreated', name: 'dateCreated' },
-                { data: 'dateUpdated', name: 'dateUpdated' },
                 { data: 'actions', name: 'Actions' }
             ],
             order: [[ 0, 'desc' ]],

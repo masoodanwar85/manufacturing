@@ -86,19 +86,33 @@
                             <th>Quantity Units</th>
                         </tr>
                         @php
+                            $previousProduct = null;
                             $totalQuantity = 0;
                         @endphp
                         @foreach($delivery->salesOrders as $s)
                             @foreach($s->stockDetailStatuses as $stockDetailStatus)
-                                @php
-                                 $totalQuantity += $stockDetailStatus->quantity;
-                                @endphp
+                                @if ($previousProduct === $stockDetailStatus->stockDetail->product->productName)
+                                    @php
+                                        $totalQuantity += $stockDetailStatus->quantity;
+                                    @endphp
+                                @else
+                                    @if ($previousProduct)
+                                        <td>{{$previousProduct}}</td>
+                                        <td>{{$totalQuantity}}</td>
+                                    @endif
+                                    @php
+                                        $totalQuantity = $stockDetailStatus->quantity;
+                                        $previousProduct = $stockDetailStatus->stockDetail->product->productName;
+                                    @endphp
+                                @endif
                             @endforeach
                         @endforeach
-                        <tr>
-                            <td>{{$delivery->salesOrders[0]->stockDetailStatuses[0]->stockDetail->product->productName}}</td>
-                            <td>{{$totalQuantity}}</td>
-                        </tr>
+                        @if ($previousProduct)
+                            <tr>
+                                <td>{{$previousProduct}}</td>
+                                <td>{{$totalQuantity}}</td>
+                            </tr>
+                        @endif
                     </table>
                 </td>
                 <td>

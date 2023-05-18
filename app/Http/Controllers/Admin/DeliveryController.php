@@ -65,17 +65,8 @@ class DeliveryController extends Controller
             $table->editColumn('transport', function ($row) {
                 return $row->transport->name ? $row->transport->name : "";
             });
-            $table->editColumn('createdByUser', function ($row) {
-                return $row->createdByUserID ? $row->createdByUserID : "";
-            });
-            $table->editColumn('updatedByUser', function ($row) {
-                return $row->createdByUserID ? $row->createdByUserID : "";
-            });
             $table->editColumn('dateCreated', function ($row) {
                 return $row->dateCreated ? $row->dateCreated : "";
-            });
-            $table->editColumn('dateUpdated', function ($row) {
-                return $row->dateUpdated ? $row->dateUpdated : "";
             });
             $table->rawColumns(['actions', 'placeholder']);
 
@@ -136,6 +127,7 @@ class DeliveryController extends Controller
     public function show(Delivery $delivery)
     {
         abort_if(Gate::denies('delivery_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $delivery->load(['salesOrders','salesOrders.stockDetailStatuses.stockDetail.product'])->get();
         return view('admin.delivery.show', compact('delivery'));
     }
 
@@ -152,7 +144,12 @@ class DeliveryController extends Controller
         $godowns = Godown::all();
         $transports = Transport::all();
         $salesOrders = SalesOrder::getSaleOrders(0,'');
-        return view('admin.delivery.edit',compact('routes','godowns','transports','delivery','salesOrders'));
+        $delivery->load(['salesOrders','salesOrders.stockDetailStatuses.stockDetail.product'])->get();
+        $selectedValues = [];
+        foreach($delivery->deliveryDetails as $d){
+            $selectedValues[] = $d->salesOrderID;
+        }
+        return view('admin.delivery.edit',compact('routes','godowns','transports','delivery','salesOrders','selectedValues'));
     }
 
     /**
