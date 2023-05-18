@@ -22,56 +22,51 @@
             @endcan
         </div>
         <div class="card-body">
-            <div>
-                <div class="d-inline-block col-lg-4 col-sm-6">
-                    <dt>
-                    <dd class="font-weight-bold">Delivery Name: </dd>
-                    <dl>{{ $delivery->deliveryDate }}</dl>
-                    <dd class="font-weight-bold">Route: </dd>
-                    <dl>{{ $delivery->route->route }}</dl>
-                    <dd class="font-weight-bold">Godown: </dd>
-                    <dl>{{ $delivery->godown->name }}</dl>
-                    <dd class="font-weight-bold">Transport: </dd>
-                    <dl>{{ $delivery->transport->name }}</dl>
-                    <dd class="font-weight-bold">Created On: </dd>
-                    <dl>{{ $delivery->dateCreated}}</dl>
-                    <dd class="font-weight-bold">Updated On: </dd>
-                    <dl>{{ $delivery->dateUpdated}}</dl>
-                    </dt>
-                </div>
-                <div class="d-inline-block col-lg-6 col-sm-6 position-absolute top-0">
-                    <dd class="font-weight-bold text-capitalize">Sales Order Detail </dd>
-                    @foreach($delivery->salesOrders as $salesOrder)
-                        <dd><span class="font-weight-bold">Invoice: &nbsp;</span> {{ $salesOrder->invoiceNumber }} &nbsp;|&nbsp; <span class="font-weight-bold">Customer: &nbsp;</span> {{ $salesOrder->customer->shopName }}</dd>
-                    @endforeach
-
-                    <dd class="font-weight-bold text-capitalize">Products </dd>
-                    @php
-                        $previousProduct = null;
-                        $totalQuantity = 0;
-                    @endphp
-                    @foreach($delivery->salesOrders as $s)
-                        @foreach($s->stockDetailStatuses as $stockDetailStatus)
-                            @if ($previousProduct === $stockDetailStatus->stockDetail->product->productName)
-                                @php
-                                    $totalQuantity += $stockDetailStatus->quantity;
-                                @endphp
-                            @else
-                                @if ($previousProduct)
-                                    <dd><span class="font-weight-bold">Invoice: &nbsp;</span> {{ $previousProduct }} &nbsp;|&nbsp; <span class="font-weight-bold">Customer: &nbsp;</span> {{ $totalQuantity }}</dd>
-                                @endif
-                                @php
-                                    $totalQuantity = $stockDetailStatus->quantity;
-                                    $previousProduct = $stockDetailStatus->stockDetail->product->productName;
-                                @endphp
-                            @endif
-                        @endforeach
-                    @endforeach
-                    @if ($previousProduct)
+            <div class="row">
+                <div class="font-weight-bold col">Delivery Date: </div>
+                <div class="col">{{ $delivery->deliveryDate }}</div>
+                <div class="font-weight-bold col">Route: </div>
+                <div class="col">{{ $delivery->route->route }}</div>
+                <div class="font-weight-bold col">Godown: </div>
+                <div class="col">{{ $delivery->godown->name }}</div>
+                <div class="font-weight-bold col">Transport: </div>
+                <div class="col">{{ $delivery->transport->name }} ({{ $delivery->transport->vehicleNumber }})</div>
+                <div class="font-weight-bold col">Created On: </div>
+                <div class="col">{{ $delivery->dateCreated}}</div>
+                <div class="font-weight-bold col">Updated On: </div>
+                <div class="col">{{ $delivery->dateUpdated}}</div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <h2 class="text-center">Order Details:</h2>
+                    <table class="table">
                         <tr>
-                            <dd><span class="font-weight-bold">Invoice: &nbsp;</span> {{ $previousProduct }} &nbsp;|&nbsp; <span class="font-weight-bold">Customer: &nbsp;</span> {{ $totalQuantity }}</dd>
+                            <th>Invoice #</th>
+                            <th>Customer</th>
                         </tr>
-                    @endif
+                        @foreach($delivery->salesOrders as $salesOrder)
+                            <tr>
+                                <td>{{ $salesOrder->invoiceNumber }}</td>
+                                <td>{{ $salesOrder->customer->shopName }}</td>
+                            </tr>
+                        @endforeach
+                    </table>
+                    
+                </div>
+                <div class="col-6">
+                    <h2 class="text-center">Products</h2>
+                    <table class="table">
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                        </tr>
+                        @foreach($productsQuantities as $productQty)
+                            <tr>
+                                <td>{{ $productQty['product'] }}</td>
+                                <td>{{ $productQty['qty'] }}</td>
+                            </tr>
+                        @endforeach
+                    </table>
                 </div>
             </div>
         </div>

@@ -83,7 +83,7 @@
                         <select name="transportID" class="form-control @if($errors->has('transportID')) is-invalid @endif">
                             <option value="">Select Transport</option>
                             @foreach ($transports as $transport)
-                                <option value="{{ $transport->transportID }}" @if($delivery->transportID == $transport->transportID) selected @endif>{{ $transport->name }}</option>
+                                <option value="{{ $transport->transportID }}" @if($delivery->transportID == $transport->transportID) selected @endif>{{ $transport->name }}  ({{ $transport->vehicleNumber}})</option>
                             @endforeach
                         </select>
                         @if($errors->has('transportID'))

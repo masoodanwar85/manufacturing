@@ -6,10 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDeliveryRequest;
 use App\Http\Requests\UpdateDeliveryRequest;
 use App\Models\Delivery;
-use App\Models\DeliveryDetails;
-use App\Models\Product;
 use App\Models\Route;
 use App\Models\Godown;
+use Illuminate\Support\Arr;
 use App\Models\SalesOrder;
 use App\Models\Transport;
 use Illuminate\Http\Request;
@@ -128,7 +127,20 @@ class DeliveryController extends Controller
     {
         abort_if(Gate::denies('delivery_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $delivery->load(['salesOrders','salesOrders.stockDetailStatuses.stockDetail.product'])->get();
-        return view('admin.delivery.show', compact('delivery'));
+        $productsQuantities = [];
+        foreach ($delivery->salesOrders as $salesOrder) {
+            foreach ($salesOrder->stockDetailStatuses as $stockDetailStatus) {
+                $key = 'product_'.$stockDetailStatus->stockDetail->productID;
+                if (!array_key_exists($key, $productsQuantities)) {
+                    $productsQuantities[$key] = [
+                        'product' => $stockDetailStatus->stockDetail->product->productName,
+                        'qty' => 0
+                    ];
+                }
+                $productsQuantities[$key]['qty'] += $stockDetailStatus->quantity;
+            }
+        }
+        return view('admin.delivery.show', compact('delivery','productsQuantities'));
     }
 
     /**
@@ -199,7 +211,20 @@ class DeliveryController extends Controller
 
     public function deliveryReport(Delivery $delivery)
     {
-        $delivery->load(['salesOrders','salesOrders.stockDetailStatuses.stockDetail.product'])->get();
-        return view('admin.delivery.deliveryReport',compact('delivery'));
+        $delivery->load(['salesOrders.stockDetailStatuses.stockDetail.product'])->get();
+        $productsQuantities = [];
+        foreach ($delivery->salesOrders as $salesOrder) {
+            foreach ($salesOrder->stockDetailStatuses as $stockDetailStatus) {
+                $key = 'product_'.$stockDetailStatus->stockDetail->productID;
+                if (!array_key_exists($key, $productsQuantities)) {
+                    $productsQuantities[$key] = [
+                        'product' => $stockDetailStatus->stockDetail->product->productName,
+                        'qty' => 0
+                    ];
+                }
+                $productsQuantities[$key]['qty'] += $stockDetailStatus->quantity;
+            }
+        }
+        return view('admin.delivery.deliveryReport',compact('delivery','productsQuantities'));
     }
 }

@@ -1,63 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Invoice and Delivery Report</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
+@extends('adminlte::print')
 
-        h1 {
-            text-align: center;
-        }
+@section('title','Delivery Report')
 
-        .invoice-details {
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        .delivery-report {
-            margin-top: 40px;
-        }
-
-        .report-item {
-            margin-bottom: 20px;
-        }
-
-        .report-item h2 {
-            margin-bottom: 10px;
-        }
-
-        .report-item table {
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
-<h1>Invoice and Delivery Report</h1>
-
-
+@section('content')
 <div class="delivery-report">
     <div class="report-item">
         <h2>Delivery Details</h2>
-        <table>
+        <table cellspacing="5" cellpadding="5" width="100%">
             <tr>
                 <th>Delivery Date</th>
                 <th>Route</th>
@@ -76,11 +25,11 @@
 
 <div class="delivery-report">
     <div class="report-item">
-        <table>
+        <table cellspacing="5" cellpadding="5" width="100%">
             <tr>
-                <td>
-                    <h2>Product</h2>
-                    <table>
+                <td width="45%" valign="top">
+                    <h2>Products</h2>
+                    <table cellspacing="5" cellpadding="5" width="100%">
                         <tr>
                             <th>Product</th>
                             <th>Quantity Units</th>
@@ -89,35 +38,17 @@
                             $previousProduct = null;
                             $totalQuantity = 0;
                         @endphp
-                        @foreach($delivery->salesOrders as $s)
-                            @foreach($s->stockDetailStatuses as $stockDetailStatus)
-                                @if ($previousProduct === $stockDetailStatus->stockDetail->product->productName)
-                                    @php
-                                        $totalQuantity += $stockDetailStatus->quantity;
-                                    @endphp
-                                @else
-                                    @if ($previousProduct)
-                                        <td>{{$previousProduct}}</td>
-                                        <td>{{$totalQuantity}}</td>
-                                    @endif
-                                    @php
-                                        $totalQuantity = $stockDetailStatus->quantity;
-                                        $previousProduct = $stockDetailStatus->stockDetail->product->productName;
-                                    @endphp
-                                @endif
-                            @endforeach
-                        @endforeach
-                        @if ($previousProduct)
+                        @foreach($productsQuantities as $productQty)
                             <tr>
-                                <td>{{$previousProduct}}</td>
-                                <td>{{$totalQuantity}}</td>
+                                <td>{{ $productQty['product'] }}</td>
+                                <td>{{ $productQty['qty'] }}</td>
                             </tr>
-                        @endif
+                        @endforeach
                     </table>
                 </td>
-                <td>
-                    <h2>Invoice</h2>
-                    <table>
+                <td width="45%" valign="top">
+                    <h2>Invoices</h2>
+                    <table cellspacing="5" cellpadding="5" width="100%">
                         <tr>
                             <th>Invoice Number</th>
                             <th>Customer</th>
@@ -134,5 +65,4 @@
         </table>
     </div>
 </div>
-</body>
-</html>
+@stop
