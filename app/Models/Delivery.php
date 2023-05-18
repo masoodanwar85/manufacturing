@@ -19,6 +19,10 @@ class Delivery extends Model
         return $this->hasMany('App\Models\DeliveryDetails','deliveryID','deliveryID');
     }
 
+    public function salesOrders(){
+        return $this->belongsToMany('App\Models\SalesOrder', 'deliveryDetails', 'deliveryID', 'salesOrderID');
+    }
+
     public function route()
     {
         return $this->belongsTo('App\Models\Route','routeID','routeID');

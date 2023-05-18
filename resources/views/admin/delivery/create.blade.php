@@ -5,7 +5,7 @@
 @section('content_header')
     <h1>New Delivery</h1>
 @stop
-
+@section('plugins.Select2', true)
 @section('content')
 	<div class="card card-default color-palette-box">
         <div class="card-header">
@@ -26,6 +26,23 @@
 	                        </em>
 	                    @endif
 					</div>
+                </div>
+                <div class="form-group row {{ $errors->has('salesOrderID') ? 'has-error' : '' }}">
+                    <label for="saleAgent" class="col-sm-2 col-form-label">Sales Order: *</label>
+                    <div class="col-sm-10">
+                        <select name="salesOrderID[]" class="form-control select2 @if($errors->has('salesOrderID')) is-invalid @endif" multiple>
+                            @foreach ($salesOrders as $salesOrder)
+                                @if($salesOrder->salesOrderStatusID == 1)
+                                    <option value="{{ $salesOrder->salesOrderID }}">Invoice.{{ $salesOrder->invoiceNumber }} | {{$salesOrder->shopName}} | {{\App\Services\CurrencyService::getCurrencyFormatted($salesOrder->totalAmount)}} </option>
+                                @endif
+                            @endforeach
+                        </select>
+                        @if($errors->has('salesOrderID'))
+                            <em class="invalid-feedback">
+                                {{ $errors->first('salesOrderID') }}
+                            </em>
+                        @endif
+                    </div>
                 </div>
                 <div class="form-group row {{ $errors->has('routeID') ? 'has-error' : '' }}">
                     <label for="saleAgent" class="col-sm-2 col-form-label">Route: *</label>
@@ -84,4 +101,11 @@
 @stop
 @section('css')
     <link rel="stylesheet" href="/css/admin_custom.css">
+    <link rel="stylesheet" href="/css/_app.css">
+@stop
+@section('js')
+    <script src="/js/utils.js"></script>
+    <script>
+        $('select.select2').select2();
+    </script>
 @stop

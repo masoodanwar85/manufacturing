@@ -12,8 +12,11 @@
             <h3 class="card-title">
                 <i class="fas fa-shipping-fast"></i> {{ $delivery->deliveryName }}
             </h3>
+            <a class="btn btn-warning btn-sm float-right mr-2" href="{{ route('delivery.deliveryReport',$delivery->deliveryID) }}">
+                <i class="fas fa-print"></i> Print Report
+            </a>
             @can('delivery_update')
-            <a class="btn btn-primary btn-sm float-right" href="{{ route('delivery.edit',$delivery->deliveryID) }}">
+            <a class="btn btn-primary btn-sm float-right mr-2" href="{{ route('delivery.edit',$delivery->deliveryID) }}">
                 <i class="fas fa-edit"></i> Edit Delivery
             </a>
             @endcan
