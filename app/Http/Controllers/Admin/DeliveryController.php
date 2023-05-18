@@ -86,7 +86,7 @@ class DeliveryController extends Controller
         $routes = Route::all();
         $godowns = Godown::all();
         $transports = Transport::all();
-        $salesOrders = SalesOrder::getSaleOrders(0,'');
+        $salesOrders = SalesOrder::where('salesOrderStatusID', 1)->get();
         return view('admin.delivery.create',compact('routes','godowns','transports','salesOrders'));
     }
 
@@ -126,7 +126,7 @@ class DeliveryController extends Controller
     public function show(Delivery $delivery)
     {
         abort_if(Gate::denies('delivery_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $delivery->load(['salesOrders','salesOrders.stockDetailStatuses.stockDetail.product'])->get();
+        $delivery->load(['salesOrders.stockDetailStatuses.stockDetail.product'])->get();
         $productsQuantities = [];
         foreach ($delivery->salesOrders as $salesOrder) {
             foreach ($salesOrder->stockDetailStatuses as $stockDetailStatus) {
@@ -152,11 +152,11 @@ class DeliveryController extends Controller
     public function edit(Delivery $delivery)
     {
         abort_if(Gate::denies('delivery_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $delivery->load(['salesOrders.stockDetailStatuses.stockDetail.product']);
         $routes = Route::all();
         $godowns = Godown::all();
         $transports = Transport::all();
-        $salesOrders = SalesOrder::getSaleOrders(0,'');
-        $delivery->load(['salesOrders','salesOrders.stockDetailStatuses.stockDetail.product'])->get();
+        $salesOrders = SalesOrder::where('salesOrderStatusID', 1)->orWhereIn('salesOrderID', $delivery->deliveryDetails->pluck('salesOrderID')->toArray())->get();
         $selectedValues = [];
         foreach($delivery->deliveryDetails as $d){
             $selectedValues[] = $d->salesOrderID;

@@ -33,9 +33,7 @@
                     <div class="col-sm-10">
                         <select name="salesOrderID[]" class="form-control select2 @if($errors->has('salesOrderID')) is-invalid @endif" multiple>
                             @foreach ($salesOrders as $salesOrder)
-                                @if($salesOrder->salesOrderStatusID == 1)
-                                    <option value="{{ $salesOrder->salesOrderID }}" {{ in_array($salesOrder->salesOrderID, $selectedValues) ? 'selected' : '' }}>Invoice.{{ $salesOrder->invoiceNumber }} | {{$salesOrder->shopName}} | {{\App\Services\CurrencyService::getCurrencyFormatted($salesOrder->totalAmount)}} </option>
-                                @endif
+                                <option value="{{ $salesOrder->salesOrderID }}" {{ in_array($salesOrder->salesOrderID, $selectedValues) ? 'selected' : '' }}>Invoice # {{ $salesOrder->invoiceNumber }} ::: Customer:  {{$salesOrder->customer->shopName}}</option>
                             @endforeach
                         </select>
                         @if($errors->has('salesOrderID'))
