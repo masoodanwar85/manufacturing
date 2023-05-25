@@ -23,6 +23,7 @@
         $('select.select2').select2();
         bindRemoveClick();
         bindQuantityChanged();
+        bindGodownChanged();
     });
 
 	function getNextSerial(bookType) {
@@ -123,6 +124,12 @@
     function bindQuantityChanged() {
         $('input[name="quantity[]"]').bind('keydown mouseup keypress blur keyup change', function(e) {
             quantityChanged(e.target);
+        });
+    }
+
+    function bindGodownChanged() {
+        $('select[name="godownID[]"]').bind('change', function(e) {
+            godownChanged(e.target);
         });
     }
 
@@ -250,7 +257,9 @@
 			unitsInProduct = productsInfo[productID].unitsInProduct;
 		}
 		trElem.find('.godown').html(godownHTML);
+        bindGodownChanged();
         trElem.find('select[name="godownID[]"]').prop('selectedIndex',1);
+        quantityAvailable = trElem.find('select[name="godownID[]"] :selected').attr('qty');
 		trElem.find('input[name="unitsInProduct[]"]').val(unitsInProduct);
 		trElem.find('.totalUnitsAvailable').text(totalUnitsAvailableText);
 		trElem.find('input[name="quantity[]"]').attr('max',quantityAvailable);
@@ -284,7 +293,7 @@
 		var optionsHTML = "";
 		var godownsArray = godownProductsInfo[productID].godowns;
 		godownsArray.forEach(function(godownObj) {
-			optionsHTML += '<option value="'+godownObj.godownID+'">' + godownObj.godownName + ' (' + productUnitText(productID,godownObj.quantityAvailable) + ')' + '</option>';
+			optionsHTML += '<option value="'+godownObj.godownID+'" qty="'+godownObj.quantityAvailable+'">' + godownObj.godownName + ' (' + productUnitText(productID,godownObj.quantityAvailable) + ')' + '</option>';
 		});
 		return '<select name="godownID[]" class="form-control"><option value=""></option>' + optionsHTML + '</select>';
 	}
@@ -299,6 +308,16 @@
             jQElem.val(maxQty);
         }
         calculateProductRowTotal(quantityField);
+    }
+
+    function godownChanged(godownField) {
+        var jQElem = $(godownField);
+		var trElem = jQElem.closest('tr');
+        var quantityAvailable = jQElem.find(':selected').attr('qty');
+        if (quantityAvailable === undefined) {
+            quantityAvailable = trElem.find('.totalUnitsAvailable').text();
+        }
+        trElem.find('input[name="quantity[]"]').attr('max',quantityAvailable);
     }
 
     function calculateBalance() {
