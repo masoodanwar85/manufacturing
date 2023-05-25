@@ -337,6 +337,13 @@ return [
                     'can'  => ['customer_read','customer_create','customer_delete'],
 					'active' => ['admin/customer','regex:@^admin/customer/.*$@']
                 ],
+                [
+                    'text' => 'Delivery',
+                    'url'  => 'admin/delivery',
+                    'icon' => 'fas fa-fw fa-shipping-fast',
+                    'can'  => ['delivery_read','delivery_create','delivery_delete'],
+                    'active' => ['admin/delivery','regex:@^admin/delivery/.*$@']
+                ],
             ],
         ],
         [

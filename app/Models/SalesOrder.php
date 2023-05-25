@@ -46,6 +46,16 @@ class SalesOrder extends Model
 		return $this->belongsToMany('App\Models\StockDetailStatus','salesOrderDetail','salesOrderID','stockDetailStatusID');
 	}
 
+    public function deliveryDetails()
+    {
+        return $this->hasMany('App\Models\DeliveryDetails','salesOrderID','salesOrderID');
+    }
+
+    public function salesOrderStatus()
+    {
+        return $this->belongsTo('App\Models\SalesOrderStatus','salesOrderStatusID','salesOrderStatusID');
+    }
+
 	public static function getSaleOrders($salesOrderID = 0,$filters = []) {
 	    DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
         $strWhere = "";
@@ -62,12 +72,13 @@ class SalesOrder extends Model
             $strWhere .= " AND temp.customerID = " . $filters['customerID'];
         }
         $rawSQL = "
-			SELECT temp.salesOrderID,temp.invoiceNumber,temp.bookSerial,temp.orderDate,temp.discount,temp.shippingCharges,temp.paymentDueDate,(SUM(totalAmount) - SUM(salesReturnAmount)) AS totalAmount,SUM(totalPaid) AS totalPaid,(SUM(totalAmount) - SUM(salesReturnAmount) - SUM(totalPaid)) AS remaining,customer.customerID,customer.customerName,customer.shopName
+			SELECT temp.salesOrderID,temp.salesOrderStatusID,temp.invoiceNumber,temp.bookSerial,temp.orderDate,temp.discount,temp.shippingCharges,temp.paymentDueDate,(SUM(totalAmount) - SUM(salesReturnAmount)) AS totalAmount,SUM(totalPaid) AS totalPaid,(SUM(totalAmount) - SUM(salesReturnAmount) - SUM(totalPaid)) AS remaining,customer.customerID,customer.customerName,customer.shopName
 			FROM (
 				SELECT
 					salesOrder.salesOrderID,
 					salesOrder.customerID,
                     salesOrder.salesAgentID,
+                    salesOrder.salesOrderStatusID,
 					salesOrder.invoiceNumber,
                     salesOrder.bookSerial,
 					salesOrder.orderDate,
@@ -87,6 +98,7 @@ class SalesOrder extends Model
 					salesOrder.salesOrderID,
 					salesOrder.customerID,
                     salesOrder.salesAgentID,
+                    salesOrder.salesOrderStatusID,
 					salesOrder.invoiceNumber,
                     salesOrder.bookSerial,
 					salesOrder.orderDate,
@@ -106,6 +118,7 @@ class SalesOrder extends Model
 					salesOrder.salesOrderID,
 					salesOrder.customerID,
                     salesOrder.salesAgentID,
+                    salesOrder.salesOrderStatusID,
 					salesOrder.invoiceNumber,
                     salesOrder.bookSerial,
 					salesOrder.orderDate,

@@ -92,7 +92,11 @@ class PrivilegeSeeder extends Seeder
             ['moduleID' => 21, 'accessLevelID' => 1, 'privilegeCode' => 'PRODUCTION','privilegeName' => 'Production Create'],
 			['moduleID' => 21, 'accessLevelID' => 2, 'privilegeCode' => 'PRODUCTION','privilegeName' => 'Production Read'],
 			['moduleID' => 21, 'accessLevelID' => 3, 'privilegeCode' => 'PRODUCTION','privilegeName' => 'Production Update'],
-			['moduleID' => 21, 'accessLevelID' => 4, 'privilegeCode' => 'PRODUCTION','privilegeName' => 'Production Delete']
+			['moduleID' => 21, 'accessLevelID' => 4, 'privilegeCode' => 'PRODUCTION','privilegeName' => 'Production Delete'],
+            ['moduleID' => 22, 'accessLevelID' => 1, 'privilegeCode' => 'DELIVERY','privilegeName' => 'Delivery Create'],
+            ['moduleID' => 22, 'accessLevelID' => 2, 'privilegeCode' => 'DELIVERY','privilegeName' => 'Delivery Read'],
+            ['moduleID' => 22, 'accessLevelID' => 3, 'privilegeCode' => 'DELIVERY','privilegeName' => 'Delivery Update'],
+            ['moduleID' => 22, 'accessLevelID' => 4, 'privilegeCode' => 'DELIVERY','privilegeName' => 'Delivery Delete']
         ];
 
         foreach ($aryPrivileges as $privilege) {

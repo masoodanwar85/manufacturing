@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\SalesOrderStatus;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -26,6 +27,9 @@ class DatabaseSeeder extends Seeder
             UserRoleSeeder::class,
 			SettingTypeSeeder::class,
 			SettingSeeder::class,
+			CitySeeder::class,
+			AreaSeeder::class,
+			RouteSeeder::class,
 			MeasurementUnitSeeder::class,
 			MeasurementUnitConversionSeeder::class,
 			TransactionTypeSeeder::class,
@@ -43,6 +47,7 @@ class DatabaseSeeder extends Seeder
 			TransportSeeder::class,
 			SupplierSeeder::class,
 			CustomerSeeder::class,
+			SalesOrderStatusSeeder::class,
 			// PurchaseOrderSeeder::class,
 			StaffSeeder::class,
 			BankAccountSeeder::class,

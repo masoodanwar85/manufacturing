@@ -19,6 +19,10 @@ class Transport extends Model
     {
         return $this->hasOne('App\Models\AccountHead','headID','headID');
     }
+    public function deliveries()
+    {
+        return $this->hasMany('App\Models\Delivery','transportID','transportID');
+    }
 
 	public static function getBalance($transportID,$isHeadID = FALSE) {
 		$transportHeadID = $transportID;

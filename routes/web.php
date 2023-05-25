@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -58,6 +59,7 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
     Route::get('invoiceBooks/{bookType}/nextSerial', [App\Http\Controllers\Admin\InvoiceBooksController::class, 'getNextSerialNumber'])->name('invoiceBooks.nextSerial');
 	Route::post('invoiceBooks/voidSerial', [App\Http\Controllers\Admin\InvoiceBooksController::class, 'voidSerialNumber'])->name('invoiceBooks.voidSerial');
 	Route::get('production/{production}/nextStage', [App\Http\Controllers\Admin\ProductionController::class, 'nextStage'])->name('production.nextStage');
+	Route::get('deliveryReport/{delivery}', [App\Http\Controllers\Admin\DeliveryController::class, 'deliveryReport'])->name('delivery.deliveryReport');
     Route::resource('user', App\Http\Controllers\Admin\UserController::class);
     Route::resource('role', App\Http\Controllers\Admin\RoleController::class);
 	Route::resource('product', App\Http\Controllers\Admin\ProductController::class);
@@ -75,6 +77,7 @@ Route::group(['middleware' => 'auth','prefix' => 'admin'], function() {
     Route::resource('attendance', App\Http\Controllers\Admin\AttendanceController::class);
 	Route::resource('stock', App\Http\Controllers\Admin\StockController::class);
 	Route::resource('sales', App\Http\Controllers\Admin\SalesOrderController::class);
+	Route::resource('delivery', App\Http\Controllers\Admin\DeliveryController::class);
 	Route::resource('customer', App\Http\Controllers\Admin\CustomerController::class);
     Route::resource('invoiceBooks', App\Http\Controllers\Admin\InvoiceBooksController::class);
 	Route::resource('setting', App\Http\Controllers\Admin\SettingController::class)->only(['edit','update']);
