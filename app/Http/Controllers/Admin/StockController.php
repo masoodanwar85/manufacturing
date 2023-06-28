@@ -586,9 +586,40 @@ class StockController extends Controller
     //     return redirect()->route('stock.index');
     // }
 
+    public function stockFix() {
+        $aryProducts = [
+            ['productID' => 17,'qty' => 0, 'godownID' => 1]
+        ];
+
+        foreach ($aryProducts as $product) {
+            $rawSQL = "select stockDetailID,SUM(totalQty) as finalQty from (
+                    SELECT stockDetailID,statusID,godownID,case when statusID = 1 then SUM(quantity) else (SUM(quantity) * -1) end as totalQty
+                    FROM stockDetailStatus
+                    WHERE godownID = " . $product['godownID'] . " and stockDetailID IN ( SELECT stockDetailID FROM stockDetail WHERE productID = " . $product['productID'] . " and purchaseOrderDetailID is null)
+                    group by stockDetailID,statusID,godownID
+                ) as t
+                group by stockDetailID
+                having finalQty > 0";
+            $in_stock_results = DB::select($rawSQL);
+            foreach ($in_stock_results as $in_stock) {
+                $stockDetail = \App\Models\StockDetail::find($in_stock->stockDetailID);
+                $stockDetailStatus = \App\Models\StockDetailStatus::where('stockDetailID', $stockDetail->stockDetailID)->whereNull('productionID')->where('godownID', $product['godownID'])->get();
+                $stockDetailStatusIDs = $stockDetailStatus->pluck('stockDetailStatusID')->all();
+                $total_available = $stockDetailStatus->where('statusID', 1)->whereIn('stockDetailStatusID',$stockDetailStatusIDs)->sum('quantity');
+                $stockDetailStatus_available = $stockDetailStatus->where('statusID',1)->all();
+                $available_count = count($stockDetailStatus_available);
+                $total_sold = $stockDetailStatus->where('statusID', 3)->whereIn('stockDetailStatusID',$stockDetailStatusIDs)->sum('quantity');
+                if ($total_available > $total_sold && $available_count == 1) {
+                    $updated_qty = $stockDetailStatus_available[0]['quantity'] - ($total_sold + $product['qty']);
+                    echo "UPDATE stockDetailStatus SET quantity = $updated_qty, quantityUnits = $updated_qty WHERE stockDetailStatusID = " . $stockDetailStatus_available[0]['stockDetailStatusID'];
+                }
+            }
+        }
+    }
+
     public function reduceStockFix() {
         $aryProducts = [
-            ['productID' => 34,'qty' => 194, 'godownID' => 2]
+            ['productID' => 5,'qty' => 0, 'godownID' => 1]
         ];
 
         foreach ($aryProducts as $product) {
