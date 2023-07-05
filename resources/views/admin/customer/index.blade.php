@@ -26,7 +26,7 @@
 						<th>Phone</th>
 						<th>Address</th>
 						<th>Balance</th>
-						<th>Created At</th>
+						<th>Sales Agent</th>
 						<th>Action</th>
 					</tr>
 				</thead>
@@ -54,7 +54,7 @@
                     { data: 'phone', name: 'phone' },
 					{ data: 'address', name: 'address' },
 					{ data: 'balance', name: 'balance' },
-                    { data: 'dateCreated', name: 'dateCreated' },
+                    { data: 'salesAgent', name: 'salesAgent' },
                     { data: 'actions', name: 'Actions' }
                 ],
                 pageLength: 100,

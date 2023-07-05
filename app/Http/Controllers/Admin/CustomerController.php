@@ -36,40 +36,33 @@ class CustomerController extends Controller
             $table->addColumn('actions', '&nbsp;');
 
             $table->editColumn('actions', function ($row) {
-                $viewGate      = 'customer_read';
-                $editGate      = 'customer_update';
-                $deleteGate    = 'customer_delete';
+                $viewGate = 'customer_read';
+                $editGate = 'customer_update';
+                $deleteGate = 'customer_delete';
                 $crudRoutePart = 'customer';
                 $primaryKey = 'customerID';
 
-                return view('partials.datatablesActions', compact(
-                    'viewGate',
-                    'editGate',
-                    'deleteGate',
-                    'crudRoutePart',
-                    'row',
-                    'primaryKey'
-                ));
+                return view(
+                    'partials.datatablesActions',
+                    compact(
+                        'viewGate',
+                        'editGate',
+                        'deleteGate',
+                        'crudRoutePart',
+                        'row',
+                        'primaryKey'
+                    )
+                );
             });
 
-            $table->editColumn('customerName', function ($row) {
-                return $row->customerName ? $row->customerName : "";
+            $table->editColumn('salesAgent', function ($row) {
+                return $row->salesAgent ? $row->salesAgent->staffName : '';
             });
-			$table->editColumn('balance', function ($row) {
+
+            $table->editColumn('balance', function ($row) {
                 return \App\Services\CurrencyService::getCurrencyFormatted(Customer::getBalance($row->customerID)[0]->totalPayable);
             });
-			$table->editColumn('shopName', function ($row) {
-                return $row->shopName ? $row->shopName : "";
-            });
-            $table->editColumn('phone', function ($row) {
-                return $row->phone ? $row->phone : "";
-            });
-			$table->editColumn('address', function ($row) {
-                return $row->address ? $row->address : "";
-            });
-            $table->editColumn('dateCreated', function ($row) {
-                return $row->dateCreated ? $row->dateCreated : "";
-            });
+
             $table->rawColumns(['actions', 'placeholder']);
 
             return $table->make(true);
@@ -85,9 +78,9 @@ class CustomerController extends Controller
      */
     public function create()
     {
-		abort_if(Gate::denies('customer_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('customer_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $saleAgents = \App\Models\Staff::salesAgents()->get();
-        return view('admin.customer.create',compact('saleAgents'));
+        return view('admin.customer.create', compact('saleAgents'));
     }
 
     /**
@@ -98,18 +91,18 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
-		DB::beginTransaction();
-		try {
-			$request->merge(['createdByUserID' => Auth::id()]);
-			$request->merge(['headID' => \App\Models\AccountHead::addAccountHead($request->customerName . ' (' . $request->shopName . ')' . ' (Customer)',Auth::id(),\Config::get('constants.account_heads.customer'),1,0,0,0,0,0)]);
-			$customer = Customer::create($request->all());
-			DB::commit();
-			$request->session()->flash('message', 'Customer created successfully!');
-		} catch (\Exception $e) {
-			DB::rollback();
+        DB::beginTransaction();
+        try {
+            $request->merge(['createdByUserID' => Auth::id()]);
+            $request->merge(['headID' => \App\Models\AccountHead::addAccountHead($request->customerName . ' (' . $request->shopName . ')' . ' (Customer)', Auth::id(), \Config::get('constants.account_heads.customer'), 1, 0, 0, 0, 0, 0)]);
+            $customer = Customer::create($request->all());
+            DB::commit();
+            $request->session()->flash('message', 'Customer created successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
             $request->session()->flash('error', 'An error occurred while creating customer!');
-		}
-		return redirect()->route('customer.index');
+        }
+        return redirect()->route('customer.index');
     }
 
     /**
@@ -120,15 +113,15 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-		abort_if(Gate::denies('customer_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('customer_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $customer->load('salesAgent');
         $salesAgentID = Auth::user()->staff ? Auth::user()->staff->staffID : null;
         if ($salesAgentID != null && ($customer->salesAgent == null || $customer->salesAgent->staffID != $salesAgentID)) {
             return response()->json(['message' => '403 Forbidden'], 403);
         }
         $totalPayable = Customer::getBalance($customer->customerID)[0]->totalPayable;
-		$customerTransactions = \App\Services\TransactionService::getSubHeadTransactions(Customer::find($customer->customerID)->headID,'salesOrders');
-        return view('admin.customer.show', compact('customer','totalPayable','customerTransactions'));
+        $customerTransactions = \App\Services\TransactionService::getSubHeadTransactions(Customer::find($customer->customerID)->headID, 'salesOrders');
+        return view('admin.customer.show', compact('customer', 'totalPayable', 'customerTransactions'));
     }
 
     /**
@@ -139,9 +132,9 @@ class CustomerController extends Controller
      */
     public function edit(Customer $customer)
     {
-		abort_if(Gate::denies('customer_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('customer_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $saleAgents = \App\Models\Staff::salesAgents()->get();
-		return view('admin.customer.edit', compact('customer','saleAgents'));
+        return view('admin.customer.edit', compact('customer', 'saleAgents'));
     }
 
     /**
@@ -153,16 +146,16 @@ class CustomerController extends Controller
      */
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
-		DB::beginTransaction();
-		try {
-			\App\Models\AccountHead::updateAccountHead($customer->headID,$request->customerName . ' (' . $request->shopName . ')' . ' (Customer)');
-			$customer->update($request->all());
-			DB::commit();
-			$request->session()->flash('message', 'Customer updated successfully!');
-		} catch (\Exception $e) {
-			DB::rollback();
-			$request->session()->flash('error', 'An error occurred while updating customer!');
-		}
+        DB::beginTransaction();
+        try {
+            \App\Models\AccountHead::updateAccountHead($customer->headID, $request->customerName . ' (' . $request->shopName . ')' . ' (Customer)');
+            $customer->update($request->all());
+            DB::commit();
+            $request->session()->flash('message', 'Customer updated successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            $request->session()->flash('error', 'An error occurred while updating customer!');
+        }
         return redirect()->route('customer.index');
     }
 
@@ -174,23 +167,24 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer, Request $request)
     {
-		abort_if(Gate::denies('customer_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		DB::beginTransaction();
-		try {
-			$customer->delete();
-			$customer->head->delete();
-			DB::commit();
-			$request->session()->flash('message', 'Customer deleted successfully!');
-		} catch (\Exception $e) {
-			DB::rollback();
-			$request->session()->flash('error', 'An error occurred while deleting customer!');
-		}
+        abort_if(Gate::denies('customer_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        DB::beginTransaction();
+        try {
+            $customer->delete();
+            $customer->head->delete();
+            DB::commit();
+            $request->session()->flash('message', 'Customer deleted successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            $request->session()->flash('error', 'An error occurred while deleting customer!');
+        }
 
         return redirect()->route('customer.index');
     }
 
-	public function getBalance(int $customerID) {
-		$customerBalance = Customer::getBalance($customerID);
-		return $customerBalance;
-	}
+    public function getBalance(int $customerID)
+    {
+        $customerBalance = Customer::getBalance($customerID);
+        return $customerBalance;
+    }
 }
