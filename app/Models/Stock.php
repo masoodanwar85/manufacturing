@@ -491,4 +491,37 @@ class Stock extends Model
             ORDER BY godown.saleSortOrder";
 		return DB::select($rawSQL);
 	}
+
+	public static function getStockError($productID,$godownID = NULL)
+	{
+	    DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+		$rawSQL = "
+			select stockDetailID,productID,godownID,SUM(totalQuantityPurchased) as purchased,SUM(quantitySold) as sold from (
+				select
+					stockDetailStatus.stockDetailID,
+					stockDetail.productID,
+					stockDetailStatus.godownID,
+					SUM(stockDetailStatus.quantity) AS totalQuantityPurchased,
+					0 AS quantitySold
+				FROM stockDetail
+				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
+				WHERE stockDetailStatus.statusID = 1 and stockDetail.productID = " . $productID . " AND stockDetailStatus.godownID = " . (int) $godownID . "
+				GROUP BY stockDetailStatus.stockDetailID,stockDetail.productID,stockDetailStatus.godownID
+				UNION
+				select
+					stockDetailStatus.stockDetailID,
+					stockDetail.productID,
+					stockDetailStatus.godownID,
+					0 AS totalQuantityPurchased,
+					SUM(stockDetailStatus.quantity) AS quantitySold
+				FROM stockDetail
+				INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
+				WHERE stockDetailStatus.statusID = 3 and stockDetail.productID = " . $productID . " AND stockDetailStatus.godownID = " . (int) $godownID . "
+				GROUP BY stockDetailStatus.stockDetailID,stockDetail.productID,stockDetailStatus.godownID
+			) as t
+			group by stockDetailID,productID,godownID
+			having sold < purchased
+			order by stockDetailID,godownID";
+		return DB::select($rawSQL);
+	}
 }

@@ -586,40 +586,127 @@ class StockController extends Controller
     //     return redirect()->route('stock.index');
     // }
 
+    // public function stockFix() {
+    //     $aryProducts = [
+    //         ['productID' => 17,'qty' => 0, 'godownID' => 1]
+    //     ];
+
+    //     foreach ($aryProducts as $product) {
+    //         $rawSQL = "select stockDetailID,SUM(totalQty) as finalQty from (
+    //                 SELECT stockDetailID,statusID,godownID,case when statusID = 1 then SUM(quantity) else (SUM(quantity) * -1) end as totalQty
+    //                 FROM stockDetailStatus
+    //                 WHERE godownID = " . $product['godownID'] . " and stockDetailID IN ( SELECT stockDetailID FROM stockDetail WHERE productID = " . $product['productID'] . " and purchaseOrderDetailID is null)
+    //                 group by stockDetailID,statusID,godownID
+    //             ) as t
+    //             group by stockDetailID
+    //             having finalQty > 0";
+    //         $in_stock_results = DB::select($rawSQL);
+    //         foreach ($in_stock_results as $in_stock) {
+    //             $stockDetail = \App\Models\StockDetail::find($in_stock->stockDetailID);
+    //             $stockDetailStatus = \App\Models\StockDetailStatus::where('stockDetailID', $stockDetail->stockDetailID)->whereNull('productionID')->where('godownID', $product['godownID'])->get();
+    //             $stockDetailStatusIDs = $stockDetailStatus->pluck('stockDetailStatusID')->all();
+    //             $total_available = $stockDetailStatus->where('statusID', 1)->whereIn('stockDetailStatusID',$stockDetailStatusIDs)->sum('quantity');
+    //             $stockDetailStatus_available = $stockDetailStatus->where('statusID',1)->all();
+    //             $available_count = count($stockDetailStatus_available);
+    //             $total_sold = $stockDetailStatus->where('statusID', 3)->whereIn('stockDetailStatusID',$stockDetailStatusIDs)->sum('quantity');
+    //             if ($total_available > $total_sold && $available_count == 1) {
+    //                 $updated_qty = $stockDetailStatus_available[0]['quantity'] - ($total_sold + $product['qty']);
+    //                 echo "UPDATE stockDetailStatus SET quantity = $updated_qty, quantityUnits = $updated_qty WHERE stockDetailStatusID = " . $stockDetailStatus_available[0]['stockDetailStatusID'];
+    //             }
+    //         }
+    //     }
+    // }
+
     public function stockFix() {
         $aryProducts = [
-            ['productID' => 17,'qty' => 0, 'godownID' => 1]
+            ['productID' => 12,'qty' => 1, 'godownID' => 2]
         ];
 
-        foreach ($aryProducts as $product) {
-            $rawSQL = "select stockDetailID,SUM(totalQty) as finalQty from (
-                    SELECT stockDetailID,statusID,godownID,case when statusID = 1 then SUM(quantity) else (SUM(quantity) * -1) end as totalQty
-                    FROM stockDetailStatus
-                    WHERE godownID = " . $product['godownID'] . " and stockDetailID IN ( SELECT stockDetailID FROM stockDetail WHERE productID = " . $product['productID'] . " and purchaseOrderDetailID is null)
-                    group by stockDetailID,statusID,godownID
-                ) as t
-                group by stockDetailID
-                having finalQty > 0";
-            $in_stock_results = DB::select($rawSQL);
-            foreach ($in_stock_results as $in_stock) {
-                $stockDetail = \App\Models\StockDetail::find($in_stock->stockDetailID);
-                $stockDetailStatus = \App\Models\StockDetailStatus::where('stockDetailID', $stockDetail->stockDetailID)->whereNull('productionID')->where('godownID', $product['godownID'])->get();
-                $stockDetailStatusIDs = $stockDetailStatus->pluck('stockDetailStatusID')->all();
-                $total_available = $stockDetailStatus->where('statusID', 1)->whereIn('stockDetailStatusID',$stockDetailStatusIDs)->sum('quantity');
-                $stockDetailStatus_available = $stockDetailStatus->where('statusID',1)->all();
-                $available_count = count($stockDetailStatus_available);
-                $total_sold = $stockDetailStatus->where('statusID', 3)->whereIn('stockDetailStatusID',$stockDetailStatusIDs)->sum('quantity');
-                if ($total_available > $total_sold && $available_count == 1) {
-                    $updated_qty = $stockDetailStatus_available[0]['quantity'] - ($total_sold + $product['qty']);
-                    echo "UPDATE stockDetailStatus SET quantity = $updated_qty, quantityUnits = $updated_qty WHERE stockDetailStatusID = " . $stockDetailStatus_available[0]['stockDetailStatusID'];
+        foreach ($aryProducts as $aryProduct) {
+            $productID = $aryProduct['productID'];
+            $qty = $aryProduct['qty'];
+            $godownID = $aryProduct['godownID'];
+
+            $productStock = Stock::getStock($productID,FALSE,TRUE, $godownID, null);
+
+            if ($qty == $productStock[0]->inStockQuantity) {
+
+            } elseif ($qty > $productStock[0]->inStockQuantity) {
+                echo "<br />Product ID : " . $productID . " needs to be added more<br />";
+            } else {
+                $results = Stock::getStockError($productID,$godownID);
+
+                $needToReduce = $productStock[0]->inStockQuantity - $qty;
+
+                foreach ($results as $result) {
+                    $thisStockDetailID = $result->stockDetailID;
+                    $thisPurchased = $result->purchased;
+                    $thisSold = $result->sold;
+                    $thisRemaining = $thisPurchased - $thisSold;
+                    
+                    $stockDetailStatuses = \App\Models\StockDetailStatus::where('stockDetailID', $thisStockDetailID)->where('godownID', $godownID)->get();
+                    $stockDetail = \App\Models\StockDetail::find($thisStockDetailID);
+                    $stock = Stock::find($stockDetail->stockID);
+
+                    if ($stock->productionID !== null) {
+                        $productionBOMs = \App\Models\ProductionBOM::where('productionID', $stock->productionID)->where('productID', $productID)->get();
+                    }
+                    
+
+                    $availableQty = 0;
+                    $unAvailableQty = 0;
+                    $canBeReduced = 0;
+                    foreach ($stockDetailStatuses as $stockDetailStatus) {
+                        if (in_array($stockDetailStatus->statusID,\Config::get('constants.stock_status.aryIsAvailableForSale'))) {
+                            $availableQty+=$stockDetailStatus->quantity;
+                        } else {
+                            $unAvailableQty+=$stockDetailStatus->quantity;
+                        }
+                    }
+
+                    $canBeReduced = $availableQty - $unAvailableQty;
+
+                    if ($canBeReduced > 0 && $needToReduce > 0) {
+                        if ($unAvailableQty === 0) {
+                            if ($canBeReduced <= $needToReduce ) {
+                                if ($stock->productionID !== null) {
+                                    foreach ($productionBOMs as $productionBOM) {
+                                        if ($productionBOM->quantity == $canBeReduced) {
+                                            echo "<br />DELETE FROM productionBOMItem WHERE productionBOMID = " . $productionBOM->productionBOMID . ";";
+                                            echo "<br />DELETE FROM productionBOM WHERE productionBOMID = " . $productionBOM->productionBOMID . ";";
+                                        }
+                                    }
+                                }
+                                echo "<br />DELETE FROM stockDetailStatus WHERE stockDetailID = " . $thisStockDetailID . ";";
+                                echo "<br />DELETE FROM stockDetail WHERE stockDetailID = " . $thisStockDetailID . ";";
+                                echo "<br />DELETE FROM stock WHERE stockID = " . $stock->stockID . ";";
+                                $needToReduce -= $canBeReduced;
+                            } else {
+
+                            }
+                        } else {
+                            if ($canBeReduced > $needToReduce ) {
+                                $updatedQty = $stockDetailStatuses[0]->quantity - $needToReduce;
+                                if ($stock->productionID !== null) {
+                                    foreach ($productionBOMs as $productionBOM) {
+                                        echo "<br />UPDATE productionBOM SET quantity = " . $updatedQty . " WHERE productionBOMID = " . $productionBOM->productionBOMID . ";";
+                                        break;
+                                    }
+                                }
+                                echo "<br />UPDATE stockDetail SET quantity = " . $updatedQty . ", quantityUnits = " . $updatedQty . " WHERE stockDetailID = " . $thisStockDetailID . ";";
+                                echo "<br />UPDATE stockDetailStatus SET quantity = " . $updatedQty . ", quantityUnits = " . $updatedQty . " WHERE stockDetailStatusID = " . $stockDetailStatuses[0]->stockDetailStatusID . ";";
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
+
     public function reduceStockFix() {
         $aryProducts = [
-            ['productID' => 5,'qty' => 0, 'godownID' => 1]
+            ['productID' => 12,'qty' => 1, 'godownID' => 2]
         ];
 
         foreach ($aryProducts as $product) {
