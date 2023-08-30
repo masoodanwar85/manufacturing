@@ -27,14 +27,16 @@ class AttendanceController extends Controller
             $monthAttendance = $request->get('monthAttendance');
         }
 
-        $aryMonthAttendance = explode("-",$monthAttendance);
+        $aryMonthAttendance = explode("-", $monthAttendance);
 
-        $staffMonthlyAttendance = Staff::where('paymentAmount','>','0')->with(['attendance' => function($query) use($aryMonthAttendance) {
-            $query->whereYear('attendanceDate','=',$aryMonthAttendance[0])->whereMonth('attendanceDate','=',$aryMonthAttendance[1]);
-        }])->get();
+        $staffMonthlyAttendance = Staff::where('isActive', 1)->where('paymentAmount', '>', '0')->with([
+            'attendance' => function ($query) use ($aryMonthAttendance) {
+                $query->whereYear('attendanceDate', '=', $aryMonthAttendance[0])->whereMonth('attendanceDate', '=', $aryMonthAttendance[1]);
+            }
+        ])->get();
 
         $monthDates = Attendance::getMonthDates($monthAttendance . '-01');
-        return view('admin.attendance.index',compact('staffMonthlyAttendance','monthDates','monthAttendance'));
+        return view('admin.attendance.index', compact('staffMonthlyAttendance', 'monthDates', 'monthAttendance'));
     }
 
     /**
@@ -44,23 +46,25 @@ class AttendanceController extends Controller
      */
     public function create(Request $request)
     {
-		abort_if(Gate::denies('attendance_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		$today = \Carbon\Carbon::now();
+        abort_if(Gate::denies('attendance_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $today = \Carbon\Carbon::now();
         $attendanceDate = $today->format('Y-m-d');
         if ($request->get('attendanceDate') && strlen($request->get('attendanceDate'))) {
             $attendanceDate = \Carbon\Carbon::parse($request->get('attendanceDate'))->format('Y-m-d');
         }
 
-		if (\Carbon\Carbon::parse($attendanceDate)->diffInDays($today) <= 30 && \Carbon\Carbon::parse($attendanceDate)->lte($today)) {
-			$staffAttendance = Staff::where('paymentAmount','>','0')->with(['attendance' => function($query) use($attendanceDate) {
-	            $query->where('attendanceDate','=',$attendanceDate);
-	        }])->get();
-	        $leaveTypes = \App\Models\LeaveType::all();
-	        $canOverrideToday = TRUE;
-	        return view('admin.attendance.create',compact('staffAttendance','attendanceDate','leaveTypes','canOverrideToday'));
-		} else {
-			abort(403);
-		}
+        if (\Carbon\Carbon::parse($attendanceDate)->diffInDays($today) <= 30 && \Carbon\Carbon::parse($attendanceDate)->lte($today)) {
+            $staffAttendance = Staff::where('isActive', 1)->where('paymentAmount', '>', '0')->with([
+                'attendance' => function ($query) use ($attendanceDate) {
+                    $query->where('attendanceDate', '=', $attendanceDate);
+                }
+            ])->get();
+            $leaveTypes = \App\Models\LeaveType::all();
+            $canOverrideToday = TRUE;
+            return view('admin.attendance.create', compact('staffAttendance', 'attendanceDate', 'leaveTypes', 'canOverrideToday'));
+        } else {
+            abort(403);
+        }
     }
 
     /**
@@ -72,23 +76,23 @@ class AttendanceController extends Controller
     public function store(Request $request)
     {
         DB::beginTransaction();
-		try {
+        try {
             $staffIDs = $request->get('staffIDs');
             $aryStaffAttendance = $request->get('staffAttendances');
             $aryDescriptions = $request->get('descriptions');
             foreach ($staffIDs as $idx => $staffID) {
                 $Staff = \App\Models\Staff::find($staffID);
-                $transaction = \App\Models\Transaction::where('transactionDate',\Carbon\Carbon::parse($request->get('attendanceDate'))->toDateString())
-    				->whereHas('transactionDetails', function($query) use ($Staff) {
-    					$query->where('headID',\Config::get('constants.account_heads.salaries_payable'))->where('subHeadID',$Staff->headID)->where('isDebit',0);
-    				})->get();
+                $transaction = \App\Models\Transaction::where('transactionDate', \Carbon\Carbon::parse($request->get('attendanceDate'))->toDateString())
+                    ->whereHas('transactionDetails', function ($query) use ($Staff) {
+                        $query->where('headID', \Config::get('constants.account_heads.salaries_payable'))->where('subHeadID', $Staff->headID)->where('isDebit', 0);
+                    })->get();
 
                 if (count($transaction)) {
-    				// Delete it
+                    // Delete it
                     $transaction[0]->delete();
-    			}
+                }
 
-                $attendance = Attendance::where('staffID',$staffID)->where('attendanceDate',$request->get('attendanceDate'))->first();
+                $attendance = Attendance::where('staffID', $staffID)->where('attendanceDate', $request->get('attendanceDate'))->first();
                 if ($attendance) {
                     $attendance->delete();
                 }
@@ -102,13 +106,13 @@ class AttendanceController extends Controller
                     'createdByUserID' => Auth::id()
                 ]);
             }
-			DB::commit();
-			$request->session()->flash('message', 'Attendance created successfully!');
-		} catch (\Exception $e) {
-			DB::rollback();
+            DB::commit();
+            $request->session()->flash('message', 'Attendance created successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
             $request->session()->flash('error', 'An error occurred while creating attendance!');
-		}
-		return redirect()->route('attendance.index');
+        }
+        return redirect()->route('attendance.index');
     }
 
     /**
@@ -119,7 +123,7 @@ class AttendanceController extends Controller
      */
     public function show(Staff $staff)
     {
-		abort_if(Gate::denies('attendance_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('attendance_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         // $staffTransactions = \App\Services\TransactionService::getSubHeadTransactions(Staff::find($staff->staffID)->headID);
         // return view('admin.attendance.show', compact('staff','staffTransactions'));
     }
@@ -132,7 +136,7 @@ class AttendanceController extends Controller
      */
     public function edit(Staff $staff)
     {
-		abort_if(Gate::denies('attendance_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('attendance_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         // $staffTypes = \App\Models\StaffType::all()->sortBy('staffType');
         // return view('admin.attendance.edit', compact('staff','staffTypes'));
     }
@@ -146,17 +150,17 @@ class AttendanceController extends Controller
      */
     public function update(UpdateAttendanceRequest $request, Staff $staff)
     {
-		// DB::beginTransaction();
-		// try {
-		// 	\App\Models\AccountHead::updateAccountHead($staff->headID,$request->staffName . ' (Staff)');
-		// 	$staff->update($request->all());
-		// 	DB::commit();
-		// 	$request->session()->flash('message', 'Staff updated successfully!');
-		// } catch (\Exception $e) {
-		// 	DB::rollback();
-		// 	$request->session()->flash('error', 'An error occurred while updating staff!');
-		// }
-		return redirect()->route('attendance.index');
+        // DB::beginTransaction();
+        // try {
+        // 	\App\Models\AccountHead::updateAccountHead($staff->headID,$request->staffName . ' (Staff)');
+        // 	$staff->update($request->all());
+        // 	DB::commit();
+        // 	$request->session()->flash('message', 'Staff updated successfully!');
+        // } catch (\Exception $e) {
+        // 	DB::rollback();
+        // 	$request->session()->flash('error', 'An error occurred while updating staff!');
+        // }
+        return redirect()->route('attendance.index');
     }
 
     /**
@@ -165,26 +169,26 @@ class AttendanceController extends Controller
      * @param  \App\Models\Staff  $staff
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Staff $staff,Request $request)
+    public function destroy(Staff $staff, Request $request)
     {
-		// abort_if(Gate::denies('attendance_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		// DB::beginTransaction();
-		// try {
-		// 	$staff->delete();
-		// 	$staff->head->delete();
-		// 	DB::commit();
-		// 	$request->session()->flash('message', 'Staff deleted successfully!');
-		// } catch (\Exception $e) {
-		// 	DB::rollback();
-		// 	dd($e);
-		// 	$request->session()->flash('error', 'An error occurred while deleting staff!');
-		// }
+        // abort_if(Gate::denies('attendance_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        // DB::beginTransaction();
+        // try {
+        // 	$staff->delete();
+        // 	$staff->head->delete();
+        // 	DB::commit();
+        // 	$request->session()->flash('message', 'Staff deleted successfully!');
+        // } catch (\Exception $e) {
+        // 	DB::rollback();
+        // 	dd($e);
+        // 	$request->session()->flash('error', 'An error occurred while deleting staff!');
+        // }
 
         return redirect()->route('attendance.index');
     }
 
     // public function getBalance(int $staffID) {
-	// 	$staffBalance = Staff::getBalance($staffID);
-	// 	return $staffBalance;
-	// }
+    // 	$staffBalance = Staff::getBalance($staffID);
+    // 	return $staffBalance;
+    // }
 }
