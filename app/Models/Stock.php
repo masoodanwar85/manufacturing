@@ -492,6 +492,64 @@ class Stock extends Model
 		return DB::select($rawSQL);
 	}
 
+	// select stockDetailID,productID,godownID,SUM(totalQuantityPurchased) as purchased,SUM(quantitySold) as sold, SUM(GReturn) as goodReturn,SUM(manufacturing) as manufacturing from (
+	// select
+	// 	stockDetailStatus.stockDetailID,
+	// 	stockDetail.productID,
+	// 	stockDetailStatus.godownID,
+	// 	SUM(stockDetailStatus.quantity) AS totalQuantityPurchased,
+	// 	0 AS quantitySold,
+	// 	0 as GReturn,
+	// 	0 as manufacturing
+	// FROM stockDetail
+	// INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
+	// WHERE stockDetailStatus.statusID = 1 and stockDetail.productID = 17
+	// GROUP BY stockDetailStatus.stockDetailID,stockDetail.productID,stockDetailStatus.godownID
+	// UNION
+	// select
+	// 	stockDetailStatus.stockDetailID,
+	// 	stockDetail.productID,
+	// 	stockDetailStatus.godownID,
+	// 	0 AS totalQuantityPurchased,
+	// 	SUM(stockDetailStatus.quantity) AS quantitySold,
+	// 	0 as GReturn,
+	// 	0 as manufacturing
+	// FROM stockDetail
+	// INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
+	// WHERE stockDetailStatus.statusID = 3 and stockDetail.productID = 17
+	// GROUP BY stockDetailStatus.stockDetailID,stockDetail.productID,stockDetailStatus.godownID
+	// UNION
+	// select
+	// 	stockDetailStatus.stockDetailID,
+	// 	stockDetail.productID,
+	// 	stockDetailStatus.godownID,
+	// 	0 AS totalQuantityPurchased,
+	// 	0 AS quantitySold,
+	// 	SUM(stockDetailStatus.quantity) AS GReturn,
+	// 	0 as manufacturing
+	// FROM stockDetail
+	// INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
+	// WHERE stockDetailStatus.statusID = 2 and stockDetail.productID = 17
+	// GROUP BY stockDetailStatus.stockDetailID,stockDetail.productID,stockDetailStatus.godownID
+	// UNION
+	// select
+	// 	stockDetailStatus.stockDetailID,
+	// 	stockDetail.productID,
+	// 	stockDetailStatus.godownID,
+	// 	0 AS totalQuantityPurchased,
+	// 	0 AS quantitySold,
+	// 	0 AS GReturn,
+	// 	SUM(stockDetailStatus.quantity) as manufacturing
+	// FROM stockDetail
+	// INNER JOIN stockDetailStatus ON stockDetailStatus.stockDetailID = stockDetail.stockDetailID
+	// WHERE stockDetailStatus.statusID = 6 and stockDetail.productID = 17
+	// GROUP BY stockDetailStatus.stockDetailID,stockDetail.productID,stockDetailStatus.godownID
+	// ) as t
+	// group by stockDetailID,productID,godownID
+	// having sold < purchased
+	// order by godownID,stockDetailID
+
+
 	public static function getStockError($productID,$godownID = NULL)
 	{
 	    DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
