@@ -308,7 +308,7 @@ class AccountHeadController extends Controller
 		$customers = \App\Models\Customer::all()->sortBy('customerName');
 		$expenses = AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.expense') . ' AND isShowForPayment = 1')->orderBy('headName', 'asc')->get();
 		$incomes = AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.revenue') . ' AND isShowForReceipt = 1')->orderBy('headName', 'asc')->get();
-		$staffs = \App\Models\Staff::orderBy('staffName','asc')->get();
+		$staffs = \App\Models\Staff::where('isActive', 1)->orderBy('staffName','asc')->get();
 		$bankAccounts = \App\Models\BankAccount::all();
 		$banks = \App\Models\Bank::all();
         $godowns = \App\Models\Godown::all();
@@ -450,7 +450,8 @@ class AccountHeadController extends Controller
 		abort_if(Gate::denies('transaction_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 		$customers = \App\Models\Customer::all()->sortBy('customerName');
 		$incomes = AccountHead::with('childrenAccountHeads')->whereRaw('parentHeadID = ' . \Config::get('constants.account_heads.revenue') . ' AND isShowForReceipt = 1')->get();
-		$staffs = \App\Models\Staff::all();
+		// $staffs = \App\Models\Staff::all();
+        $staffs = \App\Models\Staff::where('isActive', 1)->orderBy('staffName','asc')->get();
 		$bankAccounts = \App\Models\BankAccount::all();
 		$banks = \App\Models\Bank::all();
         $isPayment = false;
