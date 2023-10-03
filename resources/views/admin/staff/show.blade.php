@@ -83,6 +83,7 @@
                             ?>
                             <tr {!! $last_month == date('mY',strtotime($transaction->transactionDate)) ? 'class="table-success"' : '' !!}>
                                 <td>
+									<span class="d-none">{{ $transaction->transactionID }}</span>
                                     {{ date('d-m-Y',strtotime($transaction->transactionDate)) }}
                                 </td>
                                 <td>{{ $transactionDetail->head->headName }}</td>
