@@ -287,7 +287,7 @@ class ProductionController extends Controller
         try {
             $request->merge(['createdByUserID' => Auth::id()]);
             $request->merge(['isCompleted' => 1]);
-            $request->merge(['serial' => $request->mb.'-'.$request->bookSerial]);
+            $request->merge(['serial' => $request->bookSerial]);
             $request->merge(['productionStageID' => \Config::get('constants.production_stages.finished')]);
             // dd($request->all());
             $production = Production::create($request->all());

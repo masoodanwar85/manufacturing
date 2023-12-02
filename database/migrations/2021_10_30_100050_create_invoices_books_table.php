@@ -15,11 +15,11 @@ class CreateInvoicesBooksTable extends Migration
     {
         Schema::create('invoiceBooks', function (Blueprint $table) {
             $table->bigIncrements('invoiceBookID');
-			$table->enum('bookType',['RB','BB','CB']);
-			$table->integer('bookNumber');
+            $table->enum('bookType', ['RB', 'BB', 'CB', 'TB', 'MB', 'SR']);
+            $table->integer('bookNumber');
             $table->integer('startPage');
             $table->integer('endPage');
-			$table->unsignedBigInteger('createdByUserID');
+            $table->unsignedBigInteger('createdByUserID');
             $table->timestamp('dateCreated')->useCurrent();
             $table->foreign('createdByUserID')->references('userID')->on('users');
         });

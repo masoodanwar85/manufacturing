@@ -402,7 +402,7 @@ class StockController extends Controller
         DB::beginTransaction();
 		try {
             $transferDate = date('Y-m-d');
-            if ($this->doTransfer($request->previousGodownID,$request->newGodownID,$transferDate,$request->productID,$request->quantityToMove,$request->bookType, $request->bookSerial)) {
+            if ($this->doTransfer($request->previousGodownID,$request->newGodownID,$transferDate,$request->productID,$request->quantityToMove,$request->bookSerial)) {
                 DB::commit();
                 $request->session()->flash('message', 'Stock transferred successfully!');
             } else {
@@ -425,7 +425,7 @@ class StockController extends Controller
             foreach ($request->productID as $idx => $thisProductID)
             {
                 $quantityToMove = $request['quantity'][$idx];
-                if (!$this->doTransfer($request->transferFrom,$request->transferTo,$request->transferDate,$thisProductID,$quantityToMove,$request->bookType, $request->bookSerial)) {
+                if (!$this->doTransfer($request->transferFrom,$request->transferTo,$request->transferDate,$thisProductID,$quantityToMove,$request->bookSerial)) {
                     $is_success = false;
                     break;
                 }
@@ -444,7 +444,7 @@ class StockController extends Controller
         return redirect()->route('stock.index');
     }
 
-    private function doTransfer($previousGodownID,$newGodownID,$transferDate,$productID,$quantityToMove,$bookType = '', $bookSerial = '')
+    private function doTransfer($previousGodownID,$newGodownID,$transferDate,$productID,$quantityToMove,$bookSerial = '')
     {
         $request = new Request;
         $is_success = true;
@@ -452,7 +452,7 @@ class StockController extends Controller
             if ($previousGodownID != $newGodownID) {
                 $bookSerialNumber = "";
                 if (strlen($bookSerial)) {
-                    $bookSerialNumber = $bookType . '-' . $bookSerial;
+                    $bookSerialNumber = $bookSerial;
                 }
                 $quantityRemaining = $quantityToMove;
                 $stockDetails = Stock::getProductStockDetails($productID,$previousGodownID);
@@ -484,7 +484,8 @@ class StockController extends Controller
                         if ($stockDetailStatus->quantity <= $stockDetailStatusRemaining) {
                             $stockDetailStatusRemaining -= $stockDetailStatus->quantity;
                             \App\Models\StockDetailStatus::find($stockDetailStatus->stockDetailStatusID)->update([
-                                'godownID' => $newGodownID
+                                'godownID' => $newGodownID,
+                                'bookSerial' => $bookSerialNumber
                             ]);
                             $quantityRemaining -= $stockDetailStatus->quantity;
                         } else {

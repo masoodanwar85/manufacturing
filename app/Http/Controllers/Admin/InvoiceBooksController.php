@@ -22,18 +22,18 @@ class InvoiceBooksController extends Controller
      */
     public function index(Request $request)
     {
-		abort_if(Gate::denies('invoice_books_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('invoice_books_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if ($request->ajax()) {
-            $query = InvoiceBooks::withCount('serials')->orderBy('bookType','ASC')->orderBy('bookNumber','DESC')->get();
+            $query = InvoiceBooks::withCount('serials')->orderBy('bookType', 'ASC')->orderBy('bookNumber', 'DESC')->get();
             $table = Datatables::of($query);
 
             $table->addColumn('placeholder', '&nbsp;');
             $table->addColumn('actions', '&nbsp;');
 
             $table->editColumn('actions', function ($row) {
-                $viewGate      = 'invoice_books_read';
-                $editGate      = 'invoice_books_update';
-                $deleteGate    = 'invoice_books_delete';
+                $viewGate = 'invoice_books_read';
+                $editGate = 'invoice_books_update';
+                $deleteGate = 'invoice_books_delete';
                 $crudRoutePart = 'invoiceBooks';
                 $primaryKey = 'invoiceBookID';
 
@@ -44,13 +44,14 @@ class InvoiceBooksController extends Controller
                     'crudRoutePart',
                     'row',
                     'primaryKey'
-                ));
+                )
+                );
             });
 
             $table->editColumn('bookType', function ($row) {
                 return $row->bookType;
             });
-			$table->editColumn('bookNumber', function ($row) {
+            $table->editColumn('bookNumber', function ($row) {
                 return $row->bookNumber;
             });
             $table->editColumn('bookStartPage', function ($row) {
@@ -59,7 +60,7 @@ class InvoiceBooksController extends Controller
             $table->editColumn('bookEndPage', function ($row) {
                 return $row->endPage;
             });
-			$table->editColumn('invalidatedSerials', function ($row) {
+            $table->editColumn('invalidatedSerials', function ($row) {
                 return $row->serials_count;
             });
             $table->editColumn('dateCreated', function ($row) {
@@ -80,7 +81,7 @@ class InvoiceBooksController extends Controller
      */
     public function create()
     {
-		abort_if(Gate::denies('invoice_books_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('invoice_books_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return view('admin.invoiceBooks.create');
     }
 
@@ -92,17 +93,17 @@ class InvoiceBooksController extends Controller
      */
     public function store(StoreInvoiceBooksRequest $request)
     {
-		DB::beginTransaction();
-		try {
-			$request->request->add(['createdByUserID' => Auth::id()]);
-			$invoiceBooks = InvoiceBooks::create($request->all());
-			DB::commit();
-			$request->session()->flash('message', 'Invoice Book created successfully!');
-		} catch (\Exception $e) {
-			DB::rollback();
-			$request->session()->flash('error', 'An error occurred while creating Invoice Book!');
-		}
-		return redirect()->route('invoiceBooks.index');
+        DB::beginTransaction();
+        try {
+            $request->request->add(['createdByUserID' => Auth::id()]);
+            $invoiceBooks = InvoiceBooks::create($request->all());
+            DB::commit();
+            $request->session()->flash('message', 'Invoice Book created successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            $request->session()->flash('error', 'An error occurred while creating Invoice Book!');
+        }
+        return redirect()->route('invoiceBooks.index');
     }
 
     /**
@@ -113,8 +114,8 @@ class InvoiceBooksController extends Controller
      */
     public function show(InvoiceBooks $invoiceBook)
     {
-		abort_if(Gate::denies('invoice_books_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $invoiceBook = $invoiceBook->where('invoiceBookID',$invoiceBook->invoiceBookID)->with('serials')->first();
+        abort_if(Gate::denies('invoice_books_read'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $invoiceBook = $invoiceBook->where('invoiceBookID', $invoiceBook->invoiceBookID)->with('serials')->first();
         return view('admin.invoiceBooks.show', compact('invoiceBook'));
     }
 
@@ -126,8 +127,8 @@ class InvoiceBooksController extends Controller
      */
     public function edit(InvoiceBooks $invoiceBook)
     {
-		abort_if(Gate::denies('invoice_books_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		return view('admin.invoiceBooks.edit', compact('invoiceBook'));
+        abort_if(Gate::denies('invoice_books_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return view('admin.invoiceBooks.edit', compact('invoiceBook'));
     }
 
     /**
@@ -139,15 +140,15 @@ class InvoiceBooksController extends Controller
      */
     public function update(UpdateInvoiceBooksRequest $request, InvoiceBooks $invoiceBook)
     {
-		DB::beginTransaction();
-		try {
-			$invoiceBook->update($request->all());
-			DB::commit();
-			$request->session()->flash('message', 'Invoice Book updated successfully!');
-		} catch (\Exception $e) {
-			DB::rollback();
-			$request->session()->flash('error', 'An error occurred while Invoice Book!');
-		}
+        DB::beginTransaction();
+        try {
+            $invoiceBook->update($request->all());
+            DB::commit();
+            $request->session()->flash('message', 'Invoice Book updated successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            $request->session()->flash('error', 'An error occurred while Invoice Book!');
+        }
         return redirect()->route('invoiceBooks.index');
     }
 
@@ -159,68 +160,71 @@ class InvoiceBooksController extends Controller
      */
     public function destroy(InvoiceBooks $invoiceBook, Request $request)
     {
-		abort_if(Gate::denies('invoice_books_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-		DB::beginTransaction();
-		try {
-			$invoiceBook->delete();
-			DB::commit();
-			$request->session()->flash('message', 'Invoice Book deleted successfully!');
-		} catch (\Exception $e) {
-			DB::rollback();
-			$request->session()->flash('error', 'An error occurred while deleting Invoice Book!');
-		}
+        abort_if(Gate::denies('invoice_books_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        DB::beginTransaction();
+        try {
+            $invoiceBook->delete();
+            DB::commit();
+            $request->session()->flash('message', 'Invoice Book deleted successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            $request->session()->flash('error', 'An error occurred while deleting Invoice Book!');
+        }
 
         return redirect()->route('invoiceBooks.index');
     }
 
-    public function updateBookSerials(Request $request) {
-		abort_if(Gate::denies('invoice_books_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+    public function updateBookSerials(Request $request)
+    {
+        abort_if(Gate::denies('invoice_books_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $invoiceBook = InvoiceBooks::find($request->get('invoiceBookID'));
         if ($request->serialNumber != null) {
             $aryBookSerials = [];
             foreach ($request->serialNumber as $idx => $serial) {
-    			array_push($aryBookSerials,[
-    				'serialNumber' => $serial,
-    				'reason' => $request->reason[$idx],
-    				'createdByUserID' => Auth::id()
-    			]);
+                array_push($aryBookSerials, [
+                    'serialNumber' => $serial,
+                    'reason' => $request->reason[$idx],
+                    'createdByUserID' => Auth::id()
+                ]);
             }
         }
 
         DB::beginTransaction();
-		try {
+        try {
             $invoiceBook->serials()->delete();
             if ($request->serialNumber != null) {
                 $invoiceBook->serials()->createMany($aryBookSerials);
             }
-			DB::commit();
-			$request->session()->flash('message', 'Book Serials Voids updated successfully!');
-		} catch (\Exception $e) {
-			DB::rollback();
-			$request->session()->flash('error', 'An error occurred while Updating Serials Voids!');
-		}
+            DB::commit();
+            $request->session()->flash('message', 'Book Serials Voids updated successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            $request->session()->flash('error', 'An error occurred while Updating Serials Voids!');
+        }
 
-        return redirect()->route('invoiceBooks.show',$request->get('invoiceBookID'));
-	}
+        return redirect()->route('invoiceBooks.show', $request->get('invoiceBookID'));
+    }
 
-    public function getNextSerialNumber($bookType) {
-		abort_if(Gate::denies('invoice_books_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+    public function getNextSerialNumber($bookType)
+    {
+        abort_if(Gate::denies('invoice_books_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $nextSerial = InvoiceBooks::getInvoiceBooksMissingSerialNumbers(['bookType' => $bookType, 'nextSerial' => 1]);
-		if (!empty($nextSerial)) {
+        if (!empty($nextSerial)) {
             return $nextSerial[0]->serial;
         } else {
             return NULL;
         }
-	}
+    }
 
-	public function voidSerialNumber(Request $request) {
-		$aryInvoiceBookNumber = explode('-',$request->get('invoiceBookNumber'));
-		$invoiceBook = InvoiceBooks::where('bookType',$aryInvoiceBookNumber[0])->where('bookNumber',$aryInvoiceBookNumber[1])->first();
-		$invoiceBook->serials()->create([
-			'serialNumber' => $aryInvoiceBookNumber[2],
-			'reason' => $request->get('reason'),
-			'createdByUserID' => Auth::id()
-		]);
-		return NULL;
-	}
+    public function voidSerialNumber(Request $request)
+    {
+        $aryInvoiceBookNumber = explode('-', $request->get('invoiceBookNumber'));
+        $invoiceBook = InvoiceBooks::where('bookType', $aryInvoiceBookNumber[0])->where('bookNumber', $aryInvoiceBookNumber[1])->first();
+        $invoiceBook->serials()->create([
+            'serialNumber' => $aryInvoiceBookNumber[2],
+            'reason' => $request->get('reason'),
+            'createdByUserID' => Auth::id()
+        ]);
+        return NULL;
+    }
 }

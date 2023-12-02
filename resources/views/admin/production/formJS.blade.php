@@ -4,15 +4,54 @@
 	{{ \App\Services\CurrencyService::strJSConvertToPKR() }}
 
 	$(function() {
-		
 		@if ($isNew == false)
-			calculateProductRowTotal();
-			bindRemoveClick();
+		calculateProductRowTotal();
+		bindRemoveClick();
 		@else
 			addProductRow();
+			getNextSerial('MB');
 		@endif
 		bindQuantityChanged();
 	});
+
+
+	function getNextSerial(bookType) {
+        $.ajax({
+            url: `/admin/invoiceBooks/${bookType}/nextSerial`,
+            success: function (returned) {
+                $('#reason').text('');
+                if (returned == '') {
+                    $('#bookSerial').removeAttr('readonly');
+                    $('#invoiceBookNum').val();
+                    $('#invoiceBookNumber').val();
+                } else {
+                    $('#bookSerial').attr('readonly', true);
+                    $('#bookSerial').val(returned);
+                    $('#invoiceBookNum').val(returned);
+                    $('#invoiceBookNumber').val(returned);
+                }
+            }
+        });
+    }
+
+    function voidThisSerial() {
+        var bookSerialNumber = $('#invoiceBookNumber').val();
+        var reason = $('#reason').val();
+        if (bookSerialNumber.length && reason.length) {
+            var bookType = bookSerialNumber.substring(0, 2);
+            $.ajax({
+                url: '{{ route('invoiceBooks.voidSerial') }}',
+                type: 'POST',
+                data: $('#frmVoidSerial').serialize(),
+                success: function (returned) {
+                    console.log(returned);
+                    getNextSerial(bookType);
+                }
+            });
+        } else {
+            alert('Invalid Book Serial to Void or Reason required');
+        }
+    }
 
 	var productsInfo = {
         @foreach ($BOMProducts as $product)

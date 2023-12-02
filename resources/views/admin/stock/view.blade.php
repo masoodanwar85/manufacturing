@@ -189,14 +189,22 @@
                         </div>
 						<div class="form-group row">
                             <label for="inputPassword" class="col-sm-4 col-form-label">Book Serial #:</label>
-                            <div class="col-sm-4">
-                                <select class="form-control" name="bookType">
+                            <div class="col-sm-2">
+                                <select class="form-control" name="bookType" id="bookType">
+									<option value=""></option>
 									<option value="TB">TB</option>
 									<option value="SR">SR</option>
                                 </select>
                             </div>
 							<div class="col-sm-4">
-								<input type="text" class="form-control" name="bookSerial" value="" required />
+								<input type="text" readonly placeholder="Book Serial #" id="bookSerial" class="form-control" name="bookSerial" value="" required />
+							</div>
+							<div class="col-sm-2">
+								@can('invoice_books_create')
+								<button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#exampleModal" style="color:white;" title="Void Bill">
+									<i class="fas fa-times"></i>
+								</button>
+								@endcan
 							</div>
                         </div>
                     </div>
@@ -275,6 +283,42 @@
 			</table>
 		</div>
 	</div>
+
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<form name="frm" id="frmVoidSerial" action="" method="post">
+					@csrf
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">Void Serial</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<div class="form-group row">
+							<label for="prevGodown" class="col-sm-4 col-form-label">Invoice Book #:</label>
+							<div class="col-sm-8">
+								<input type="text" class="form-control" id="invoiceBookNum" readonly disabled value="" />
+								<input type="hidden" id="invoiceBookNumber" name="invoiceBookNumber" value="" />
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="reason" class="col-sm-4 col-form-label">Reason:</label>
+							<div class="col-sm-8">
+								<textarea class="form-control" id="reason" name="reason" required></textarea>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+						<button type="button" onclick="voidThisSerial();" data-dismiss="modal"
+							class="btn btn-primary">Void</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 @stop
 
 @section('css')
@@ -290,6 +334,50 @@
 			$('#quantityToMove').val(totalQty);
             $('#prevGodown').val(godownName);
 			$('#quantityToMove').attr('max',totalQty);
+		}
+		$(function() {
+			$('#bookType').change(function() {
+				var bookType = $(this).val();
+				getNextSerial(bookType);
+			});
+		});
+
+		function getNextSerial(bookType) {
+			$.ajax({
+				url: `/admin/invoiceBooks/${bookType}/nextSerial`,
+				success: function (returned) {
+					$('#reason').text('');
+					if (returned == '') {
+						$('#bookSerial').removeAttr('readonly');
+						$('#invoiceBookNum').val();
+						$('#invoiceBookNumber').val();
+					} else {
+						$('#bookSerial').attr('readonly', true);
+						$('#bookSerial').val(returned);
+						$('#invoiceBookNum').val(returned);
+						$('#invoiceBookNumber').val(returned);
+					}
+				}
+			});
+		}
+
+		function voidThisSerial() {
+			var bookSerialNumber = $('#invoiceBookNumber').val();
+			var reason = $('#reason').val();
+			if (bookSerialNumber.length && reason.length) {
+				var bookType = bookSerialNumber.substring(0, 2);
+				$.ajax({
+					url: '{{ route('invoiceBooks.voidSerial') }}',
+					type: 'POST',
+					data: $('#frmVoidSerial').serialize(),
+					success: function (returned) {
+						console.log(returned);
+						getNextSerial(bookType);
+					}
+				});
+			} else {
+				alert('Invalid Book Serial to Void or Reason required');
+			}
 		}
     </script>
 @stop

@@ -19,13 +19,16 @@
 				<div class="form-group row {{ $errors->has('bookSerial') ? 'has-error' : '' }}">
                     <label for="bookSerial" class="col-sm-2 col-form-label">Book Serial#: *</label>
                     <div class="col-sm-10">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <div class="input-group-text">
-                                    <input type="hidden" name="mb" value="MB">MB -
-                                </div>
-                            </div>
-                            <input type="text" name="bookSerial" class="form-control @if($errors->has('bookSerial')) is-invalid @endif" value="{{ old('bookSerial', '') }}" required>
+
+						<div class="input-group">
+                            <input type="text" readonly name="bookSerial" id="bookSerial" class="form-control @if($errors->has('bookSerial')) is-invalid @endif" value="{{ old('bookSerial', '') }}" required>
+							<div class="col-sm-2">
+								@can('invoice_books_create')
+								<button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#exampleModal" style="color:white;" title="Void Bill">
+									<i class="fas fa-times"></i>
+								</button>
+								@endcan
+							</div>
                         </div>
                         @if($errors->has('bookSerial'))
                             <em class="invalid-feedback">
@@ -94,6 +97,43 @@
             </form>
         </div>
     </div>
+
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+	aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<form name="frm" id="frmVoidSerial" action="" method="post">
+				@csrf
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Void Serial</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="form-group row">
+						<label for="prevGodown" class="col-sm-4 col-form-label">Invoice Book #:</label>
+						<div class="col-sm-8">
+							<input type="text" class="form-control" id="invoiceBookNum" readonly disabled value="" />
+							<input type="hidden" id="invoiceBookNumber" name="invoiceBookNumber" value="" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="reason" class="col-sm-4 col-form-label">Reason:</label>
+						<div class="col-sm-8">
+							<textarea class="form-control" id="reason" name="reason" required></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button type="button" onclick="voidThisSerial();" data-dismiss="modal"
+						class="btn btn-primary">Void</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
 
     @include('admin.production.dynamicFields')
 @endsection
