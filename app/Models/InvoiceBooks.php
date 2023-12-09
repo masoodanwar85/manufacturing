@@ -60,7 +60,7 @@ class InvoiceBooks extends Model
         if (isset($params['bookType']) && strlen($params['bookType'])) {
             $strWhere .= " AND invoiceBooks.bookType = '" . $params['bookType'] . "'";
         }
-        if (in_array($params['bookType'],['TB','RB'])) {
+        if (in_array($params['bookType'],['TB','SR'])) {
             $rawSQL = "
                 SELECT serialNumber.id as sequenceNumber, CONCAT_WS('-',invoiceBooks.bookType,invoiceBooks.bookNumber,serialNumber.id) as serial,bookSerials.bookSerialID,invoiceBooks.*
                 FROM serialNumber
