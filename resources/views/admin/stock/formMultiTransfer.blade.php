@@ -47,7 +47,7 @@
 							<select name="bookType" id="bookType" class="form-control" required>
 								<option value=""></option>
 								<option value="TB">TB</option>
-								<option value="RB">RB</option>
+								<option value="SR">SR</option>
 							</select>
 						</div>
 						<div class="col-sm-6">
