@@ -62,7 +62,7 @@ class InvoiceBooks extends Model
         }
         if (in_array($params['bookType'],['TB','SR'])) {
             $rawSQL = "
-                SELECT serialNumber.id as sequenceNumber, CONCAT_WS('-',invoiceBooks.bookType,invoiceBooks.bookNumber,serialNumber.id) as serial,bookSerials.bookSerialID,invoiceBooks.*
+                SELECT serialNumber.id as sequenceNumber, CONCAT_WS('-',invoiceBooks.bookType,invoiceBooks.bookNumber,serialNumber.id) as serial,bookSerials.bookSerialID,invoiceBooks.invoiceBookID,invoiceBooks.bookType,invoiceBooks.bookNumber,invoiceBooks.startPage,invoiceBooks.endPage
                 FROM serialNumber
                 LEFT JOIN invoiceBooks ON (invoiceBooks.startPage = serialNumber.id OR invoiceBooks.startpage <= serialNumber.id) AND (invoiceBooks.endPage = serialNumber.id OR invoiceBooks.endPage >= serialNumber.id)
                 LEFT JOIN bookSerials ON bookSerials.invoiceBookID = invoiceBooks.invoiceBookID AND bookSerials.serialNumber = serialNumber.id
@@ -71,7 +71,7 @@ class InvoiceBooks extends Model
             ";
         } elseif ($params['bookType'] == 'MB') {
             $rawSQL = "
-                SELECT serialNumber.id as sequenceNumber, CONCAT_WS('-',invoiceBooks.bookType,invoiceBooks.bookNumber,serialNumber.id) as serial,bookSerials.bookSerialID,invoiceBooks.*
+                SELECT serialNumber.id as sequenceNumber, CONCAT_WS('-',invoiceBooks.bookType,invoiceBooks.bookNumber,serialNumber.id) as serial,bookSerials.bookSerialID,invoiceBooks.invoiceBookID,invoiceBooks.bookType,invoiceBooks.bookNumber,invoiceBooks.startPage,invoiceBooks.endPage
                 FROM serialNumber
                 LEFT JOIN invoiceBooks ON (invoiceBooks.startPage = serialNumber.id OR invoiceBooks.startpage <= serialNumber.id) AND (invoiceBooks.endPage = serialNumber.id OR invoiceBooks.endPage >= serialNumber.id)
                 LEFT JOIN bookSerials ON bookSerials.invoiceBookID = invoiceBooks.invoiceBookID AND bookSerials.serialNumber = serialNumber.id
@@ -80,7 +80,7 @@ class InvoiceBooks extends Model
             ";
         } else {
             $rawSQL = "
-                SELECT serialNumber.id as sequenceNumber, CONCAT_WS('-',invoiceBooks.bookType,invoiceBooks.bookNumber,serialNumber.id) as serial,bookSerials.bookSerialID,invoiceBooks.*
+                SELECT serialNumber.id as sequenceNumber, CONCAT_WS('-',invoiceBooks.bookType,invoiceBooks.bookNumber,serialNumber.id) as serial,bookSerials.bookSerialID,invoiceBooks.invoiceBookID,invoiceBooks.bookType,invoiceBooks.bookNumber,invoiceBooks.startPage,invoiceBooks.endPage
                 FROM serialNumber
                 INNER JOIN invoiceBooks ON invoiceBooks.startpage <= serialNumber.id AND invoiceBooks.endPage >= serialNumber.id
                 -- LEFT JOIN invoiceBooks ON (invoiceBooks.startPage = serialNumber.id OR invoiceBooks.startpage <= serialNumber.id) AND (invoiceBooks.endPage = serialNumber.id OR invoiceBooks.endPage >= serialNumber.id)
