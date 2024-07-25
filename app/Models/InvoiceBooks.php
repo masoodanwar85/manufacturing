@@ -64,18 +64,20 @@ class InvoiceBooks extends Model
             $rawSQL = "
                 SELECT serialNumber.id as sequenceNumber, CONCAT_WS('-',invoiceBooks.bookType,invoiceBooks.bookNumber,serialNumber.id) as serial,bookSerials.bookSerialID,invoiceBooks.invoiceBookID,invoiceBooks.bookType,invoiceBooks.bookNumber,invoiceBooks.startPage,invoiceBooks.endPage
                 FROM serialNumber
-                LEFT JOIN invoiceBooks ON (invoiceBooks.startPage = serialNumber.id OR invoiceBooks.startpage <= serialNumber.id) AND (invoiceBooks.endPage = serialNumber.id OR invoiceBooks.endPage >= serialNumber.id)
+                LEFT JOIN invoiceBooks ON invoiceBooks.startpage <= serialNumber.id AND invoiceBooks.endPage >= serialNumber.id
                 LEFT JOIN bookSerials ON bookSerials.invoiceBookID = invoiceBooks.invoiceBookID AND bookSerials.serialNumber = serialNumber.id
-                LEFT JOIN stockDetailStatus ON CONCAT_WS('-',SUBSTRING_INDEX(bookSerial,'-',2),TRIM(leading '0' from SUBSTRING_INDEX(bookSerial,'-',-1))) = CONCAT_WS('-', invoiceBooks.bookType, invoiceBooks.bookNumber, serialNumber.id)
+                -- LEFT JOIN stockDetailStatus ON CONCAT_WS('-',SUBSTRING_INDEX(bookSerial,'-',2),TRIM(leading '0' from SUBSTRING_INDEX(bookSerial,'-',-1))) = CONCAT_WS('-', invoiceBooks.bookType, invoiceBooks.bookNumber, serialNumber.id)
+                LEFT JOIN stockDetailStatus ON bookSerial = CONCAT_WS('-', invoiceBooks.bookType, invoiceBooks.bookNumber, serialNumber.id)
                 WHERE invoiceBooks.bookNumber IS NOT NULL AND stockDetailStatus.stockDetailStatusID IS NULL AND bookSerials.bookSerialID IS NULL
             ";
         } elseif ($params['bookType'] == 'MB') {
             $rawSQL = "
                 SELECT serialNumber.id as sequenceNumber, CONCAT_WS('-',invoiceBooks.bookType,invoiceBooks.bookNumber,serialNumber.id) as serial,bookSerials.bookSerialID,invoiceBooks.invoiceBookID,invoiceBooks.bookType,invoiceBooks.bookNumber,invoiceBooks.startPage,invoiceBooks.endPage
                 FROM serialNumber
-                LEFT JOIN invoiceBooks ON (invoiceBooks.startPage = serialNumber.id OR invoiceBooks.startpage <= serialNumber.id) AND (invoiceBooks.endPage = serialNumber.id OR invoiceBooks.endPage >= serialNumber.id)
+                LEFT JOIN invoiceBooks ON invoiceBooks.startpage <= serialNumber.id AND invoiceBooks.endPage >= serialNumber.id
                 LEFT JOIN bookSerials ON bookSerials.invoiceBookID = invoiceBooks.invoiceBookID AND bookSerials.serialNumber = serialNumber.id
-                LEFT JOIN production ON CONCAT_WS('-',SUBSTRING_INDEX(serial,'-',2),TRIM(leading '0' from SUBSTRING_INDEX(serial,'-',-1))) = CONCAT_WS('-', invoiceBooks.bookType, invoiceBooks.bookNumber, serialNumber.id)
+                -- LEFT JOIN production ON CONCAT_WS('-',SUBSTRING_INDEX(serial,'-',2),TRIM(leading '0' from SUBSTRING_INDEX(serial,'-',-1))) = CONCAT_WS('-', invoiceBooks.bookType, invoiceBooks.bookNumber, serialNumber.id)
+                LEFT JOIN production ON serial = CONCAT_WS('-', invoiceBooks.bookType, invoiceBooks.bookNumber, serialNumber.id)
                 WHERE invoiceBooks.bookNumber IS NOT NULL AND production.productionID IS NULL AND bookSerials.bookSerialID IS NULL
             ";
         } else {
