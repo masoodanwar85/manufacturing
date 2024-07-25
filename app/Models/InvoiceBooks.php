@@ -85,7 +85,7 @@ class InvoiceBooks extends Model
                 INNER JOIN invoiceBooks ON invoiceBooks.startpage <= serialNumber.id AND invoiceBooks.endPage >= serialNumber.id
                 -- LEFT JOIN invoiceBooks ON (invoiceBooks.startPage = serialNumber.id OR invoiceBooks.startpage <= serialNumber.id) AND (invoiceBooks.endPage = serialNumber.id OR invoiceBooks.endPage >= serialNumber.id)
                 LEFT JOIN bookSerials ON bookSerials.invoiceBookID = invoiceBooks.invoiceBookID AND bookSerials.serialNumber = serialNumber.id
-                LEFT JOIN `transaction` ON CONCAT_WS('-',SUBSTRING_INDEX(transactionTypeNumber,'-',2),CONVERT(SUBSTRING_INDEX(transactionTypeNumber,'-',-1), UNSIGNED)) = CONCAT_WS('-', invoiceBooks.bookType, invoiceBooks.bookNumber, serialNumber.id) AND `transaction`.transactionTypeNumber LIKE '" . $params['bookType'] . "-%'
+                LEFT JOIN `transaction` ON CONCAT_WS('-',SUBSTRING_INDEX(transactionTypeNumber,'-',2),TRIM(leading '0' from SUBSTRING_INDEX(transactionTypeNumber,'-',-1))) = CONCAT_WS('-', invoiceBooks.bookType, invoiceBooks.bookNumber, serialNumber.id) AND `transaction`.transactionTypeNumber LIKE '" . $params['bookType'] . "-%'
                 WHERE invoiceBooks.bookNumber IS NOT NULL AND `transaction`.transactionID IS NULL AND bookSerials.bookSerialID IS NULL
             ";
         }
