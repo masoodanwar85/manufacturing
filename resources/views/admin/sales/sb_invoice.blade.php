@@ -46,7 +46,11 @@
 						</address>
 					</div>
 					<div class="col-sm-5 invoice-col">
-
+                        <ol>
+                        @foreach ($customerEquipments as $customerEquipment)
+                            <li>{{ $customerEquipment->equipmentType }} - {{ $customerEquipment->equipmentSerial }}</li>
+                        @endforeach
+                        </ol>
 					</div>
 					<!-- /.col -->
 				</div>

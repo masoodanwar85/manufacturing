@@ -89,4 +89,9 @@ class Customer extends Model
 		";
         return DB::select($rawSQL);
 	}
+
+	public function equipments()
+    {
+        return $this->hasMany('App\Models\CustomerEquipment','customerID','customerID');
+    }
 }

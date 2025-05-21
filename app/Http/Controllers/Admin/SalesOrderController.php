@@ -172,7 +172,8 @@ class SalesOrderController extends Controller
 		$cashHeadID = \Config::get('constants.account_heads.cash');
 		$client = \App\Models\Client::find(\App\Models\User::find(Auth::id())->clientID);
 		$thisSaleOrderDetails = SalesOrderDetail::getSaleOrderDetails($salesOrderID);
-		return view('admin.sales.sb_invoice', compact('salesOrder','cashHeadID','client','thisSaleOrderDetails'));
+        $customerEquipments = \App\Models\CustomerEquipment::where('customerID',$salesOrder->customerID)->get();
+        return view('admin.sales.sb_invoice', compact('salesOrder','cashHeadID','client','thisSaleOrderDetails','customerEquipments'));
     }
 
 	public function invoicePDF(int $salesOrderID)

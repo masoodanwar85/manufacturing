@@ -72,6 +72,88 @@
 					</div>
 				</div>
 
+				<hr />
+
+				<div class="form-group row">
+					<label for="equipments" class="col-sm-2 col-form-label"></label>
+					<div class="col-sm-10">
+						<table class="table">
+							<tr>
+								<th>#</th>
+								<th>Type</th>
+								<th>Serial</th>
+							</tr>
+							<tr>
+								<td>1.</td>
+								<td>
+									<select name="equipmentType[]" class="form-control">
+										<option value=""></option>
+										<option value="VC Cooler">VC Cooler</option>
+										<option value="Deep Freezer">Deep Freezer</option>
+									</select>
+								</td>
+								<td>
+									<input type="text" name="equipmentSerial[]" class="form-control" />
+								</td>
+							</tr>
+							<tr>
+								<td>2.</td>
+								<td>
+									<select name="equipmentType[]" class="form-control">
+										<option value=""></option>
+										<option value="VC Cooler">VC Cooler</option>
+										<option value="Deep Freezer">Deep Freezer</option>
+									</select>
+								</td>
+								<td>
+									<input type="text" name="equipmentSerial[]" class="form-control" />
+								</td>
+							</tr>
+							<tr>
+								<td>3.</td>
+								<td>
+									<select name="equipmentType[]" class="form-control">
+										<option value=""></option>
+										<option value="VC Cooler">VC Cooler</option>
+										<option value="Deep Freezer">Deep Freezer</option>
+									</select>
+								</td>
+								<td>
+									<input type="text" name="equipmentSerial[]" class="form-control" />
+								</td>
+							</tr>
+							<tr>
+								<td>4.</td>
+								<td>
+									<select name="equipmentType[]" class="form-control">
+										<option value=""></option>
+										<option value="VC Cooler">VC Cooler</option>
+										<option value="Deep Freezer">Deep Freezer</option>
+									</select>
+								</td>
+								<td>
+									<input type="text" name="equipmentSerial[]" class="form-control" />
+								</td>
+							</tr>
+							<tr>
+								<td>5.</td>
+								<td>
+									<select name="equipmentType[]" class="form-control">
+										<option value=""></option>
+										<option value="VC Cooler">VC Cooler</option>
+										<option value="Deep Freezer">Deep Freezer</option>
+									</select>
+								</td>
+								<td>
+									<input type="text" name="equipmentSerial[]" class="form-control" />
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+
+				
+
 				<div>
 					<input class="btn btn-primary" type="submit" value="Save">
 				</div>

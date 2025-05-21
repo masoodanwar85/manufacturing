@@ -80,7 +80,8 @@ class CustomerController extends Controller
     {
         abort_if(Gate::denies('customer_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $saleAgents = \App\Models\Staff::salesAgents()->get();
-        return view('admin.customer.create', compact('saleAgents'));
+        $customerEquipments = [];
+        return view('admin.customer.create', compact('saleAgents','customerEquipments'));
     }
 
     /**
@@ -96,6 +97,7 @@ class CustomerController extends Controller
             $request->merge(['createdByUserID' => Auth::id()]);
             $request->merge(['headID' => \App\Models\AccountHead::addAccountHead($request->customerName . ' (' . $request->shopName . ')' . ' (Customer)', Auth::id(), \Config::get('constants.account_heads.customer'), 1, 0, 0, 0, 0, 0)]);
             $customer = Customer::create($request->all());
+            
             DB::commit();
             $request->session()->flash('message', 'Customer created successfully!');
         } catch (\Exception $e) {
@@ -134,7 +136,8 @@ class CustomerController extends Controller
     {
         abort_if(Gate::denies('customer_update'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $saleAgents = \App\Models\Staff::salesAgents()->get();
-        return view('admin.customer.edit', compact('customer', 'saleAgents'));
+        $customerEquipments = $customer->equipments()->get();
+        return view('admin.customer.edit', compact('customer', 'saleAgents','customerEquipments'));
     }
 
     /**
@@ -150,10 +153,21 @@ class CustomerController extends Controller
         try {
             \App\Models\AccountHead::updateAccountHead($customer->headID, $request->customerName . ' (' . $request->shopName . ')' . ' (Customer)');
             $customer->update($request->all());
+            $customer->equipments()->delete();
+            foreach ($request->equipmentType as $idx => $equipment_type) {
+                if ($equipment_type) {
+                    $customer->equipments()->create([
+                        'equipmentType' => $equipment_type,
+                        'equipmentSerial' => $request->equipmentSerial[$idx],
+                        'createdByUserID' => Auth::id()
+                    ]);
+                }
+            }
             DB::commit();
             $request->session()->flash('message', 'Customer updated successfully!');
         } catch (\Exception $e) {
             DB::rollback();
+            dd($e);
             $request->session()->flash('error', 'An error occurred while updating customer!');
         }
         return redirect()->route('customer.index');

@@ -73,6 +73,56 @@
 					</div>
 				</div>
 
+				<hr />
+
+				<div class="form-group row">
+					<label for="equipments" class="col-sm-2 col-form-label"></label>
+					<div class="col-sm-10">
+
+						<table class="table">
+							<tr>
+								<th>#</th>
+								<th>Type</th>
+								<th>Serial</th>
+							</tr>
+							<?php
+								$records_already_exists = $customerEquipments->count();
+							?>
+							@foreach($customerEquipments as $customerEquipment)
+							<tr>
+								<td>{{ $loop->iteration }}.</td>
+								<td>
+									<select name="equipmentType[]" class="form-control">
+										<option value=""></option>
+										<option value="VC Cooler" {!! ($customerEquipment->equipmentType == 'VC Cooler') ? 'selected' : '' !!}>VC Cooler</option>
+										<option value="Deep Freezer" {!! ($customerEquipment->equipmentType == 'Deep Freezer') ? 'selected' : '' !!}>Deep Freezer</option>
+									</select>
+								</td>
+								<td>
+									<input type="text" name="equipmentSerial[]" class="form-control" value="{{ $customerEquipment->equipmentSerial }}" />
+								</td>
+							</tr>
+							@endforeach
+							@for($ctr = $records_already_exists; $ctr < 5; $ctr++)
+							<tr>
+								<td>{{ $ctr + 1 }}.</td>
+								<td>
+									<select name="equipmentType[]" class="form-control">
+										<option value=""></option>
+										<option value="VC Cooler">VC Cooler</option>
+										<option value="Deep Freezer">Deep Freezer</option>
+									</select>
+								</td>
+								<td>
+									<input type="text" name="equipmentSerial[]" class="form-control" />
+								</td>
+							</tr>
+							@endfor
+							
+						</table>
+					</div>
+				</div>
+
 				<div>
 					<input class="btn btn-primary" type="submit" value="Update">
 				</div>
